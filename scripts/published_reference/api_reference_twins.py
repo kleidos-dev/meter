@@ -823,9 +823,15 @@ def bar_pages(index: str) -> list[str]:
 
 
 def topic_order(topics: str) -> list[str]:
-    """Return the topics in the order the page of topics lists them."""
+    """Return the topics in the order the tree of the page of topics lists them.
+
+    The tree, when the page has one (``table.directory``): the list of modules
+    above it (``scripts/api_reference_front.py``) names only the first level.
+    """
     seen: list[str] = []
     main = topics[topics.find("<main") :]
+    tree = main.find('<table class="directory"')
+    main = main[tree:] if tree != -1 else main
     for target in re.findall(r'<a\b[^>]*\bhref="(group__[^"#]+)"', main):
         name = api_reference_links.page_of(target)
         if name not in seen:

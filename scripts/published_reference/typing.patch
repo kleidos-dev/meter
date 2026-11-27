@@ -1,6 +1,6 @@
 --- a/api_reference_pages.py
 +++ b/api_reference_pages.py
-@@ -433,7 +433,7 @@
+@@ -458,7 +458,7 @@
      rows = [_CELL_RE.findall(row) for row in _ROW_RE.findall(table)]
      if not rows or any(tuple(kind for kind, _ in row) not in _ROWS for row in rows):
          return None
@@ -20,3 +20,22 @@
          for child in node.elements():
              if child.tag == "dt":
                  words = self.words(child)
+--- a/api_reference_search.py
++++ b/api_reference_search.py
+@@ -44,6 +44,7 @@
+ from collections import Counter
+ from collections.abc import Iterable, Mapping
+ from pathlib import Path
++from typing import Any
+ 
+ import api_reference_links
+ import api_reference_pages
+@@ -299,7 +300,7 @@
+     return found
+ 
+ 
+-def shown(entry: list, pages: list) -> tuple[str, ...]:
++def shown(entry: list[Any], pages: list[Any]) -> tuple[str, ...]:
+     """Return what a reader sees of an entry in the search's results.
+ 
+     A page: its name, its kind, its scope and its description. A member: its

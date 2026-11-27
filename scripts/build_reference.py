@@ -3,12 +3,13 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 """build_reference.py — the meter's documentation as it is published, guarded.
 
-``https://api.kleidos.dev/meter/`` is to be this script's output, once this
-repository is public: one site, the Markdown pages of the repository and the
-firmware's reference (``Doxyfile``), in the design of the Kleidos API host,
-which serves the firmware's reference beside it. A port of the Kleidos firmware
-repository's ``scripts/build_api_reference.py``, read against this tree. Three
-steps, stopping at the first that fails:
+``https://api.kleidos.dev/meter/`` is this script's output, from a copy the
+Kleidos firmware repository pins to a commit of ``main``: one site, the
+Markdown pages of the repository and the firmware's reference (``Doxyfile``),
+in the design of the Kleidos API host, which serves the firmware's reference
+beside it. A port of the Kleidos firmware repository's
+``scripts/build_api_reference.py``, read against this tree. Three steps,
+stopping at the first that fails:
 
 1. **Doxygen**, with ``Doxyfile.public`` (an overlay of the gate's
    ``Doxyfile``), into a temporary directory. The overlay keeps
@@ -19,8 +20,8 @@ steps, stopping at the first that fails:
    file this script does not know stops the build. The images of the documents
    stay: the ones a page draws, which Doxygen copied from ``IMAGE_PATH``, and
    the ones a page links to, which this script copies from there. Each page is
-   rewritten where the host's policy (no script, no frame, no inline style)
-   would break it, and given the landmarks a reader's tools look for: its
+   rewritten where the host's policy (no script but the host's search, no
+   frame, no inline style) would break it, and given the landmarks a reader's tools look for: its
    content in ``<main>``, its title as its one ``<h1>``, the entry of the bar it
    is marked, an image's caption as its text, and a heading the Markdown
    filter named after its page GitHub's anchor beside that name. Then the
@@ -28,8 +29,10 @@ steps, stopping at the first that fails:
    addresses the host serves, without ``.html``, with each page's clean
    address as its canonical one (``api_reference_links.py``), each page's
    Markdown twin beside it and the site's ``llms.txt``
-   (``api_reference_twins.py``). Those three modules are the firmware
-   repository's, copied byte for byte but for the two lines of
+   (``api_reference_twins.py``), and the search's two lists, every page and
+   every member it documents, which the host's own search reads in the
+   reader's browser (``api_reference_search.py``). Those four modules are the
+   firmware repository's, copied byte for byte but for the few lines of
    ``scripts/published_reference/typing.patch`` and held to its ``SOURCE.json``
    (``tests/firmware/test_published_reference_copies.py``): never edit them
    here.
@@ -38,7 +41,9 @@ steps, stopping at the first that fails:
 
 The pages are styled by the host, not by this tree: the header
 (``docs/published-reference/header.html``) links ``../assets/tokens.css`` and
-``../assets/api.css``, which the host serves beside ``meter/``.
+``../assets/api.css``, and loads the host's search, ``../assets/search.js``,
+which the host serves beside ``meter/``; without a script, the search's
+control leads to the page of the search (``docs/published-reference/search.md``).
 ``scripts/preview_reference.py`` serves a built tree with them on this
 computer.
 
@@ -66,6 +71,7 @@ sys.path.insert(0, str(SCRIPTS))
 
 import api_reference_links  # noqa: E402
 import api_reference_pages  # noqa: E402
+import api_reference_search  # noqa: E402
 import api_reference_twins  # noqa: E402
 import check_reference  # noqa: E402
 
@@ -431,6 +437,7 @@ def stage_tree(raw: Path, out: Path, images: dict[str, Path]) -> tuple[Counter[s
         done = drop_dead_letters(api_reference_pages.finished(name, text, index_of(name)))
         (out / name).write_text(api_reference_links.finish(name, done, REFERENCE), encoding="utf-8")
     write_twins(out, sorted(pages))
+    api_reference_search.write(out, sorted(pages))
     return left, unknown
 
 

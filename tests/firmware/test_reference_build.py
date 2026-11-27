@@ -166,16 +166,19 @@ def test_the_overlay_publishes_no_source_no_script_and_the_host_s_design() -> No
     assert settings["HTML_FOOTER"] == "docs/published-reference/footer.html"
     assert settings["LAYOUT_FILE"] == "docs/published-reference/layout.xml"
     assert settings["HTML_OUTPUT"] == build_reference.HTML_OUTPUT
-    assert (ROOT / "Doxyfile.public").read_text(encoding="utf-8").count(
-        "@INCLUDE               = Doxyfile"
-    ) == 1
+    overlay = (ROOT / "Doxyfile.public").read_text(encoding="utf-8")
+    assert overlay.count("@INCLUDE               = Doxyfile") == 1
+    assert overlay.count("INPUT                 += docs/published-reference/search.md") == 1
 
 
 def test_the_header_links_the_host_s_sheets_and_holds_the_note_and_every_bar_entry() -> None:
     header = (ROOT / "docs" / "published-reference" / "header.html").read_text(encoding="utf-8")
     assert "$relpath^../assets/tokens.css" in header and "$relpath^../assets/api.css" in header
     assert check_reference.NOTE in header
-    assert "<script" not in header and "style=" not in header
+    search = check_reference.SEARCH_SCRIPT.replace('"../', '"$relpath^../')
+    assert header.count("<script") == 1 and header.count(search) == 1
+    assert "style=" not in header
+    assert header.count('<a class="search-open" href="$relpath^search_page.html">') == 1
     for target in re.findall(r'href="\$relpath\^([a-z_]+\.html)"', header):
         stem = target.removesuffix(".html")
         assert stem == "index" or stem.endswith("_page"), target

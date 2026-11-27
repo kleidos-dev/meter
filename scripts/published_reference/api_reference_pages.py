@@ -22,9 +22,10 @@ takes a page, or a piece of one, and returns it with one thing changed.
   where it is wider than the column.
 - **Names** (:func:`break_names`): where a long name may break: after ``::``,
   ``/`` and ``_``, and nowhere else while it fits.
-- **Lists** (:func:`tree_rows`, :func:`kinds_as_words`, :func:`index_entries`): a
-  row says how deep it is, and what it is with a word and not a letter; in an index by letter the letter is a heading that says it,
-  and the name is the link.
+- **Lists** (:func:`tree_rows`, :func:`kinds_as_words`, :func:`index_entries`,
+  :func:`owners_linked`): a row says how deep it is, and what it is with a word
+  and not a letter; in an index by letter the letter is a heading that says it,
+  the name is the link, and a namespace member's namespace leads to its page.
 - **Diagrams** (:func:`drawing`): the drawing itself, in the page, with no color,
   face or size of its own (the host's sheet draws it in both themes), its boxes
   rounded, and the badge of its kind beside its caption.
@@ -184,8 +185,28 @@ DESCRIPTION = 200
 
 #: A paragraph, after the first one a page's text opens with.
 _PARAGRAPH_RE = re.compile(r"<p\b[^>]*>(.*?)</p>", re.S)
-#: Where a sentence ends: its stop after a word, and a capital after it.
+#: Where a sentence may end: its stop after a word, and a capital after it.
 _SENTENCE_END_RE = re.compile(r"(?<=[\w)\]'\"][.!?])\s+(?=[A-Z])")
+#: The abbreviations whose stop never ends a sentence, and the one that ends
+#: it only before a capital (``etc.``), all in lower case.
+_ABBREVIATIONS = frozenset({"e.g.", "i.e.", "cf.", "vs."})
+_ABBREVIATION_THEN_CAPITAL = frozenset({"etc."})
+
+
+def ends_sentence(words: str, stop: int) -> bool:
+    """Return whether the stop that ends at *stop* in *words* ends a sentence.
+
+    Not after an abbreviation (``e.g.``, ``i.e.``, ``cf.``, ``vs.``; ``etc.``
+    only before a capital) and not inside brackets left open, where a
+    brief's aside goes on (``(e.g. Load the RAM. Then refresh it)``).
+    """
+    before = words[:stop]
+    said = before.rsplit(None, 1)[-1].lstrip("([{\"'").lower() if before.strip() else ""
+    if said in _ABBREVIATIONS:
+        return False
+    if said in _ABBREVIATION_THEN_CAPITAL and not words[stop:].lstrip()[:1].isupper():
+        return False
+    return before.count("(") <= before.count(")") and before.count("[") <= before.count("]")
 
 
 def description(text: str) -> str:
@@ -208,7 +229,11 @@ def description(text: str) -> str:
     words = words.rstrip(" :")
     if len(words) <= DESCRIPTION:
         return words
-    ends = [m.start() for m in _SENTENCE_END_RE.finditer(words) if m.start() <= DESCRIPTION]
+    ends = [
+        m.start()
+        for m in _SENTENCE_END_RE.finditer(words)
+        if m.start() <= DESCRIPTION and ends_sentence(words, m.start())
+    ]
     if ends:
         return words[: ends[-1]]
     return words[:DESCRIPTION].rsplit(" ", 1)[0].rstrip(" ,;:(") + "…"
@@ -834,6 +859,29 @@ def index_entries(text: str) -> str:
     return _INDEX_ITEM_RE.sub(entry, text)
 
 
+_OWNER_RE = re.compile(r'<span class="of">in ([A-Za-z_][\w:]*)</span>')
+
+
+def namespace_page(scope: str) -> str:
+    """Return the file Doxygen writes a namespace's page to (``CASE_SENSE_NAMES = YES``)."""
+    return "namespace" + scope.replace("_", "__").replace(":", "_1") + ".html"
+
+
+def owners_linked(name: str, text: str) -> str:
+    """Return a letter of the namespace members whose owner leads to its namespace's page.
+
+    Doxygen links an entry to its member and writes the namespace it is in as
+    words; the guard's broken-link rule holds every namespace named so to a
+    page of its own.
+    """
+    if not name.startswith("namespacemembers"):
+        return text
+    return _OWNER_RE.sub(
+        lambda m: f'<span class="of">in <a class="el" href="{namespace_page(m[1])}">{m[1]}</a></span>',
+        text,
+    )
+
+
 _LETTERS_RE = re.compile(r'(?:<br\s*/>\s*)?<div class="qindex">(.*?)</div>', re.S)
 _SEPARATOR = '<div class="alphasepar"></div>'
 
@@ -1097,6 +1145,7 @@ def shaped(name: str, text: str) -> str:
     )
     for step in steps:
         text = step(text)
+    text = owners_linked(name, text)
     text = kinds_as_words(path_to_here(name, text), spoken=name != "namespaces.html")
     if name in SCOPE_TREES:
         text = qualified_names(text)

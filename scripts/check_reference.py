@@ -10,10 +10,17 @@ the Kleidos firmware repository's guard of its published reference
 name:
 
 * ``kind`` — a file that is not a page, a page's Markdown twin, the site's
-  ``llms.txt`` or an image of the documents.
+  ``llms.txt``, one of the search's two lists or an image of the documents.
 * ``script`` — what the host's policy blocks or a static host has no use
-  for: a ``<script>``, an ``<iframe>``, an inline ``style=``, an ``on…=``
+  for: a ``<script>`` other than the host's search's one tag
+  (:data:`SEARCH_SCRIPT`), an ``<iframe>``, an inline ``style=``, an ``on…=``
   handler, a ``javascript:`` address.
+* ``search`` — a page that loads the host's search more than once; and, while
+  the pages load it, a list of the search (``search-pages.json``,
+  ``search-members.json``) that is missing, not the shape the build writes,
+  over its budget, naming a page or an anchor the tree does not hold, or
+  holding two entries a reader cannot tell apart
+  (``api_reference_search.problems``, the firmware repository's own rule).
 * ``source`` — a page of source, or a link to one.
 * ``broken-link`` — a link or an image in the tree whose file, or whose anchor
   in that page, is not there; and an outbound link with no host.
@@ -30,7 +37,8 @@ name:
   what Doxygen 1.17.0 makes of a Markdown link to an anchor
   (``scripts/doxygen_md_filter.py`` writes those links as HTML so it never
   does).
-* ``private`` — a private value, in a page, a twin or the ``llms.txt``: a MAC
+* ``private`` — a private value, in a page, a twin, the ``llms.txt`` or a list
+  of the search: a MAC
   address, a USB serial number or a serial port named by one (the patterns
   of ``.gitleaks.toml`` and ``.gitleaks-mac.toml``, their fakes allowed), a
   private, loopback-free or link-local IPv4 address, a host name of a local
@@ -60,6 +68,9 @@ from dataclasses import dataclass
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(REPO_ROOT / "scripts" / "published_reference"))
+
+import api_reference_search  # noqa: E402
 
 #: Where the host serves the site.
 ORIGIN = "https://api.kleidos.dev/"
@@ -79,6 +90,13 @@ NOT_PUBLIC = ("jmrplens/kleidos",)
 IMAGE_SUFFIXES = frozenset({".png", ".svg", ".jpg", ".jpeg", ".gif", ".webp"})
 LLMS = "llms.txt"
 
+#: The one script a page may load: the host's search, deferred, from the
+#: host's assets beside the site (``docs/published-reference/header.html``).
+SEARCH_SCRIPT = '<script src="../assets/search.js" defer></script>'
+
+#: The search's two lists, beside the pages (``scripts/build_reference.py``).
+SEARCH_LISTS = frozenset(api_reference_search.FILES)
+
 #: The files of the host a page links outside its tree (the header's).
 HOST_FILES = frozenset(
     {"../", "/llms.txt", "../assets/tokens.css", "../assets/api.css", "../favicon.ico"}
@@ -91,7 +109,10 @@ _MAIN_RE = re.compile(r'<main id="doc-content">\s*(.{0,200})', re.S)
 _CANONICAL_RE = re.compile(r'<link rel="canonical" href="([^"]+)"/>')
 _TWIN_LINK_RE = re.compile(r'<link rel="alternate" type="text/markdown" href="([^"]+)"')
 _BLOCKED: tuple[tuple[re.Pattern[str], str], ...] = (
-    (re.compile(r"<script\b", re.I), "a <script>"),
+    (
+        re.compile(r'<script\b(?! src="\.\./assets/search\.js" defer></script>)', re.I),
+        "a <script> that is not the host's search",
+    ),
     (re.compile(r"<iframe\b", re.I), "an <iframe>"),
     (re.compile(r"\sstyle=\"", re.I), "an inline style"),
     (re.compile(r"\son[a-z]+=\"", re.I), "an event handler"),
@@ -209,6 +230,8 @@ def _page_findings(
     for pattern, what in _BLOCKED:
         if pattern.search(text):
             yield Finding(name, "script", what)
+    if text.count(SEARCH_SCRIPT) > 1:
+        yield Finding(name, "search", "the host's search loaded more than once")
     for match in _DOUBLED_RE.finditer(text):
         yield Finding(
             name, "doubled-text", f"the words of a link written twice: {match.group(1)[:60]}"
@@ -264,6 +287,7 @@ def findings(tree: Path) -> list[Finding]:
         elif not (
             path.suffix in (".html", ".md")
             or path.name == LLMS
+            or path.name in SEARCH_LISTS
             or path.suffix.lower() in IMAGE_SUFFIXES
         ):
             found.append(Finding(path.name, "kind", "a kind of file the site does not publish"))
@@ -287,8 +311,14 @@ def findings(tree: Path) -> list[Finding]:
     for url in _LLMS_ENTRY_RE.findall(llms):
         if not url.startswith(prefix) or page_of(url.removeprefix(prefix)) not in files:
             found.append(Finding(LLMS, "twin", f"{url}: an entry whose page is not in the tree"))
+    if any(SEARCH_SCRIPT in text for text in pages.values()):
+        held = {name: frozenset(ids) for name, ids in anchors.items()}
+        found += [
+            Finding(file, "search", what)
+            for file, what in api_reference_search.problems(tree, pages, held)
+        ]
     for name in sorted(files):
-        if name.endswith((".html", ".md")) or name == LLMS:
+        if name.endswith((".html", ".md")) or name == LLMS or name in SEARCH_LISTS:
             text = pages.get(name) or (tree / name).read_text(encoding="utf-8")
             found += [
                 Finding(name, "private" if "not public" not in what else "not-public", what)
@@ -343,8 +373,9 @@ def _good_tree(tree: Path) -> None:
         ),
     }
     for name, body in pages.items():
-        (tree / name).write_text(_page(name, body), encoding="utf-8")
+        (tree / name).write_text(_page(name, body, SEARCH_SCRIPT), encoding="utf-8")
         (tree / (name.removesuffix(".html") + ".md")).write_text(f"# {name}\n", encoding="utf-8")
+    api_reference_search.write(tree, sorted(pages))
     (tree / "live.png").write_bytes(b"\x89PNG")
     (tree / LLMS).write_text(
         f"# Site\n\n> A site.\n\n## Front pages\n\n- [Usage]({ORIGIN}{REFERENCE}/usage_page)\n",
@@ -381,6 +412,27 @@ def _add(name: str, text: str) -> Plant:
 PLANTS: tuple[tuple[str, str, Plant], ...] = (
     ("kind", "a stylesheet", _add("doxygen.css", "body{}")),
     ("script", "a script", _edit("index.html", "<p id", "<script>x()</script><p id")),
+    (
+        "script",
+        "another script from the host's assets",
+        _edit("index.html", "<p id", '<script src="../assets/other.js" defer></script><p id'),
+    ),
+    ("search", "the search loaded twice", _edit("index.html", "<p id", SEARCH_SCRIPT + "<p id")),
+    (
+        "search",
+        "a list of the search missing",
+        lambda tree: (tree / api_reference_search.MEMBERS_FILE).unlink(),
+    ),
+    (
+        "search",
+        "a list of the search naming a page the tree does not hold",
+        _edit(api_reference_search.PAGES_FILE, '"page","usage_page"', '"page","gone_page"'),
+    ),
+    (
+        "search",
+        "a list of the search that is not JSON",
+        _add(api_reference_search.PAGES_FILE, "[not json"),
+    ),
     (
         "script",
         "an inline style",
@@ -461,6 +513,11 @@ PLANTS: tuple[tuple[str, str, Plant], ...] = (
         _edit("index.html", "<p id", "<p>someone@example.org</p><p id"),
     ),
     ("private", "a private value in a twin", _edit("usage_page.md", "\n", "\n10.0.0.7\n")),
+    (
+        "private",
+        "a private value in a list of the search",
+        _edit(api_reference_search.PAGES_FILE, '"usage_page.html"', '"10.0.0.7"'),
+    ),
     (
         "not-public",
         "a link to the firmware repository",

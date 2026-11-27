@@ -3,13 +3,14 @@
 """The published site's page modules are the firmware repository's, but for one recorded patch.
 
 ``scripts/build_reference.py`` shapes each page, writes its links at the API
-host's clean addresses and converts it to its Markdown twin with three modules
+host's clean addresses, converts it to its Markdown twin and writes the
+search's two lists with four modules
 of the Kleidos firmware repository's own build of its published reference,
 copied into ``scripts/published_reference/`` and recorded in its
 ``SOURCE.json`` (source, commit, and for each file its path there, the
 SHA-256 of its bytes there and of the copy here): the two references on one
 host stay one design only while the code that shapes them is one. The copies
-differ from their source by ``typing.patch`` alone, two lines this
+differ from their source by ``typing.patch`` alone, the few lines this
 repository's strict mypy asks for. So each copy's bytes are what the manifest
 records, the patch undone gives the source's bytes, and nothing else is in the
 folder. With that repository checked out beside this one (or named by

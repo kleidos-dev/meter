@@ -2,13 +2,14 @@
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
 # Doxyfile.public: the meter's documentation as it is published, at
-# https://api.kleidos.dev/meter/ once this repository is public.
+# https://api.kleidos.dev/meter/.
 #
 # An overlay of the Doxyfile: the same pages, the same filter, the same
 # preprocessor and the same warnings, with the output of the Kleidos firmware
 # repository's published reference (kleidos:Doxyfile.public): the host's
 # header, footer and layout (docs/published-reference/), the public API of the
-# firmware without its source, no script, no frame, no search and no tree.
+# firmware without its source, no script, no frame, no tree, and the host's
+# own search in place of Doxygen's.
 # The Doxyfile stays the gate and is not changed by this file.
 #
 # Never run by hand into a tree that is then published: the build is
@@ -39,6 +40,12 @@ HTML_OUTPUT            = meter
 #---------------------------------------------------------------------------
 LAYOUT_FILE            = docs/published-reference/layout.xml
 CASE_SENSE_NAMES       = YES
+
+#---------------------------------------------------------------------------
+# One page more than the gate's: the page of the search, which the header's
+# control leads to without a script (docs/published-reference/search.md).
+#---------------------------------------------------------------------------
+INPUT                 += docs/published-reference/search.md
 
 #---------------------------------------------------------------------------
 # No source, as the firmware's reference publishes none: each of these is YES
@@ -80,9 +87,11 @@ INTERACTIVE_SVG        = NO
 GENERATE_LEGEND        = NO
 
 #---------------------------------------------------------------------------
-# No script: the host serves none (its Content-Security-Policy admits only
-# the zone's analytics beacon). No search, no tree, no folding, no menus; the
-# header's bar is the navigation.
+# No script of Doxygen's: the host serves one of its own, its search
+# (../assets/search.js), which reads the two lists the build writes beside the
+# pages (scripts/build_reference.py), and its Content-Security-Policy admits
+# that and the zone's analytics beacon only. No Doxygen search, no tree, no
+# folding, no menus; the header's bar is the navigation.
 #---------------------------------------------------------------------------
 SEARCHENGINE           = NO
 GENERATE_TREEVIEW      = NO

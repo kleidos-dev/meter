@@ -5,15 +5,16 @@
 
 ``scripts/build_reference.py`` writes the pages and nothing of the host's:
 they link ``../assets/tokens.css``, ``../assets/api.css``, the host's faces and
-its mark, which ``https://api.kleidos.dev/`` serves beside ``meter/``. This
-script puts a built tree under ``meter/`` beside those files and serves the
-whole on this computer (``127.0.0.1`` only) the way the host does: a page at
+its mark, and load its search (``../assets/search.js``), which
+``https://api.kleidos.dev/`` serves beside ``meter/``. This script puts a
+built tree under ``meter/`` beside those files and serves the whole on this
+computer (``127.0.0.1`` only) the way the host does: a page at
 its address without ``.html`` (``/meter/usage_page``), the site's index at
 ``/meter/``, an old ``.html`` address sent to the clean one with a 301, and
 anything missing a 404.
 
-The host's files are fetched once from :data:`ASSETS_ORIGIN`, the sheets and
-the mark first and then every face the sheets name, into
+The host's files are fetched once from :data:`ASSETS_ORIGIN`, the sheets, the
+search and the mark first and then every face the sheets name, into
 ``~/.cache/kleidos-meter/api-assets`` (``KLEIDOS_METER_CACHE`` moves it;
 ``--refresh`` fetches them again), and are never written into this
 repository: the design is the host's, not a copy here. ``--assets <dir>``
@@ -46,7 +47,13 @@ from pathlib import Path
 ASSETS_ORIGIN = "https://api.kleidos.dev/"
 
 #: The host's files a page of the site links, from the host's root.
-HOST_FILES = ("assets/tokens.css", "assets/api.css", "assets/logo-mark.svg", "favicon.ico")
+HOST_FILES = (
+    "assets/tokens.css",
+    "assets/api.css",
+    "assets/search.js",
+    "assets/logo-mark.svg",
+    "favicon.ico",
+)
 
 #: A file a sheet names (a face).
 _URL_RE = re.compile(r"url\(\s*[\"']?([^\"')]+)[\"']?\s*\)")
