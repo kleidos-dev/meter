@@ -136,6 +136,7 @@ Every report says with `q=` how far to trust it ([the usage guide](docs/usage.md
 .
 ├── README.md, AGENTS.md, CLAUDE.md, CHANGELOG.md, LICENSE, LICENSES/, NOTICE.md, REUSE.toml, pyproject.toml
 ├── Doxyfile, Doxyfile.public   # the documentation site and its gate; the site as published (scripts/build_reference.py)
+├── sonar-project.properties    # the host package's SonarQube Cloud project, which CI's Sonar job reads
 ├── docs/
 │   ├── README.md, usage.md     # the index and the site's main page; the guide to a measuring session
 │   ├── images/panel/           # the panel's views, taken from serve --sim by take_panel_shots.py

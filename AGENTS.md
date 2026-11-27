@@ -60,7 +60,7 @@ The GPIOs of the five roles (the INA228's SDA, SCL and ALERT, Relay 1, Relay 2) 
 
 `scripts/run_tests.sh` (every test and the report) and `pre-commit run --all-files` (every hook) are the two every change runs; [docs/testing.md](docs/testing.md) lists every gate with its command.
 
-**One CI run per ready head**: iterate as a draft (its Check job fails on purpose), run the local gates, mark it ready when they pass, push again only if something must change. `main` requires no check: fast-forward a head only once its ready run made the Check job green ([docs/testing.md](docs/testing.md)).
+**One CI run per ready head**: iterate as a draft (its Check job fails on purpose), run the local gates, mark it ready when they pass, push again only if something must change. A ruleset requires Check on `main`: fast-forward a head only once its ready run made Check green ([docs/testing.md](docs/testing.md)).
 
 ## The panel
 

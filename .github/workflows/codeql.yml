@@ -1,20 +1,22 @@
 # SPDX-FileCopyrightText: 2026 José M. Requena Plens
 # SPDX-License-Identifier: GPL-3.0-or-later
 #
-# Static application security testing of the firmware's C++ with CodeQL,
-# as the Kleidos firmware repository runs it (its codeql.yml): CodeQL cannot
+# Static application security testing with CodeQL. The firmware's C++ as the
+# Kleidos firmware repository analyses it (its codeql.yml): CodeQL cannot
 # build a PlatformIO and ESP-IDF project by itself, so the job builds the
 # device image between the init and analyze steps, as CI's firmware job builds
 # it (the pinned platform, scripts/install_idf.sh, the cached ESP-IDF
-# package), and CodeQL traces the compiler calls.
+# package), and CodeQL traces the compiler calls. Beside it, the languages
+# CodeQL reads without a build (python, javascript-typescript, actions).
 #
-# Code scanning is not enabled on this private repository (the API answers
-# "Advanced Security must be enabled"), so nothing is uploaded: the SARIF is
-# kept as the `codeql-sarif` artifact and its result count goes to the job
-# summary. Advisory, as in the firmware repository: a workflow of its own,
-# beside CI (the project's CI convention), which no merge waits for. When the
-# repository is public, `upload` becomes `always` and the results go to the
-# Security tab.
+# This is the repository's advanced setup: GitHub's default setup is off,
+# since code scanning refuses an advanced workflow's results while it is on.
+# The results go to the repository's Security tab (code scanning, free on a
+# public repository): `upload: always`, which needs `security-events: write`
+# on the jobs alone. The C++ SARIF is also kept as the `codeql-sarif` artifact
+# and its result count goes to the job summary. Advisory, as in the firmware
+# repository: a workflow of its own, beside CI (the project's CI convention),
+# which no merge waits for.
 name: CodeQL
 
 on:
@@ -29,11 +31,10 @@ on:
     - cron: "0 6 * * 1"
   workflow_dispatch:
 
-# The CodeQL action reads the run's metadata (get-a-workflow-run) on a
-# private repository; with nothing uploaded it needs no security-events.
+# Read-only for the workflow; the analyze job alone may write its results to
+# code scanning.
 permissions:
   contents: read
-  actions: read
 
 concurrency:
   group: codeql-${{ github.ref }}-${{ github.event_name }}
@@ -45,6 +46,12 @@ jobs:
     if: github.event.pull_request.draft != true
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    # security-events: the SARIF upload to code scanning; actions: the CodeQL
+    # action reads the run's metadata (get-a-workflow-run).
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
     env:
       KLEIDOS_PIO_JOB_ALONE: "1"
     steps:
@@ -71,6 +78,11 @@ jobs:
         with:
           languages: c-cpp
           build-mode: manual
+          # No TRAP cache: the action turns it on by default here, and
+          # with the cache of main's run the C/C++ extractor's pre-finalize
+          # aborts (recursive_directory_iterator on a missing
+          # trapCaches/cpp/tarballs, 2026-11-27, CodeQL 2.27.6).
+          trap-caching: false
       # CodeQL traces the compiler calls of this build.
       - name: Build meter
         run: pio run --project-dir firmware -e meter
@@ -78,7 +90,7 @@ jobs:
         uses: github/codeql-action/analyze@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4.39.4
         with:
           category: /language:c-cpp
-          upload: never
+          upload: always
           upload-database: false
           output: ${{ runner.temp }}/codeql-sarif
       - name: The result count
@@ -87,7 +99,7 @@ jobs:
           set -euo pipefail
           count=$(python3 -c 'import json, pathlib, sys; print(sum(len(r.get("results", [])) for p in pathlib.Path(sys.argv[1]).glob("*.sarif") for r in json.loads(p.read_text())["runs"]))' "$RUNNER_TEMP/codeql-sarif")
           echo "CodeQL results: $count"
-          { echo "### CodeQL (c-cpp)"; echo; echo "- results: $count (SARIF in the \`codeql-sarif\` artifact)"; } >> "$GITHUB_STEP_SUMMARY"
+          { echo "### CodeQL (c-cpp)"; echo; echo "- results: $count (in the Security tab, and the SARIF in the \`codeql-sarif\` artifact)"; } >> "$GITHUB_STEP_SUMMARY"
       - name: Keep the SARIF
         if: ${{ !cancelled() }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -95,3 +107,37 @@ jobs:
           name: codeql-sarif
           path: ${{ runner.temp }}/codeql-sarif/
           if-no-files-found: warn
+
+  # The languages CodeQL reads without a build: the host package and the
+  # scripts (python), the panel's page (javascript-typescript) and the
+  # workflows (actions). GitHub's default setup would analyze them, but it
+  # refuses an advanced workflow's upload beside it, so the repository runs
+  # advanced setup alone and analyzes them here.
+  analyze-sources:
+    name: "🛡️ CodeQL (${{ matrix.language }}, the sources)"
+    if: github.event.pull_request.draft != true
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      actions: read
+      security-events: write
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [python, javascript-typescript, actions]
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4.39.4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: none
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4.39.4
+        with:
+          category: /language:${{ matrix.language }}
+          upload: always
+          upload-database: false

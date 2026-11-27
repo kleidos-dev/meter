@@ -12,8 +12,10 @@
 # A workflow of its own, beside CI (the project's CI convention): its weekly
 # schedule re-scans an unchanged tree for newly disclosed vulnerabilities,
 # which would otherwise run the whole of CI on a schedule, and nothing waits
-# for it. Code scanning is not enabled on this private repository, so the
-# Trivy SARIF and the SBOM are kept as artifacts and not uploaded.
+# for it. Both scanners' SARIF go to the repository's Security tab (code
+# scanning, free on a public repository), each under a category of its own,
+# which needs `security-events: write` on those two jobs alone; the Trivy
+# SARIF and the SBOM are also kept as the `security-scan` artifact.
 name: Security scan
 
 on:
@@ -37,6 +39,9 @@ jobs:
     name: "🛡️ Dependency vulnerabilities (OSV, advisory)"
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -45,15 +50,29 @@ jobs:
         continue-on-error: true
         uses: google/osv-scanner-action/osv-scanner-action@32d3cd482bdadfb38b186c0ad1b031902d55d932 # v2.7.1
         with:
+          # --allow-no-lockfiles: the tree has no lockfile OSV-Scanner reads
+          # (the ESP-IDF and PlatformIO pins, pyproject.toml without a lock),
+          # and without it the scan ends with code 128 and writes no SARIF.
           scan-args: |-
+            --format=sarif
+            --output-file=osv-results.sarif
+            --allow-no-lockfiles
             --recursive
-            --skip-git
             ./
+      - name: Upload the OSV SARIF to code scanning
+        if: ${{ !cancelled() && hashFiles('osv-results.sarif') != '' }}
+        uses: github/codeql-action/upload-sarif@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4.39.4
+        with:
+          sarif_file: osv-results.sarif
+          category: osv-scanner
 
   trivy:
     name: "🛡️ Dependencies, secrets and licenses (Trivy, advisory, CycloneDX SBOM)"
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -68,6 +87,12 @@ jobs:
           format: sarif
           output: trivy-results.sarif
           exit-code: "0"
+      - name: Upload the Trivy SARIF to code scanning
+        if: ${{ !cancelled() && hashFiles('trivy-results.sarif') != '' }}
+        uses: github/codeql-action/upload-sarif@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4.39.4
+        with:
+          sarif_file: trivy-results.sarif
+          category: trivy
       - name: Generate the CycloneDX SBOM
         continue-on-error: true
         uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0

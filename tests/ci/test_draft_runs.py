@@ -7,14 +7,17 @@ repository's rules) takes minutes; everything after it takes the better part
 of an hour. A pull request pushed again and again while it is iterated on must
 not pay for that each time, so ``📋 What changed`` reports every heavy family
 false on a draft and the tests job skips. A draft's run is no verdict, and
-nothing in GitHub stops a draft head from being fast-forwarded to ``main``
-(no protection, no ruleset), so ``🙋 Draft`` fails on a draft and ``✅ Check``
-fails with it: no draft head carries a green gate. Marking the pull request
-ready for review runs the whole of it (``pull_request`` includes
+``main`` takes a signed fast-forward push of any head whose ``✅ Check`` is
+green, draft or not (the ruleset that requires the check reads the commit's
+status, not the pull request's), so ``🙋 Draft`` fails on a draft and
+``✅ Check`` fails with it: no draft head carries a green gate. Marking the
+pull request ready for review runs the whole of it (``pull_request`` includes
 ``ready_for_review``), and so does every later push to a ready pull request.
 A skip never satisfies the gate on a ready pull request: the only jobs outside
 the path filter that may skip are the tests job, only on ``draft == 'true'``,
-and ``🙋 Draft``, only on ``draft != 'true'``.
+and ``🙋 Draft``, only on ``draft != 'true'``. The host package's coverage and
+``📊 Sonar``, which the quality kit runs on every pull request, run on a draft
+too.
 
 Host-only: the workflow read as text, and the filter's draft block run in bash.
 """

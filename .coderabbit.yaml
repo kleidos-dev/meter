@@ -15,11 +15,6 @@
 # path_filters, path_instructions and guideline files below the baseline.
 language: en-US
 
-# A private repository: without a seat the Free plan posts "PR summarization
-# only", the one thing this file turns off. false posts nothing until the
-# repository has a seat with reviews.
-enable_free_tier: false
-
 reviews:
   # Balanced feedback, the default every owner repository has used so far.
   # "assertive" is the knob for more comments; "quiet" for fewer.

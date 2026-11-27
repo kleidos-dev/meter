@@ -29,6 +29,12 @@
 #    (scripts/run_tests.sh, docs/testing.md), with the host package's mutants,
 #    kept as an artifact and written to the job summary; always. A test skipped there for a reason that names
 #    no place where it runs instead fails the report's gate.
+#    Beside it, on every run, a draft's included: the host package's tests
+#    again with branch coverage (the script's step 3), whose Cobertura report
+#    feeds Sonar (kit, sonar.yml), the host package on SonarQube Cloud
+#    (sonar-project.properties), secretless through GitHub's OIDC token. The
+#    kit runs the analysis on every pull request and push, so its coverage
+#    cannot come from the tests job, which a draft skips.
 #    Beside it, only when a path they read changed: the panel's page in a
 #    headless browser, the firmware's Doxygen reference at zero warnings, the firmware's host tests again at 32 bits
 #    with GCC (native32), the device image (meter) against the pinned
@@ -37,17 +43,19 @@
 #    after the device image, clang-tidy (over the device's compile commands
 #    and the host harness, with the kit's .clang-tidy and firmware/'s own on
 #    top) and cppcheck over the firmware.
-#    A DRAFT pull request stops after stage 2: its run is the quick job, the
-#    kit's check, "What changed" and the repository's rules (minutes), and
+#    A DRAFT pull request stops after stage 2 but for the coverage and Sonar
+#    jobs: its run is the quick job, the kit's check, "What changed", the
+#    repository's rules, the host package's coverage and Sonar (minutes), and
 #    "What changed" reports every heavy family false and the tests job skips,
 #    so iterating on a draft costs no runner hours. The run of the ready
 #    head (the pull request marked ready for review, and every later push to
 #    it) runs everything the paths ask for, and it is the verdict. A draft's
 #    run ends red on purpose: the job "🙋 Draft" fails on a draft, so
 #    "✅ Check" fails with it and no draft head ever carries a green gate.
-#    GitHub requires no check on main (no protection, no ruleset), and main
-#    takes a signed fast-forward push that ignores the draft flag; the gate
-#    must therefore say on the head itself that a draft's run judged nothing.
+#    main's rulesets require "✅ Check" on the commit and a pull request, and
+#    main takes the owner's signed fast-forward push of a head whose gate is
+#    green, which ignores the draft flag; the gate must therefore say on the
+#    head itself that a draft's run judged nothing.
 #    The kit holds the gate's name, step and env word for word, so the gate
 #    cannot carry another name on a draft as the firmware's verdict does.
 # 4. "✅ Check", last: it needs every other job of this file and fails unless
@@ -283,6 +291,61 @@ jobs:
           name: test-report
           path: build/test-report/
           if-no-files-found: warn
+
+  # The host package's tests with branch coverage against the native bridge
+  # (step 3 of scripts/run_tests.sh, as the tests job runs it), for the Sonar
+  # job: the kit runs the analysis on every pull request and push, a draft's
+  # included, so its coverage cannot come from the tests job, which a draft
+  # skips. The Cobertura report is written from the repository's root, so
+  # every file is named from there (host/kleidos_meter/..., what
+  # sonar-project.properties reads), and kept as the "coverage" artifact.
+  coverage:
+    name: "🧪 Host package coverage (for Sonar)"
+    needs: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: clang for the native bridge
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq clang
+          clang++ --version
+      - name: Install the host client
+        run: pip install -e 'host[dev]' reuse pypdf==7.1.1 pyelftools==0.33
+      - name: The native bridge (the firmware on standard input and output)
+        run: make -C firmware/test/native -j"$(nproc)" bridge CXX=clang++
+      - name: The host package's tests, branch coverage
+        env:
+          METER_BRIDGE_REQUIRED: "1"
+        run: |
+          set -euo pipefail
+          export KLEIDOS_METER_NATIVE_BRIDGE="$GITHUB_WORKSPACE/firmware/test/native/build/bridge"
+          (cd host && python3 -m pytest -q -W error -p no:cacheprovider --cov --cov-report=term)
+          python3 -m coverage xml -q --data-file=host/.coverage -o host-coverage.xml
+      - name: Keep the coverage report for Sonar
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverage
+          path: host-coverage.xml
+          if-no-files-found: error
+
+  # The host package (the client, the simulator, the panel and its page) on
+  # SonarQube Cloud: sonar-project.properties holds the project. Secretless
+  # (OIDC); a pull request from a fork or Dependabot, which GitHub gives no
+  # OIDC token, ends green with a notice. It reads the coverage job's report.
+  sonar:
+    name: "📊 Sonar"
+    needs: [lint, coverage]
+    uses: kleidos-dev/.github/.github/workflows/sonar.yml@v3
+    permissions:
+      contents: read
+      id-token: write
 
   # The panel's page (host/kleidos_meter/panel/static) in a headless Chromium
   # against serve's own simulator: host/tests/test_panel_browser.py, which the
@@ -748,7 +811,7 @@ jobs:
 
   done:
     name: "✅ Check"
-    needs: [quick, check, changes, lint, tests, panel, docs, static-analysis, native32, firmware, schematic, draft]
+    needs: [quick, check, changes, lint, tests, coverage, sonar, panel, docs, static-analysis, native32, firmware, schematic, draft]
     if: always()
     runs-on: ubuntu-latest
     timeout-minutes: 5

@@ -14,9 +14,11 @@ last, needs every other job: the kit's own check holds that job to its model.
 
 The advisory workflows beside it (``codeql.yml``, ``security.yml``, the
 Kleidos firmware repository's CodeQL and composition scans) keep the same
-naming, bounds and checkouts, read-only permissions and a cancelled
-superseded run; and every action any workflow uses is pinned to a commit,
-with the release it is beside a comment.
+naming, bounds and checkouts, read-only permissions at the top and a
+cancelled superseded run; each of their jobs uploads its SARIF to the
+Security tab and is the only place that may write security events. Every
+action any workflow uses is pinned to a commit, with the release it is beside
+a comment.
 
 Host-only: the workflow read as text (no YAML parser is a dependency here).
 """
@@ -38,6 +40,7 @@ FIRST_STAGE = {"changes", "quick"}
 KIT_CALLERS = {
     "quick": "kleidos-dev/.github/.github/workflows/quick.yml@v3",
     "check": "kleidos-dev/.github/.github/workflows/check.yml@v3",
+    "sonar": "kleidos-dev/.github/.github/workflows/sonar.yml@v3",
 }
 #: The kit's gate, the one required check: it needs every other job.
 GATE = "done"
@@ -132,8 +135,15 @@ def test_the_advisory_workflows_keep_the_convention() -> None:
         assert re.search(r"^  cancel-in-progress: true$", text, re.MULTILINE), name
         permissions = re.search(r"^permissions:\n((?:  .*\n)+)", text, re.MULTILINE)
         assert permissions and "  contents: read\n" in permissions.group(1), name
-        assert "write" not in permissions.group(1), f"{name}: writes nothing, uploads nothing"
-        assert "upload-sarif" not in text, f"{name}: code scanning is off here; keep an artifact"
+        assert "write" not in permissions.group(1), f"{name}: the workflow itself writes nothing"
+        for job, block in jobs.items():
+            granted = re.search(r"^    permissions:\n((?:      .*\n)+)", block, re.MULTILINE)
+            assert granted and "      security-events: write\n" in granted.group(1), (
+                f"{name}: {job} cannot upload its SARIF to the Security tab"
+            )
+            assert "upload: always" in block or "codeql-action/upload-sarif@" in block, (
+                f"{name}: {job} uploads no SARIF to the Security tab"
+            )
 
 
 def test_codeql_analyses_the_device_build() -> None:
@@ -145,7 +155,7 @@ def test_codeql_analyses_the_device_build() -> None:
     )
     assert init < build < analyze, "CodeQL traces the build between init and analyze"
     assert "languages: c-cpp" in text and "build-mode: manual" in text
-    assert "upload: never" in text
+    assert "upload: always" in text, "the results go to the Security tab"
 
 
 def test_every_action_is_pinned_to_a_commit() -> None:
