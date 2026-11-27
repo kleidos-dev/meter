@@ -1,0 +1,167 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: MIT
+#
+# The Kleidos quality kit's clang-tidy base (kleidos-dev/.github
+# quality/clang-tidy/base.yaml), copied to the repository root as .clang-tidy.
+# A sources directory adds its own .clang-tidy with InheritParentConfig: true
+# for what is the repository's: HeaderFilterRegex, ExcludeHeaderFilterRegex,
+# the file-scope prefixes (s_ or g), extra checks. clang-tidy appends a child's
+# Checks and WarningsAsErrors to these, so a "-<check>" there turns a kit check
+# off and needs a waiver (.github/quality/waivers.toml).
+#
+# The list is the firmware's (jmrplens/kleidos) and kleidos-dev/meter's,
+# joined: meter's misc-no-recursion and
+# cppcoreguidelines-avoid-non-const-global-variables, plus Clang's static
+# analyzer (clang-analyzer-*: path-sensitive null, init, double free, leak,
+# division by zero) and concurrency-mt-unsafe for the dual-core code.
+# Every warning is an error (meter's standard).
+#
+# Families left off, with their reason (the firmware's deviations):
+#   * cppcoreguidelines-macro-usage          build flags and SDK macros
+#   * cppcoreguidelines-pro-type-vararg      printf-style logging and SDK APIs
+#   * cppcoreguidelines-pro-bounds-*         fixed C arrays and SDK headers
+#   * cppcoreguidelines-pro-type-union-access SDK register and union structs
+#   * bugprone-signed-bitwise                HID scancodes and hardware flags
+#   * cppcoreguidelines-special-member-functions UI and state classes by design
+#   * cppcoreguidelines-narrowing-conversions -Wconversion -Werror covers it
+#   * cppcoreguidelines-pro-type-reinterpret-cast byte-level hardware I/O
+#   * cert-err58-cpp                          static objects whose constructors
+#                                            cannot throw on -fno-exceptions
+---
+Checks: >
+  -*,
+  bugprone-*,
+  -bugprone-easily-swappable-parameters,
+  -bugprone-narrowing-conversions,
+  -bugprone-exception-escape,
+  -bugprone-signed-bitwise,
+  cert-*,
+  -cert-err58-cpp,
+  cppcoreguidelines-avoid-goto,
+  cppcoreguidelines-init-variables,
+  cppcoreguidelines-misleading-capture-default-by-value,
+  cppcoreguidelines-no-malloc,
+  cppcoreguidelines-owning-memory,
+  cppcoreguidelines-prefer-member-initializer,
+  cppcoreguidelines-pro-type-const-cast,
+  cppcoreguidelines-pro-type-cstyle-cast,
+  cppcoreguidelines-pro-type-static-cast-downcast,
+  cppcoreguidelines-slicing,
+  cppcoreguidelines-virtual-class-destructor,
+  misc-definitions-in-headers,
+  misc-misplaced-const,
+  misc-unused-using-decls,
+  misc-redundant-expression,
+  modernize-use-auto,
+  modernize-use-nullptr,
+  modernize-use-override,
+  modernize-use-using,
+  modernize-loop-convert,
+  modernize-redundant-void-arg,
+  performance-*,
+  -performance-avoid-endl,
+  -performance-unnecessary-value-param,
+  readability-identifier-naming,
+  readability-redundant-string-cstr,
+  readability-simplify-boolean-expr,
+  readability-trivial-switch,
+  readability-container-size-empty,
+  readability-braces-around-statements,
+  misc-no-recursion,
+  cppcoreguidelines-avoid-non-const-global-variables,
+  clang-analyzer-*,
+  concurrency-mt-unsafe,
+
+WarningsAsErrors: '*'
+
+# Identifier naming: PascalCase types, camelBack functions and variables,
+# lower_case namespaces, UPPER_CASE macros, k + PascalCase for compile-time
+# constants, bare PascalCase enumerators, a trailing _ on private and
+# protected members. The prefix of mutable file-scope and global variables
+# (s_ in the firmware, g in meter) is the repository's, in its own file.
+CheckOptions:
+  # A boolean expression written inside a macro body belongs to whoever wrote
+  # the macro. ESP-IDF's I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG carries a
+  # `cond ? true : false`, and a call site cannot simplify it.
+  - key: readability-simplify-boolean-expr.IgnoreMacros
+    value: true
+  # --- Types ---
+  - key: readability-identifier-naming.ClassCase
+    value: CamelCase
+  - key: readability-identifier-naming.StructCase
+    value: CamelCase
+  - key: readability-identifier-naming.UnionCase
+    value: CamelCase
+  - key: readability-identifier-naming.EnumCase
+    value: CamelCase
+  - key: readability-identifier-naming.TypedefCase
+    value: CamelCase
+  - key: readability-identifier-naming.TypeAliasCase
+    value: CamelCase
+  - key: readability-identifier-naming.TemplateParameterCase
+    value: CamelCase
+  # --- Functions / methods ---
+  - key: readability-identifier-naming.FunctionCase
+    value: camelBack
+  - key: readability-identifier-naming.MethodCase
+    value: camelBack
+  # --- Variables / parameters ---
+  - key: readability-identifier-naming.VariableCase
+    value: camelBack
+  - key: readability-identifier-naming.LocalVariableCase
+    value: camelBack
+  - key: readability-identifier-naming.ParameterCase
+    value: camelBack
+  - key: readability-identifier-naming.PointerParameterCase
+    value: camelBack
+  # --- Members ---
+  - key: readability-identifier-naming.MemberCase
+    value: camelBack
+  - key: readability-identifier-naming.PublicMemberCase
+    value: camelBack
+  - key: readability-identifier-naming.PrivateMemberCase
+    value: camelBack
+  - key: readability-identifier-naming.PrivateMemberSuffix
+    value: _
+  - key: readability-identifier-naming.ProtectedMemberCase
+    value: camelBack
+  - key: readability-identifier-naming.ProtectedMemberSuffix
+    value: _
+  # --- Mutable file-scope statics ---
+  - key: readability-identifier-naming.StaticVariableCase
+    value: camelBack
+  # --- Runtime const locals / parameters stay camelBack (no k prefix) ---
+  - key: readability-identifier-naming.LocalConstantCase
+    value: camelBack
+  - key: readability-identifier-naming.ConstantParameterCase
+    value: camelBack
+  - key: readability-identifier-naming.ConstantMemberCase
+    value: camelBack
+  # --- Compile-time constants: k + PascalCase ---
+  - key: readability-identifier-naming.ConstexprVariableCase
+    value: CamelCase
+  - key: readability-identifier-naming.ConstexprVariablePrefix
+    value: k
+  - key: readability-identifier-naming.GlobalConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.GlobalConstantPrefix
+    value: k
+  - key: readability-identifier-naming.StaticConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.StaticConstantPrefix
+    value: k
+  - key: readability-identifier-naming.ClassConstantCase
+    value: CamelCase
+  - key: readability-identifier-naming.ClassConstantPrefix
+    value: k
+  # --- Enum class enumerators: bare PascalCase ---
+  - key: readability-identifier-naming.EnumConstantCase
+    value: CamelCase
+  # --- Macros / namespaces ---
+  - key: readability-identifier-naming.MacroDefinitionCase
+    value: UPPER_CASE
+  - key: readability-identifier-naming.NamespaceCase
+    value: lower_case
+
+FormatStyle: file
+...

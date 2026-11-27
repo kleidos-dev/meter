@@ -1,0 +1,592 @@
+{
+  "generated_by": "scripts/gen_pin_table.py from firmware/board/pins.toml; never edit",
+  "digest": "0x90072FE9",
+  "board": {
+    "name": "YD-ESP32-S3 (S3-N16R8) on the DSX063-1 carrier",
+    "gpio_count": 49,
+    "source": "docs/carrier-board.md §1, §2"
+  },
+  "bus": {
+    "address_first": 64,
+    "address_last": 79,
+    "clock_min_hz": 50000,
+    "clock_max_hz": 1000000
+  },
+  "roles": [
+    {
+      "key": "sda",
+      "label": "INA228 SDA",
+      "below": 49,
+      "needs": "Any free or caution pin: the own I2C master routes SDA through the GPIO matrix to any pad below GPIO49.",
+      "source": "firmware/src/i2c_bus.h kGpioCount"
+    },
+    {
+      "key": "scl",
+      "label": "INA228 SCL",
+      "below": 49,
+      "needs": "Any free or caution pin: the own I2C master routes SCL through the GPIO matrix to any pad below GPIO49.",
+      "source": "firmware/src/i2c_bus.h kGpioCount"
+    },
+    {
+      "key": "alert",
+      "label": "INA228 ALERT",
+      "below": 32,
+      "needs": "A free pin below GPIO32: the ALERT handler reads one interrupt status register, GPIO_STATUS_REG, which latches GPIO0 to GPIO31 only.",
+      "source": "firmware/src/sampler.cpp inStatusBank"
+    },
+    {
+      "key": "relay1",
+      "label": "Relay 1",
+      "below": 49,
+      "needs": "Any free or caution pin: the relay bank drives its input as a plain output.",
+      "source": "firmware/src/relay.cpp"
+    },
+    {
+      "key": "relay2",
+      "label": "Relay 2",
+      "below": 49,
+      "needs": "Any free or caution pin: the relay bank drives its input as a plain output.",
+      "source": "firmware/src/relay.cpp"
+    }
+  ],
+  "defaults": {
+    "sda": 4,
+    "scl": 5,
+    "alert": 6,
+    "address": "auto",
+    "scl_hz": 400000,
+    "pull_sda": "up",
+    "pull_scl": "up",
+    "pull_alert": "up",
+    "relay1": 7,
+    "relay1_active": "low",
+    "relay2": 15,
+    "relay2_active": "high",
+    "source": "hardware/rig.kicad_sch rev D; docs/rig-wiring.md; firmware/src/pinmap.h kDefaultMap"
+  },
+  "groups": {
+    "none": {
+      "sentence": "Nothing on the chip or the board claims it.",
+      "source": "docs/carrier-board.md §2"
+    },
+    "power": {
+      "sentence": "A supply terminal, not a GPIO.",
+      "source": "docs/carrier-board.md §6"
+    },
+    "ground": {
+      "sentence": "Ground, not a GPIO.",
+      "source": "docs/carrier-board.md §6"
+    },
+    "reset": {
+      "sentence": "The chip's enable line, not a GPIO: pulling it low reboots the board.",
+      "source": "docs/carrier-board.md §2 (vendor: \"RST/EN (pin 3)\")"
+    },
+    "strapping": {
+      "sentence": "A strapping pin: its level at reset selects the boot mode, the JTAG source or the VDD_SPI voltage.",
+      "source": "ESP-IDF, GPIO & RTC GPIO (ESP32-S3): \"GPIO0, GPIO3, GPIO45 and GPIO46 are strapping pins\""
+    },
+    "memory": {
+      "sentence": "A line of the in-package SPI flash or of the octal PSRAM.",
+      "source": "ESP-IDF, GPIO & RTC GPIO (ESP32-S3): GPIO26 to GPIO32 flash and PSRAM, GPIO33 to GPIO37 octal PSRAM; the ESP32-S3-DevKitC-1 guide: GPIO35 to GPIO37 \"not available for external use\""
+    },
+    "usb": {
+      "sentence": "The native USB pair, used by USB-Serial-JTAG by default.",
+      "source": "ESP-IDF, GPIO & RTC GPIO (ESP32-S3): \"GPIO19 and GPIO20 are used by USB-JTAG by default\""
+    },
+    "uart0": {
+      "sentence": "UART0, wired to the CH343P bridge: the console, which recovery needs.",
+      "source": "docs/carrier-board.md §2, §7"
+    },
+    "led": {
+      "sentence": "A status-LED line: the firmware blanks it at boot and holds it low.",
+      "source": "firmware/src/status_led.h kLedDataGpios; docs/carrier-board.md §4"
+    },
+    "jtag": {
+      "sentence": "A JTAG pad: usable, but taking it costs an external JTAG probe.",
+      "source": "ESP32-S3-DevKitC-1 v1.1 guide, J3 rows (MTCK, MTDO, MTDI, MTMS)"
+    },
+    "vdd_spi": {
+      "sentence": "In the VDD_SPI power domain: 3.3 V on this S3-N16R8 module, 1.8 V on an R8V part.",
+      "source": "ESP-FAQ, development board; docs/carrier-board.md §4, §9 q4"
+    }
+  },
+  "rows": [
+    {
+      "rail": "left",
+      "terminal": 1,
+      "silk": "3.3",
+      "gpio": null,
+      "class": "reserved",
+      "group": "power",
+      "hover": "3.3 V, the output of the on-board 1117C 33 LDO; it powers the INA228 breakout and Relay 2's module."
+    },
+    {
+      "rail": "left",
+      "terminal": 2,
+      "silk": "3.3",
+      "gpio": null,
+      "class": "reserved",
+      "group": "power",
+      "hover": "3.3 V, the same net as left 1."
+    },
+    {
+      "rail": "left",
+      "terminal": 3,
+      "silk": "RST",
+      "gpio": null,
+      "class": "reserved",
+      "group": "reset",
+      "hover": "Chip enable (RST/EN): pulling it low reboots the board."
+    },
+    {
+      "rail": "left",
+      "terminal": 4,
+      "silk": "4",
+      "gpio": 4,
+      "class": "free",
+      "group": "none",
+      "hover": "GPIO4 (RTC_GPIO4, TOUCH4, ADC1_CH3): free; the INA228's SDA on the rig as wired."
+    },
+    {
+      "rail": "left",
+      "terminal": 5,
+      "silk": "5",
+      "gpio": 5,
+      "class": "free",
+      "group": "none",
+      "hover": "GPIO5: free; the INA228's SCL on the rig as wired."
+    },
+    {
+      "rail": "left",
+      "terminal": 6,
+      "silk": "6",
+      "gpio": 6,
+      "class": "free",
+      "group": "none",
+      "hover": "GPIO6: free; the INA228's ALERT (ALE) on the rig as wired."
+    },
+    {
+      "rail": "left",
+      "terminal": 7,
+      "silk": "7",
+      "gpio": 7,
+      "class": "free",
+      "group": "none",
+      "hover": "GPIO7 (RTC_GPIO7, TOUCH7, ADC1_CH6): free, no pull at reset; Relay 1, the DUT's battery lead, on the rig as wired."
+    },
+    {
+      "rail": "left",
+      "terminal": 8,
+      "silk": "15",
+      "gpio": 15,
+      "class": "free",
+      "group": "none",
+      "hover": "GPIO15 (XTAL_32K_P, U0RTS): free while the RTC runs on its internal RC; Relay 2, the shunt bypass, on the rig as wired."
+    },
+    {
+      "rail": "left",
+      "terminal": 9,
+      "silk": "16",
+      "gpio": 16,
+      "class": "free",
+      "group": "none",
+      "hover": "GPIO16 (XTAL_32K_N, U0CTS): free while the RTC runs on its internal RC; not wired, parked."
+    },
+    {
+      "rail": "left",
+      "terminal": 10,
+      "silk": "17",
+      "gpio": 17,
+      "class": "free",
+      "group": "none",
+      "hover": "GPIO17 (U1TXD): free; UART1's IOMUX TX pin, which nothing here uses; not wired, parked."
+    },
+    {
+      "rail": "left",
+      "terminal": 11,
+      "silk": "18",
+      "gpio": 18,
+      "class": "free",
+      "group": "none",
+      "hover": "GPIO18 (U1RXD, CLK_OUT3): free; parked."
+    },
+    {
+      "rail": "left",
+      "terminal": 12,
+      "silk": "8",
+      "gpio": 8,
+      "class": "free",
+      "group": "none",
+      "hover": "GPIO8: free; parked."
+    },
+    {
+      "rail": "left",
+      "terminal": 13,
+      "silk": "3",
+      "gpio": 3,
+      "class": "reserved",
+      "group": "strapping",
+      "hover": "GPIO3: a strapping pin (the JTAG source); left alone."
+    },
+    {
+      "rail": "left",
+      "terminal": 14,
+      "silk": "46",
+      "gpio": 46,
+      "class": "reserved",
+      "group": "strapping",
+      "hover": "GPIO46: a strapping pin, with a weak pull-down at reset; left alone."
+    },
+    {
+      "rail": "left",
+      "terminal": 15,
+      "silk": "9",
+      "gpio": 9,
+      "class": "free",
+      "group": "none",
+      "hover": "GPIO9: free; parked."
+    },
+    {
+      "rail": "left",
+      "terminal": 16,
+      "silk": "10",
+      "gpio": 10,
+      "class": "free",
+      "group": "none",
+      "hover": "GPIO10: free; parked."
+    },
+    {
+      "rail": "left",
+      "terminal": 17,
+      "silk": "11",
+      "gpio": 11,
+      "class": "free",
+      "group": "none",
+      "hover": "GPIO11: free; parked."
+    },
+    {
+      "rail": "left",
+      "terminal": 18,
+      "silk": "12",
+      "gpio": 12,
+      "class": "free",
+      "group": "none",
+      "hover": "GPIO12: free; parked."
+    },
+    {
+      "rail": "left",
+      "terminal": 19,
+      "silk": "13",
+      "gpio": 13,
+      "class": "free",
+      "group": "none",
+      "hover": "GPIO13: free; parked."
+    },
+    {
+      "rail": "left",
+      "terminal": 20,
+      "silk": "14",
+      "gpio": 14,
+      "class": "free",
+      "group": "none",
+      "hover": "GPIO14: free; parked."
+    },
+    {
+      "rail": "left",
+      "terminal": 21,
+      "silk": "5V",
+      "gpio": null,
+      "class": "reserved",
+      "group": "power",
+      "hover": "5 V, from USB through the bridged IN-OUT jumper; it powers Relay 1's module. Nothing else may feed it."
+    },
+    {
+      "rail": "left",
+      "terminal": 22,
+      "silk": "G",
+      "gpio": null,
+      "class": "reserved",
+      "group": "ground",
+      "hover": "Ground: the INA228's, the DUT side's common tap and the relay modules'."
+    },
+    {
+      "rail": "right",
+      "terminal": 1,
+      "silk": "G",
+      "gpio": null,
+      "class": "reserved",
+      "group": "ground",
+      "hover": "Ground."
+    },
+    {
+      "rail": "right",
+      "terminal": 2,
+      "silk": "TX",
+      "gpio": 43,
+      "class": "reserved",
+      "group": "uart0",
+      "hover": "GPIO43, UART0 TX to the CH343P: the console's line out, never given to a role."
+    },
+    {
+      "rail": "right",
+      "terminal": 3,
+      "silk": "RX",
+      "gpio": 44,
+      "class": "reserved",
+      "group": "uart0",
+      "hover": "GPIO44, UART0 RX from the CH343P: the console's line in, never given to a role."
+    },
+    {
+      "rail": "right",
+      "terminal": 4,
+      "silk": "1",
+      "gpio": 1,
+      "class": "free",
+      "group": "none",
+      "hover": "GPIO1: free; parked."
+    },
+    {
+      "rail": "right",
+      "terminal": 5,
+      "silk": "2",
+      "gpio": 2,
+      "class": "free",
+      "group": "none",
+      "hover": "GPIO2: free; parked."
+    },
+    {
+      "rail": "right",
+      "terminal": 6,
+      "silk": "42",
+      "gpio": 42,
+      "class": "caution",
+      "group": "jtag",
+      "hover": "GPIO42, JTAG MTMS: usable for SDA, SCL or a relay, at the cost of an external JTAG probe; not for ALERT, which needs a pin below GPIO32; parked."
+    },
+    {
+      "rail": "right",
+      "terminal": 7,
+      "silk": "41",
+      "gpio": 41,
+      "class": "caution",
+      "group": "jtag",
+      "hover": "GPIO41, JTAG MTDI: usable for SDA, SCL or a relay, at the cost of an external JTAG probe; not for ALERT, which needs a pin below GPIO32; parked."
+    },
+    {
+      "rail": "right",
+      "terminal": 8,
+      "silk": "40",
+      "gpio": 40,
+      "class": "caution",
+      "group": "jtag",
+      "hover": "GPIO40, JTAG MTDO: usable for SDA, SCL or a relay, at the cost of an external JTAG probe; not for ALERT, which needs a pin below GPIO32; parked."
+    },
+    {
+      "rail": "right",
+      "terminal": 9,
+      "silk": "39",
+      "gpio": 39,
+      "class": "caution",
+      "group": "jtag",
+      "hover": "GPIO39, JTAG MTCK: usable for SDA, SCL or a relay, at the cost of an external JTAG probe; not for ALERT, which needs a pin below GPIO32; parked."
+    },
+    {
+      "rail": "right",
+      "terminal": 10,
+      "silk": "38",
+      "gpio": 38,
+      "class": "reserved",
+      "group": "led",
+      "hover": "GPIO38: the status-LED line of an ESP32-S3-DevKitC-1 v1.1, free on this board's copper, but the firmware blanks it at boot and holds it low."
+    },
+    {
+      "rail": "right",
+      "terminal": 11,
+      "silk": "37",
+      "gpio": 37,
+      "class": "reserved",
+      "group": "memory",
+      "hover": "GPIO37 (SPIDQS): the octal PSRAM's line; printed on the rail, but not available."
+    },
+    {
+      "rail": "right",
+      "terminal": 12,
+      "silk": "36",
+      "gpio": 36,
+      "class": "reserved",
+      "group": "memory",
+      "hover": "GPIO36 (SPIIO7): the octal PSRAM's line; printed on the rail, but not available."
+    },
+    {
+      "rail": "right",
+      "terminal": 13,
+      "silk": "35",
+      "gpio": 35,
+      "class": "reserved",
+      "group": "memory",
+      "hover": "GPIO35 (SPIIO6): the octal PSRAM's line; printed on the rail, but not available."
+    },
+    {
+      "rail": "right",
+      "terminal": 14,
+      "silk": "0",
+      "gpio": 0,
+      "class": "reserved",
+      "group": "strapping",
+      "hover": "GPIO0: a strapping pin (the boot mode) and the BOOT button; left alone."
+    },
+    {
+      "rail": "right",
+      "terminal": 15,
+      "silk": "45",
+      "gpio": 45,
+      "class": "reserved",
+      "group": "strapping",
+      "hover": "GPIO45: a strapping pin (the VDD_SPI voltage), with a weak pull-down at reset; left alone."
+    },
+    {
+      "rail": "right",
+      "terminal": 16,
+      "silk": "48",
+      "gpio": 48,
+      "class": "reserved",
+      "group": "led",
+      "hover": "GPIO48: this board's RGB LED net, behind the open RGB jumper; the firmware blanks it at boot and holds it low."
+    },
+    {
+      "rail": "right",
+      "terminal": 17,
+      "silk": "47",
+      "gpio": 47,
+      "class": "caution",
+      "group": "vdd_spi",
+      "hover": "GPIO47, in the VDD_SPI domain: 3.3 V on this S3-N16R8 module, 1.8 V on an R8V; usable for SDA, SCL or a relay once the domain's voltage is measured; not for ALERT, which needs a pin below GPIO32; parked."
+    },
+    {
+      "rail": "right",
+      "terminal": 18,
+      "silk": "21",
+      "gpio": 21,
+      "class": "free",
+      "group": "none",
+      "hover": "GPIO21: free; parked."
+    },
+    {
+      "rail": "right",
+      "terminal": 19,
+      "silk": "20",
+      "gpio": 20,
+      "class": "reserved",
+      "group": "usb",
+      "hover": "GPIO20, native USB D+: left alone."
+    },
+    {
+      "rail": "right",
+      "terminal": 20,
+      "silk": "19",
+      "gpio": 19,
+      "class": "reserved",
+      "group": "usb",
+      "hover": "GPIO19, native USB D-: left alone."
+    },
+    {
+      "rail": "right",
+      "terminal": 21,
+      "silk": "GND",
+      "gpio": null,
+      "class": "reserved",
+      "group": "ground",
+      "hover": "Ground."
+    },
+    {
+      "rail": "right",
+      "terminal": 22,
+      "silk": "GND",
+      "gpio": null,
+      "class": "reserved",
+      "group": "ground",
+      "hover": "Ground."
+    },
+    {
+      "rail": "offboard",
+      "terminal": 0,
+      "silk": "",
+      "gpio": 26,
+      "class": "reserved",
+      "group": "memory",
+      "hover": "GPIO26 (SPICS1): the in-package flash and PSRAM; not on either rail."
+    },
+    {
+      "rail": "offboard",
+      "terminal": 0,
+      "silk": "",
+      "gpio": 27,
+      "class": "reserved",
+      "group": "memory",
+      "hover": "GPIO27 (SPIHD): the in-package flash and PSRAM; not on either rail."
+    },
+    {
+      "rail": "offboard",
+      "terminal": 0,
+      "silk": "",
+      "gpio": 28,
+      "class": "reserved",
+      "group": "memory",
+      "hover": "GPIO28 (SPIWP): the in-package flash and PSRAM; not on either rail."
+    },
+    {
+      "rail": "offboard",
+      "terminal": 0,
+      "silk": "",
+      "gpio": 29,
+      "class": "reserved",
+      "group": "memory",
+      "hover": "GPIO29 (SPICS0): the in-package flash and PSRAM; not on either rail."
+    },
+    {
+      "rail": "offboard",
+      "terminal": 0,
+      "silk": "",
+      "gpio": 30,
+      "class": "reserved",
+      "group": "memory",
+      "hover": "GPIO30 (SPICLK): the in-package flash and PSRAM; not on either rail."
+    },
+    {
+      "rail": "offboard",
+      "terminal": 0,
+      "silk": "",
+      "gpio": 31,
+      "class": "reserved",
+      "group": "memory",
+      "hover": "GPIO31 (SPIQ): the in-package flash and PSRAM; not on either rail."
+    },
+    {
+      "rail": "offboard",
+      "terminal": 0,
+      "silk": "",
+      "gpio": 32,
+      "class": "reserved",
+      "group": "memory",
+      "hover": "GPIO32 (SPID): the in-package flash and PSRAM; not on either rail."
+    },
+    {
+      "rail": "offboard",
+      "terminal": 0,
+      "silk": "",
+      "gpio": 33,
+      "class": "reserved",
+      "group": "memory",
+      "hover": "GPIO33 (SPIIO4): the octal PSRAM; not on either rail."
+    },
+    {
+      "rail": "offboard",
+      "terminal": 0,
+      "silk": "",
+      "gpio": 34,
+      "class": "reserved",
+      "group": "memory",
+      "hover": "GPIO34 (SPIIO5): the octal PSRAM; not on either rail."
+    }
+  ]
+}

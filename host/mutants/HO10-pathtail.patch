@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant HO10-pathtail: A path outside every base keeps three components, not two.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_panel_paths.py
+
+diff --git a/host/kleidos_meter/panel/paths.py b/host/kleidos_meter/panel/paths.py
+--- a/host/kleidos_meter/panel/paths.py
++++ b/host/kleidos_meter/panel/paths.py
+@@ -31,7 +31,7 @@
+ PROJECT = REGISTRY_ROOT.parent
+
+ #: How many components a path outside every base keeps.
+-TAIL = 2
++TAIL = 3
+
+
+ def shown_path(

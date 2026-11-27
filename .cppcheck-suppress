@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# cppcheck suppressions for scripts/run_static_analysis.sh: one check id per
+# line, each with its reason. A finding in our own code is fixed, or
+# suppressed inline at its line with the reason beside it (--inline-suppr);
+# only what cannot be fixed in this tree is listed here. Every entry, and
+# every inline suppression, has its row in docs/misra.md's "Tool
+# suppressions" (tests/firmware/test_misra_register.py). An unreferenced
+# function is not cppcheck's to find: scripts/ast_census.py reads the image's
+# translation units together (unusedFunction, suppressed here until FW-20,
+# read one file at a time and could not follow member-function pointers).
+
+# The standard and ESP-IDF headers are not given to cppcheck (it reads the
+# fake ESP-IDF of the host harness for the project's own includes only).
+missingIncludeSystem
+# An inline suppression that a later fix made unnecessary is not an error.
+unmatchedSuppression
+# A raw loop over a fixed table is kept where the algorithm would hide a
+# bound or an early exit the code relies on (MISRA C++:2023 favors the
+# explicit loop over a callable here; docs/misra.md).
+useStlAlgorithm
+# A parameter named after the accessor of the value it carries (setProfile(
+# Profile profile) beside profile()) is deliberate. It hides no variable:
+# -Wshadow, which the compiler gates, and MISRA C++:2023's hiding rule are
+# about variables, and a member function is not one.
+shadowFunction

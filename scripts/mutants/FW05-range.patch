@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW05-range: the range the bring-up reset is not put back.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -2126,7 +2126,7 @@
+     if ( device_->ready() ) {
+         // The bring-up reset the device: its range and its accumulators with
+         // it. The range it reports is the one it took.
+-        (void)device_->setRange( range );
++        (void)range;
+         chargeWindowStartUs_ = static_cast<std::uint64_t>( esp_timer_get_time() );
+     }
+     feedWatchdog();

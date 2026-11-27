@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW07-oneshort: A flush loses the last byte the buffer had room for.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -1160,7 +1160,7 @@ void Console::appendResponse( std::string_view text ) noexcept {
+     std::size_t           room  = units.size() - responseLength_;
+     while ( text.size() > room ) {
+         (void)std::copy_n( text.begin(), room, units.subspan( responseLength_ ).begin() );
+-        responseLength_ += room;
++        responseLength_ += room - 1U;
+         text.remove_prefix( room );
+         flushResponse();
+         room = units.size();

@@ -1,0 +1,18 @@
+// SPDX-FileCopyrightText: 2026 José M. Requena Plens
+// SPDX-License-Identifier: MIT
+//
+// The Kleidos quality kit's markdownlint base (kleidos-dev/.github
+// quality/markdownlint/base.jsonc), copied to .github/quality/markdownlint.jsonc
+// and extended by the repository's .markdownlint-cli2.jsonc. Only the rules
+// that catch broken rendering are on: the rest of markdownlint's defaults are
+// style, and the estate's measured findings were noise (no-wrap is
+// md_nowrap.py's rule, not markdownlint's MD013).
+{
+  "default": false,
+  // A table row whose pipes do not match the header's.
+  "MD055": true,
+  // A table row with more or fewer cells than the header.
+  "MD056": true,
+  // A table with no blank line around it.
+  "MD058": true
+}

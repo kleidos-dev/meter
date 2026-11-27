@@ -1,0 +1,24 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW02-stageearly: a refused option leaves the role's pin staged.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -1905,6 +1905,7 @@
+         gpio = static_cast<std::int32_t>( number );
+     }
+
++    pinsPending_ = pinmap::withPin( pinsPending_, role, gpio );
+     // The option, when given: a relay's active level, a bus or alert pin's
+     // pull. Read before anything is staged, so a refused unit stages nothing.
+     const bool  hasOption = call.params.count() > 2U;
+@@ -1919,7 +1920,6 @@
+         }
+     }
+
+-    pinsPending_ = pinmap::withPin( pinsPending_, role, gpio );
+     if ( !hasOption ) {
+         return;
+     }

@@ -1,0 +1,22 @@
+Kleidos bench meter
+Copyright (C) 2026 José M. Requena Plens
+
+This repository is under two licences, both approved by the Open Source
+Initiative:
+
+  * The firmware (firmware/), the host software (host/, tests/), the
+    documents (docs/, calibration/, the READMEs) and everything else not
+    listed below: the GNU General Public License, version 3 or (at your
+    option) any later version. Full text: LICENSES/GPL-3.0-or-later.txt.
+
+  * The hardware design files (hardware/: the schematic, its generator, its
+    renders and the bill of materials): the CERN Open Hardware Licence
+    Version 2 - Strongly Reciprocal. Full text: LICENSES/CERN-OHL-S-2.0.txt.
+
+Which licence covers each file is stated in the file itself (an SPDX header)
+or in REUSE.toml, following the REUSE specification
+(https://reuse.software/).
+
+This program is distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+FOR A PARTICULAR PURPOSE. See the licence texts for details.

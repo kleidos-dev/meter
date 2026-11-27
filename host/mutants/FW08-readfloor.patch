@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW08-readfloor: An override may take one read of a sample instead of twice its reads.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_sim_pins.py::test_an_override_the_instrument_cannot_run_is_refused_and_changes_nothing
+
+diff --git a/host/kleidos_meter/sim.py b/host/kleidos_meter/sim.py
+--- a/host/kleidos_meter/sim.py
++++ b/host/kleidos_meter/sim.py
+@@ -1804,7 +1804,7 @@
+         period = self._conversion(self.profile, replace(averaging, on=True)).period_us
+         ring = PROFILES[self.profile][1]
+         reads = _bus_us(_RETAINED_READ_BITS if ring else _STREAMED_READ_BITS, self.scl_hz)
+-        shortest = max(2 * reads + 1, _SHORTEST_RING_US if ring else 0)
++        shortest = max(reads, _SHORTEST_RING_US if ring else 0)
+         sample = f"averaging {averaging.count} x {averaging.shunt_us} us gives {period} us a sample"
+         if period < shortest:
+             return f"{sample}, under the {shortest} us its reads need at {self.scl_hz} Hz"

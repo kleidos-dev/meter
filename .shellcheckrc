@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: MIT
+#
+# The Kleidos quality kit's shellcheck settings (kleidos-dev/.github
+# quality/shellcheck/shellcheckrc), copied to the repository root as
+# .shellcheckrc. The hook runs shellcheck with -S warning; a disable here or
+# inline (# shellcheck disable=SC1234) is a weakening: inline only, with the
+# reason on the line above.
+
+# Follow `source` to the files a script names, relative to the script.
+external-sources=true
+source-path=SCRIPTDIR

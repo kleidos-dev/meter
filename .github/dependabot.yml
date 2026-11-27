@@ -1,0 +1,70 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Weekly version updates, one grouped pull request per ecosystem, each held
+# back a week after a release (cooldown) so a compromised or yanked release
+# has time to be noticed. The quality kit's workflows are called at the
+# branch v3, which the kit's release moves, so Dependabot ignores them; its
+# hooks are a release tag that the pre-commit entry moves within the major
+# (kleidos-dev/.github docs/quality.md). The kit's commit-message gate does
+# not check a pull request Dependabot opened. The firmware's toolchain
+# (PlatformIO's platform and the ESP-IDF release, firmware/platformio.ini and
+# scripts/install_idf.sh) and the pins CI downloads by digest are moved by
+# hand: no Dependabot ecosystem reads them.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Madrid
+    cooldown:
+      default-days: 7
+    ignore:
+      - dependency-name: "kleidos-dev/.github*"
+    open-pull-requests-limit: 10
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  # The host package (host/pyproject.toml) and the repository's tool
+  # configuration (pyproject.toml, which declares no dependency).
+  - package-ecosystem: pip
+    directories:
+      - /
+      - /host
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Madrid
+    cooldown:
+      default-days: 7
+    open-pull-requests-limit: 10
+    groups:
+      python:
+        patterns:
+          - "*"
+
+  # The hook revisions of .pre-commit-config.yaml, the kit's and third parties'.
+  - package-ecosystem: pre-commit
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+      exclude:
+        - "https://github.com/kleidos-dev/.github"
+    ignore:
+      # The kit's next major is taken by hand, with the fixes it asks for.
+      - dependency-name: "https://github.com/kleidos-dev/.github"
+        update-types: ["version-update:semver-major"]
+      # crate-ci/typos also tags its sub-crates, which read as typos 5.x.
+      - dependency-name: "https://github.com/crate-ci/typos"
+        versions: [">= 2"]
+    groups:
+      hooks:
+        patterns: ["*"]

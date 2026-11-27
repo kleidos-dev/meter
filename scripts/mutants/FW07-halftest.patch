@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW07-halftest: The lead check drops the half test, so a stuck K1 under the residual limit passes.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -2715,7 +2715,7 @@
+         bool       leadFailed = false;
+         if ( relays_->path() == relay::Path::Bypass ) {
+             leadFailed =
+-                stuckLead || !relay::leadLeftShuntDead( now, shareBefore, shareAfter, judged );
++                stuckLead || !relay::leadLeftShuntDead( now, shareBefore, shareAfter, false );
+         }
+         if ( !bypassFailed && !leadFailed ) {
+             continue;

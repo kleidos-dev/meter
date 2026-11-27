@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW29-esecode: *ESE refuses 256 as an illegal value, not one out of its window.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -1391,7 +1391,7 @@
+         return;
+     }
+     if ( value > 255U ) {
+-        failText( scpi::err::kDataOutOfRange, kUsage );
++        failText( scpi::err::kIllegalParameter, kUsage );
+         return;
+     }
+     ese_ = value;

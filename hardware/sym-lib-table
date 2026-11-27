@@ -1,0 +1,4 @@
+(sym_lib_table
+	(version 7)
+	(lib (name "rig") (type "KiCad") (uri "${KIPRJMOD}/rig.kicad_sym") (options "") (descr "Kleidos bench meter: the rig's symbols"))
+)

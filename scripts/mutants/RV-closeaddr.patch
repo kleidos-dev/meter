@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant RV-closeaddr: closeBus() keeps the old map's address, so a bring-up whose scan finds nothing reports it.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/ina228.cpp b/firmware/src/ina228.cpp
+--- a/firmware/src/ina228.cpp
++++ b/firmware/src/ina228.cpp
+@@ -84,7 +84,6 @@
+     open_           = false;
+     selected_       = false;
+     ready_          = false;
+-    address_        = ina228::kAddressDefault;
+     sclHz_          = 0;
+     manufacturerId_ = 0;
+     dieId_          = 0;

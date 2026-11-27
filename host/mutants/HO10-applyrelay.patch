@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant HO10-applyrelay: A pin map is applied with the bypass closed, as long as the lead is not open.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_panel_pins.py::test_an_order_is_refused_while_a_relay_is_not_at_rest
+
+diff --git a/host/kleidos_meter/panel/pins.py b/host/kleidos_meter/panel/pins.py
+--- a/host/kleidos_meter/panel/pins.py
++++ b/host/kleidos_meter/panel/pins.py
+@@ -164,7 +164,7 @@
+             before, circuit = (parse_fields(answer) for answer in answers)
+             if not defaults:
+                 _same_table(before)
+-            if circuit["path"] != "shunt":
++            if circuit["path"] == "none":
+                 raise SettingsRefused(
+                     409,
+                     "relays_not_at_rest",

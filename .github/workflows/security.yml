@@ -1,0 +1,87 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Software composition analysis, as the Kleidos firmware repository runs it
+# (its security.yml): OSV-Scanner over the manifests and lockfiles, and Trivy
+# over the tree (known vulnerabilities, embedded secrets, licenses) with a
+# CycloneDX SBOM. Advisory: every scanner step continues on error, because
+# the ESP-IDF and PlatformIO dependency model is not one these scanners read
+# in full (the host client's pyproject.toml is), so findings are triaged by
+# hand; the blocking secret gate is gitleaks in CI's lint job.
+#
+# A workflow of its own, beside CI (the project's CI convention): its weekly
+# schedule re-scans an unchanged tree for newly disclosed vulnerabilities,
+# which would otherwise run the whole of CI on a schedule, and nothing waits
+# for it. Code scanning is not enabled on this private repository, so the
+# Trivy SARIF and the SBOM are kept as artifacts and not uploaded.
+name: Security scan
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+  pull_request:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+jobs:
+  osv-scanner:
+    name: "🛡️ Dependency vulnerabilities (OSV, advisory)"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Run OSV-Scanner
+        continue-on-error: true
+        uses: google/osv-scanner-action/osv-scanner-action@32d3cd482bdadfb38b186c0ad1b031902d55d932 # v2.7.1
+        with:
+          scan-args: |-
+            --recursive
+            --skip-git
+            ./
+
+  trivy:
+    name: "🛡️ Dependencies, secrets and licenses (Trivy, advisory, CycloneDX SBOM)"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Run the Trivy filesystem scan
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,license
+          format: sarif
+          output: trivy-results.sarif
+          exit-code: "0"
+      - name: Generate the CycloneDX SBOM
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          format: cyclonedx
+          output: sbom.cyclonedx.json
+      - name: Keep the SARIF and the SBOM
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: security-scan
+          path: |
+            trivy-results.sarif
+            sbom.cyclonedx.json
+          if-no-files-found: warn

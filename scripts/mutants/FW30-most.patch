@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW30-most: a command that takes a parameter ignores the ones past it, where it refuses them (-108).
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -881,7 +881,7 @@
+         return;
+     }
+     const std::uint32_t most = found->mostParameters();
+-    if ( params.count() > most ) {
++    if ( most == 0U && params.count() > most ) {
+         text::Writer w = openError();
+         w.text( header );
+         if ( most == 0U ) {

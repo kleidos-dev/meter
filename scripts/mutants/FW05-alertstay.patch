@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW05-alertstay: ALERT stays on the pin it was on.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/pin_apply.cpp b/firmware/src/pin_apply.cpp
+--- a/firmware/src/pin_apply.cpp
++++ b/firmware/src/pin_apply.cpp
+@@ -32,7 +32,7 @@
+     auto&                 move = *static_cast<OnBusCore*>( context );
+     const pinmap::PinMap& to   = *move.to;
+     move.sampler->moveAlert(
+-        static_cast<gpio_num_t>( to.pins[pinmap::roleIndex( pin_table::Role::Alert )] ),
++        static_cast<gpio_num_t>( move.from->pins[pinmap::roleIndex( pin_table::Role::Alert )] ),
+         to.pullAlert == pinmap::Pull::Up );
+     move.device->closeBus();
+     // The relays' own pins are parked toward their released level already

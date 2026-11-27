@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW04-twoerrors: a bus held to its pins queues the bring-up's error too.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -376,7 +376,7 @@
+         failStoredBus();
+     }
+     // A bus held to its pins has said so, and that there is no INA228, already.
+-    if ( result != BringUpResult::Ok && pins_->bus != pin_boot::Bus::Held ) {
++    if ( result != BringUpResult::Ok ) {
+         failText( scpi::err::kHardwareMissing, bringUpReason( result ) );
+     }
+     if ( !samplerReady ) {

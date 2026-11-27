@@ -1,0 +1,276 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# CodeRabbit for the Kleidos repositories: line reviews and committable
+# suggestions, nothing else. The pull request's title and description are the
+# author's and stay exactly as written, and no summary of the pull request is
+# generated anywhere: not in the description, not in the walkthrough comment.
+#
+# This file is the whole configuration. It does not set inheritance, so no
+# value comes from a central repository or the web interface: what is not
+# written here is the schema default (reference/configuration, V2). The
+# canonical copy lives beside the commit-message gate in kleidos-dev/agents
+# and is synced into each repository; a repository adds only its own
+# path_filters, path_instructions and guideline files below the baseline.
+language: en-US
+
+# A private repository: without a seat the Free plan posts "PR summarization
+# only", the one thing this file turns off. false posts nothing until the
+# repository has a seat with reviews.
+enable_free_tier: false
+
+reviews:
+  # Balanced feedback, the default every owner repository has used so far.
+  # "assertive" is the knob for more comments; "quiet" for fewer.
+  profile: chill
+
+  # The summary is off, not relocated. high_level_summary: false keeps it out
+  # of the description; high_level_summary_in_walkthrough: false keeps it out
+  # of the walkthrough comment too. CodeRabbit still writes a summary wherever
+  # its placeholder appears in a description, so the placeholder is a string
+  # nobody types. The same goes for the title, which is only rewritten when its
+  # placeholder appears in the title (there is no boolean for it).
+  high_level_summary: false
+  high_level_summary_in_walkthrough: false
+  high_level_summary_placeholder: "coderabbit-summary-disabled"
+  auto_title_placeholder: "coderabbit-title-disabled"
+
+  # The walkthrough comment cannot be turned off (no V2 or V3 key removes it),
+  # so it is collapsed and every section it can drop is dropped. What stays is
+  # the review status (why a review was skipped or paused) and Merge Risk,
+  # which has no toggle.
+  collapse_walkthrough: true
+  changed_files_summary: false
+  sequence_diagrams: false
+  estimate_code_review_effort: false
+  assess_linked_issues: false
+  related_issues: false
+  related_prs: false
+  suggested_labels: false
+  auto_apply_labels: false
+  suggested_reviewers: false
+  auto_assign_reviewers: false
+  in_progress_fortune: false
+  poem: false
+  review_info: false
+  review_details: false
+  review_status: true
+
+  # Inline comments keep their "Prompt for Coding Agents" block: most fixes
+  # here are applied by an agent reading the review.
+  enable_prompt_for_ai_agents: true
+
+  auto_review:
+    enabled: true
+    drafts: false
+    # Any base branch, so a stacked pull request is reviewed on its own diff
+    # rather than skipped for not targeting main (the default list is empty,
+    # which means the default branch only).
+    base_branches:
+      - ".*"
+    # Bot commits (dependency bumps, generated files) carry no reviewable
+    # intent.
+    ignore_usernames:
+      - "dependabot[bot]"
+      - "github-actions[bot]"
+
+  # Reviews and suggestions only: no bot writes code into a pull request, and
+  # none of these adds its checkbox to the walkthrough. Committable suggestion
+  # blocks in inline comments are unaffected; the author applies them.
+  finishing_touches:
+    autofix:
+      enabled: false
+    unit_tests:
+      enabled: false
+    simplify:
+      enabled: false
+    fix_ci:
+      enabled: false
+    resolve_merge_conflict:
+      enabled: false
+
+  # These never edit the title or description, but each posts a verdict on
+  # them. Commit messages are already gated by the quality kit's quick job.
+  pre_merge_checks:
+    title:
+      mode: "off"
+    description:
+      mode: "off"
+    issue_assessment:
+      mode: "off"
+
+  # ---- kleidos-dev/meter: what is not reviewed, and the rules per path ----
+  #
+  # CodeRabbit already skips the renders (*.svg, *.pdf), the BOM (*.csv) and
+  # the raw SCPI logs of the records (*.log). These are skipped too, each
+  # reviewed through its source instead:
+  path_filters:
+    # Written by hardware/gen_rig.py; CI holds them to its bytes.
+    - "!hardware/*.kicad_sch"
+    - "!hardware/*.kicad_pro"
+    - "!hardware/*.kicad_sym"
+    - "!hardware/sym-lib-table"
+    # The Kleidos KiCad kit, byte copies of brand's kicad/ (KIT.json).
+    - "!hardware/kicad/**"
+    # The ESP-IDF installer, a byte copy of the firmware repository's script.
+    - "!scripts/install_idf.sh"
+    - "!scripts/install_idf.json"
+    # The quality kit's base configurations and its comment caller, byte
+    # copies of kleidos-dev/.github (.github/quality/SOURCE.json); the
+    # waivers in .github/quality/waivers.toml are this repository's.
+    - "!.github/quality/SOURCE.json"
+    - "!.github/quality/markdownlint.jsonc"
+    - "!.github/quality/ruff.toml"
+    - "!.github/zizmor.yml"
+    - "!.gitleaks-mac.toml"
+    - "!.shellcheckrc"
+    - "!.clang-tidy"
+    - "!.github/workflows/commit-check-comment.yml"
+    # Generated by scripts/check_calibration_registry.py --write.
+    - "!calibration/index.json"
+
+  # The rules of AGENTS.md that a review of each path can check. AGENTS.md
+  # itself is read as a code guideline by default; these say where each of
+  # its rules bites.
+  path_instructions:
+    - path: "**"
+      instructions: >-
+        Every file names its holder and license: an SPDX-FileCopyrightText
+        line reading "2026 José M. Requena Plens" directly
+        above SPDX-License-Identifier, GPL-3.0-or-later everywhere and
+        CERN-OHL-S-2.0 under hardware/; a file that cannot hold a comment
+        needs its own explicit entry in REUSE.toml, which has no catch-all.
+        Never a Creative Commons license. Flag any private bench data in a
+        tracked file: serial port names, USB serials, MAC addresses, host
+        names (the KM- instrument serial is public and allowed). This
+        repository holds the instrument and its calibration, never a
+        measurement of a Kleidos board: those belong to the Kleidos firmware
+        repository's power store.
+    - path: "firmware/src/**"
+      instructions: >-
+        ESP-IDF only: no Arduino API or header, no third-party device library.
+        No dynamic memory: no new, delete, malloc/calloc/realloc/free,
+        heap_caps_* allocator, smart pointer or standard container; FreeRTOS
+        objects and task stacks use the static creators
+        (xQueueCreateStatic, xSemaphoreCreateBinaryStatic,
+        xTaskCreateStaticPinnedToCore) over static storage. Integer arithmetic
+        for every value on the wire: no float in the measurement path, no
+        locale. Every call into the firmware's own I2C master (i2c_bus.h) goes
+        through Ina228Driver's transaction entries, made in place on the bus's
+        core (Core 1, the sampler's) and routed through esp_ipc_call_blocking()
+        from the other core, one transaction per call; flag any other I2C
+        call. A function or constant the sampler loop, the ALERT handler or
+        the I2C transfer path reaches must be IRAM_ATTR / DRAM_ATTR, or be in
+        scripts/check_iram_hot_path.py's COLD list with the reason no
+        conversion runs it. The image links no Wi-Fi, Bluetooth, PHY or
+        coexistence symbol and keeps USB-Serial-JTAG off; an unused broken-out
+        GPIO is parked from relay.h kParkedPins. Warnings are errors. A
+        clang-tidy or cppcheck finding is fixed, or suppressed at its line
+        with the reason beside it and an entry in docs/misra.md (MISRA
+        C++:2023). Doxygen on every symbol: @brief, one @param[in|out] per
+        parameter, @return or @retval, the contract on the .h declaration and
+        not repeated on the .cpp definition, each file in its docs/groups.dox
+        topic (@addtogroup inside the namespace, @ingroup in the @file block).
+        A change to the firmware comes with the host tests that show its
+        decisions.
+    - path: "firmware/src/{scpi,console}*"
+      instructions: >-
+        docs/scpi.md is the normative protocol. A change to a command, a
+        response, a report key, an error number or a stream record changes
+        docs/scpi.md, the host client (host/kleidos_meter/), its simulator
+        (host/kleidos_meter/sim.py) and their tests in the same commit. Report
+        keys keep the integer unit in their name (_na, _pv, _uohm, _mc, _us)
+        and are never renamed or given another unit: a new meaning is a new
+        key. The TEXT record (METER t=<us> ch=<ch> v=<value>) never changes.
+        Every refused unit queues exactly one error and changes nothing; later
+        units of the message still run. A new command, key, error, record or
+        observable behavior is a minor version, a fix invisible on the wire a
+        patch, a removal a major; a changed meaning is not allowed. The change
+        bumps firmware/version.txt and its copies (host package, simulator,
+        host-test harness) and adds its CHANGELOG.md entry in the same commit.
+    - path: "host/**"
+      instructions: >-
+        The host client and its simulator follow docs/scpi.md, the normative
+        protocol: a protocol change lands in the firmware, docs/scpi.md, the
+        client, the simulator and their tests in one commit, is announced to
+        the Kleidos QA harness (which speaks the protocol on its own), and
+        moves the version and its copies (CHANGELOG.md, "The version rule").
+        Ruff with
+        host/pyproject.toml (line length 100, Python 3.11 target) is the
+        style.
+    - path: "firmware/test/native/**"
+      instructions: >-
+        The firmware's sources compile unchanged against the fake ESP-IDF in
+        harness/, on a simulated board: flag a test that patches or copies a
+        source instead. An MC/DC condition left uncovered needs a written
+        reason in mcdc_exclusions.toml (branch_exclusions.toml for branches).
+    - path: "firmware/{platformio.ini,sdkconfig.defaults,CMakeLists.txt,version.txt}"
+      instructions: >-
+        The toolchain pins and the strict warning set are held by
+        tests/firmware/test_project_pins.py; a pin moves only on purpose and
+        the test moves with it. sdkconfig.defaults keeps the radio, the PHY,
+        coexistence and USB-Serial-JTAG out of the image. firmware/version.txt
+        changes only by the version rule, with its copies and a CHANGELOG.md
+        entry.
+    - path: "calibration/**"
+      instructions: >-
+        The registry is the calibration (calibration/README.md). Filed records
+        and instrument events are append-only and held to their hashes: a
+        correction is a new event and a new record, never an edit of a filed
+        one. A change to a configuration or an instrument regenerates
+        index.json (scripts/check_calibration_registry.py --write).
+    - path: "hardware/**"
+      instructions: >-
+        The schematic, its project files and its renders are generated by
+        gen_rig.py and export_rig.py (KiCad 10.0.8) and never edited by hand.
+        hardware/kicad/ is a byte copy of the brand repository's kit and is
+        changed only there. ERC allows no message; the netlist stays EXPECTED
+        in export_rig.py unless the bench wiring changes, and then both change
+        in the same commit with a new revision in gen_rig.py.
+    - path: ".github/workflows/check.yml"
+      instructions: >-
+        The project's CI convention (tests/ci/test_workflow_convention.py):
+        job names "<emoji> <description>", stages cheapest first through
+        needs:, path filters only in the "📋 What changed" job (each pattern
+        lists what does not reach a family, so a new input runs it by
+        default), a superseded run cancelled, actions pinned to a full commit
+        SHA with the version in a comment, checkouts without persisted
+        credentials, read-only permissions.
+    - path: "**/*.md"
+      instructions: >-
+        English. Markdown prose is never hard-wrapped: one line per paragraph
+        and one line per list item; flag a paragraph or list item broken over
+        several lines (code blocks and tables keep their layout). Do not
+        suggest wrapping long lines.
+
+  # Ruff runs with the repository's configuration (pyproject.toml, which
+  # extends the quality kit's rule set; host/pyproject.toml extends it).
+  # Flake8 and Pylint are off: Ruff is the repository's Python linter, and
+  # their own defaults (line length 79, other rule sets) would contradict it.
+  # The rest stay at their defaults; markdownlint reads .markdownlint.yaml.
+  tools:
+    ruff:
+      enabled: true
+      config_file: "pyproject.toml"
+    flake8:
+      enabled: false
+    pylint:
+      enabled: false
+
+chat:
+  # Replies stay plain text.
+  art: false
+
+issue_enrichment:
+  # No implementation plans posted on issues: the review is the product.
+  planning:
+    enabled: false
+
+knowledge_base:
+  code_guidelines:
+    # Added to the defaults (AGENTS.md, CLAUDE.md and the rest): the register
+    # of the MISRA C++:2023 departures and the normative protocol.
+    filePatterns:
+      - "docs/misra.md"
+      - "docs/scpi.md"

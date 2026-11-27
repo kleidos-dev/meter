@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant RV-latechannel: A channel that comes after its row closed opens a second row.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_panel_live.py::test_a_channel_that_comes_after_its_row_closed_never_makes_a_second_row
+
+diff --git a/host/kleidos_meter/panel/live.py b/host/kleidos_meter/panel/live.py
+--- a/host/kleidos_meter/panel/live.py
++++ b/host/kleidos_meter/panel/live.py
+@@ -359,7 +359,6 @@
+         self._capture_rows += 1
+         # A channel of this row that comes after it closed (a tick closed it
+         # while the line was slow) is dropped: it would be a second row.
+-        self._skip_t = self._row[0]
+         self._row = None
+
+     def _close_batch(self) -> None:

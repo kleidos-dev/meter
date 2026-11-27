@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant RV-heldview: A held chart ignores the smoothing margin and the samples the ring forgot.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && METER_BROWSER_REQUIRED=1 ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_panel_browser.py -k 'frame_gate_gives'
+
+diff --git a/host/kleidos_meter/panel/static/js/chart-math.js b/host/kleidos_meter/panel/static/js/chart-math.js
+--- a/host/kleidos_meter/panel/static/js/chart-math.js
++++ b/host/kleidos_meter/panel/static/js/chart-math.js
+@@ -1537,7 +1537,7 @@
+         return true;
+     }
+     const margin = Number.isFinite(marginUs) ? marginUs : 0;
+-    return firstNewUs <= view.t1 + margin || oldestHeldUs > view.t0 - margin;
++    return firstNewUs <= view.t1;
+ }
+
+ /**

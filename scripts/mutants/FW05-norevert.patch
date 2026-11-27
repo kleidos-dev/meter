@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW05-norevert: a map that fails its proof is not put back.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -2203,7 +2203,7 @@
+         }
+         return;
+     }
+-    const PinsTrial back = tryPins( target, lastGood, range );
++    const PinsTrial back = trial;
+     if ( runningHz != lastGood.sclHz ) {
+         // A running clock SYSTem:COMMunicate:I2C:FREQuency had set.
+         (void)device_->setBusSpeed( runningHz );

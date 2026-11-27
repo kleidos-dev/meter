@@ -1,0 +1,39 @@
+{
+  "meta": {
+    "name": "Kleidos Dark",
+    "version": 5
+  },
+  "schematic": {
+    "override_item_colors": false,
+    "background": "rgb(28, 28, 28)",
+    "bus": "rgb(0, 210, 255)",
+    "bus_junction": "rgb(0, 210, 255)",
+    "component_body": "rgb(17, 17, 17)",
+    "component_outline": "rgb(224, 224, 224)",
+    "dnp_marker": "rgb(255, 107, 107)",
+    "fields": "rgb(136, 153, 170)",
+    "grid": "rgb(68, 68, 68)",
+    "hidden": "rgb(68, 68, 68)",
+    "junction": "rgb(0, 210, 255)",
+    "label_global": "rgb(127, 230, 255)",
+    "label_hier": "rgb(127, 230, 255)",
+    "label_local": "rgb(127, 230, 255)",
+    "netclass_flag": "rgb(136, 153, 170)",
+    "no_connect": "rgb(136, 153, 170)",
+    "note": "rgb(200, 210, 220)",
+    "page_limits": "rgb(68, 68, 68)",
+    "pin": "rgb(0, 210, 255)",
+    "pin_name": "rgb(136, 153, 170)",
+    "pin_number": "rgb(136, 153, 170)",
+    "private_note": "rgb(136, 153, 170)",
+    "reference": "rgb(224, 224, 224)",
+    "sheet": "rgb(136, 153, 170)",
+    "sheet_fields": "rgb(136, 153, 170)",
+    "sheet_filename": "rgb(136, 153, 170)",
+    "sheet_label": "rgb(127, 230, 255)",
+    "sheet_name": "rgb(224, 224, 224)",
+    "value": "rgb(136, 153, 170)",
+    "wire": "rgb(0, 210, 255)",
+    "worksheet": "rgb(136, 153, 170)"
+  }
+}

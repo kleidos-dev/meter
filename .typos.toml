@@ -1,0 +1,108 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Spelling gate (crate-ci/typos, at the quality kit's pin in
+# .pre-commit-config.yaml): code, comments and documents. Every entry says why
+# the word is not a typo; a word is never added here to silence a real one.
+#
+# The locale is `en-us`, the organization's (kleidos-dev/.github,
+# docs/quality.md): the British spellings this repository wrote before the
+# quality kit 3 switch became American with it.
+#
+#   typos                   # check, exit 2 on a finding (the kit's hook, CI)
+#   typos --write-changes   # only after reading every proposed change
+
+[default]
+locale = "en-us"
+extend-ignore-re = [
+  # An SCPI header, long form, short form or both, in any case: a chain of
+  # mnemonics joined by colons (`SENSe:CAPTure`, `SYST:COMM:I2C:FREQ?`,
+  # `sens:curr:thr off`, a deliberately wrong `SYSTE:ERR?` in a test). The
+  # short form is the long form cut after its capitals, so it reads as a
+  # misspelling (`CAPTure` -> "Ture", `THReshold` -> "THR").
+  "[*]?\\b[A-Za-z][A-Za-z0-9]*(?::[A-Za-z][A-Za-z0-9]*)+\\??",
+  # A lone SCPI mnemonic or parameter in its documented mixed case, three or
+  # more capitals then the rest of the word (`UNKNown`, `VOLTage`,
+  # `FREQuency`, `STATistics`).
+  "\\b[A-Z]{3,}[a-z]+\\b",
+  # The threshold keys of the statistics report and of the mark records
+  # (`thr_na`, `thr_marks`, `thr_rise`, `thr_fall`): wire names the host
+  # client and Kleidos QA parse.
+  "\\bthr_[a-z_]+\\b",
+  # An SCPI long form mapped to its short form (`"THRESHOLD": "THR"` in the
+  # simulator's table): the short form is cut from the long one.
+  "\"[A-Z]+\": \"[A-Z0-9]+\"",
+  # The regular expression the MISRA 21.2.2 guard looks for (`mem(cpy|move)`).
+  "mem\\(cpy\\|move\\)",
+  # Any run of 16 or more lower-case hex digits is a hash (an ELF SHA-256 or
+  # its 16-digit prefix as `SYSTem:INFormation?` reports it, a commit id),
+  # never a word.
+  "\\b[0-9a-f]{16,64}\\b",
+  # A commit hash quoted in a document.
+  "`[0-9a-f]{7,40}`",
+]
+
+[default.extend-words]
+# Songle Relay, the maker of the SRD-05VDC-SL-C relays of the HW-316 board.
+songle = "songle"
+# "mis-programmed" (docs/architecture.md, docs/firmware-design.md): the prefix,
+# hyphenated.
+mis = "mis"
+# Clang's static analyzer names its opt-in checkers so
+# (clang-analyzer-optin.performance.Padding, firmware/src and docs/misra.md).
+optin = "optin"
+
+[default.extend-identifiers]
+# ELF's relocation-with-addend records (SHT_RELA, the `.rela.*` sections) and
+# pyelftools' `is_RELA()`, which the reachability gate reads and its self-test
+# writes (scripts/check_heap_reachability.py).
+RELA = "RELA"
+is_RELA = "is_RELA"
+rela = "rela"
+# ESP-IDF's esp_image_header_t / esp_app_desc_t field, as Espressif spells it.
+reserv1 = "reserv1"
+# The ROUTe:LEAD parameter's short form (CLOSe), as the console accepts it
+# and the host client sends it.
+CLOS = "CLOS"
+# ESP-IDF 6.0.3's hal/uart_ll.h, as Espressif names its threshold setter
+# (`thr` for threshold); the firmware's UART0 calls it (firmware/src/uart0.cpp).
+uart_ll_set_rxfifo_full_thr = "uart_ll_set_rxfifo_full_thr"
+# Clang's AST node for a function parameter, as its JSON dump names the kind
+# (scripts/ast_census.py counts the C arrays of 11.3.1 by it).
+ParmVarDecl = "ParmVarDecl"
+# C++20's <bit> functions, as the standard names them (count right zeros and
+# ones), which scripts/misra_register.py looks for (MISRA C++:2023 4.1.1).
+countr_zero = "countr_zero"
+countr_one = "countr_one"
+
+[files]
+ignore-hidden = false
+extend-exclude = [
+  ".git/",
+  ".pio/",
+  ".venv/",
+  ".pytest_cache/",
+  ".ruff_cache/",
+  "build/",
+  "compile_commands.json",
+  # Byte-for-byte fixtures and records: an XMP packet as kicad-cli and pypdf
+  # write it, and the calibration records (bench transcripts, the owner's
+  # words quoted in Spanish), which are evidence and never edited.
+  "tests/hardware/fixtures/",
+  "calibration/records/",
+  # Renders and KiCad files: generated text whose tokens are coordinates,
+  # UUIDs and font glyph names, and the brand repository's kit copy.
+  "*.svg",
+  "*.pdf",
+  "*.kicad_sch",
+  "*.kicad_sym",
+  "*.kicad_pro",
+  "*.kicad_prl",
+  "*.kicad_wks",
+  "sym-lib-table",
+  "hardware/kicad/",
+  # Binary build output.
+  "*.bin",
+  "*.elf",
+  "*.map",
+]

@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant HO10-pyshared: The Python rules see a shared pin only between neighboring roles.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_pins.py::test_the_python_rules_give_every_vector_the_firmwares_verdict
+
+diff --git a/host/kleidos_meter/pins.py b/host/kleidos_meter/pins.py
+--- a/host/kleidos_meter/pins.py
++++ b/host/kleidos_meter/pins.py
+@@ -241,7 +241,7 @@
+             return "reserved", key
+         if gpio >= role["below"]:
+             return "too_high", key
+-        if any(pins.pin(earlier["key"]) == gpio for earlier in roles[:index]):
++        if any(pins.pin(earlier["key"]) == gpio for earlier in roles[max(0, index - 1) : index]):
+             return "shared", key
+     bus = board["bus"]
+     if pins.addr != ADDRESS_AUTO and not bus["address_first"] <= pins.addr <= bus["address_last"]:

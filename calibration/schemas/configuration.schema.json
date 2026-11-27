@@ -1,0 +1,127 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kleidos.meter.configuration/1",
+  "title": "A hardware configuration of the bench meter",
+  "description": "The bill of the parts that set the measurement (calibration/README.md, 'The registry'). Two configurations are the same sense core when sense.breakout.id and sense.shunt.id are equal; instruments of one sense core are compared with each other.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "id", "description", "sense", "routing", "controller", "firmware", "expected"],
+  "properties": {
+    "schema": { "const": "kleidos.meter.configuration/1" },
+    "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]{2,63}$", "description": "The file's name without .json." },
+    "description": { "type": "string", "minLength": 1 },
+    "sense": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["adc", "breakout", "shunt", "wiring"],
+      "properties": {
+        "adc": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["part", "mfg", "die"],
+          "properties": {
+            "part": { "type": "string", "minLength": 1 },
+            "mfg": { "type": "string", "pattern": "^0x[0-9A-F]{4}$", "description": "SYSTem:INFormation? mfg=, as the instrument prints it." },
+            "die": { "type": "string", "pattern": "^0x[0-9A-F]{3}$", "description": "SYSTem:INFormation? die=." }
+          }
+        },
+        "breakout": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "marking", "revision"],
+          "properties": {
+            "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+            "marking": { "type": "string" },
+            "revision": { "type": ["string", "null"] }
+          }
+        },
+        "shunt": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["id", "marking", "nominal_nohm", "tolerance_ppm", "plausible_ppm", "tcr_ppm_per_c"],
+          "properties": {
+            "id": { "type": "string", "pattern": "^[a-z0-9][a-z0-9-]*$" },
+            "marking": { "type": "string" },
+            "nominal_nohm": { "type": "integer", "minimum": 1 },
+            "tolerance_ppm": { "type": ["integer", "null"], "minimum": 1, "description": "The part's stated tolerance; null when the part states none." },
+            "plausible_ppm": { "type": "integer", "minimum": 1, "description": "Past this from nominal a reading is the wiring, not the part." },
+            "tcr_ppm_per_c": { "type": ["integer", "null"] }
+          }
+        },
+        "wiring": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["schematic_rev", "kelvin", "vbus_side"],
+          "properties": {
+            "schematic_rev": { "type": "string" },
+            "kelvin": { "type": "string" },
+            "vbus_side": { "enum": ["source", "unknown"] }
+          }
+        }
+      }
+    },
+    "routing": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["lead", "bypass"],
+      "properties": {
+        "lead": { "$ref": "#/$defs/relay" },
+        "bypass": {
+          "allOf": [{ "$ref": "#/$defs/relay" }],
+          "description": "part is SYSTem:INFormation?'s bypass_part= token."
+        }
+      }
+    },
+    "controller": { "type": "string" },
+    "firmware": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["image", "min_version"],
+      "properties": {
+        "image": { "enum": ["meter", "meter_relay2"], "description": "SYSTem:INFormation? image=." },
+        "min_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+        "max_version": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$",
+          "description": "The last version whose image of this name is this configuration's: from 0.8.0 the image named meter drives the Relay 2 Click, so the HW-316 rig's ends at 0.7.0."
+        },
+        "image_aliases": {
+          "type": "array",
+          "description": "Other names this rig's image has had, each accepted from its own version on: the one image meter (0.8.0 and later) is the meter_relay2 image of 0.3.0 to 0.7.0. Filed events keep the name they were taken with.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["image", "min_version"],
+            "properties": {
+              "image": { "enum": ["meter", "meter_relay2"] },
+              "min_version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" }
+            }
+          }
+        }
+      }
+    },
+    "expected": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["adc_gain_error_ppm", "range_split_max_ppm", "recalibration_days"],
+      "properties": {
+        "adc_gain_error_ppm": { "type": "integer", "minimum": 0 },
+        "range_split_max_ppm": { "type": "integer", "minimum": 0 },
+        "recalibration_days": { "type": "integer", "minimum": 1 }
+      }
+    }
+  },
+  "$defs": {
+    "relay": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["part", "channel", "gpio", "description"],
+      "properties": {
+        "part": { "type": "string", "minLength": 1 },
+        "channel": { "type": "string" },
+        "gpio": { "type": "integer", "minimum": 0, "maximum": 48 },
+        "description": { "type": "string" }
+      }
+    }
+  }
+}

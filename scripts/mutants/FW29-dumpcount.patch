@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW29-dumpcount: TRACe:DATA?'s count of 0 is refused as an illegal value.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console_commands.cpp b/firmware/src/console_commands.cpp
+--- a/firmware/src/console_commands.cpp
++++ b/firmware/src/console_commands.cpp
+@@ -1681,7 +1681,7 @@
+             return;
+         }
+         if ( requested == 0U ) {
+-            failText( scpi::err::kDataOutOfRange, kUsage );
++            failText( scpi::err::kIllegalParameter, kUsage );
+             return;
+         }
+         count = ( requested < count ) ? requested : count;

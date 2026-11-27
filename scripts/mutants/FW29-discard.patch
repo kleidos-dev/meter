@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW29-discard: a range switch waits the reset word's period whatever the device converts at.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console_commands.cpp b/firmware/src/console_commands.cpp
+--- a/firmware/src/console_commands.cpp
++++ b/firmware/src/console_commands.cpp
+@@ -292,7 +292,7 @@
+         // starts, and before one the device converts at its reset word's.
+         std::uint16_t diag = 0;
+         (void)device_->readDiagAlrt( diag );
+-        lastRangeDiscardUs_ = adcConfigPeriodMicroseconds( device_->adcConfig() );
++        lastRangeDiscardUs_ = adcConfigPeriodMicroseconds( kAdcConfigReset );
+         vTaskDelay( rtos::ticksFromMs( lastRangeDiscardUs_ / 1000U + kDiscardGraceMs ) );
+         if ( device_->readDiagAlrt( diag ) == ESP_OK ) {
+             lastRangeConverted_ = ( bits::hasBit( diag, kDiagCnvrf ) ) ? 1U : 0U;

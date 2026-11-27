@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW06-keepson: a refused override is kept.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/sampler.cpp b/firmware/src/sampler.cpp
+--- a/firmware/src/sampler.cpp
++++ b/firmware/src/sampler.cpp
+@@ -741,6 +741,7 @@
+     }
+     if ( wanted.on ) {
+         if ( !paceAllows( averagedSpec( own, wanted ), error ) ) {
++            averaging_[profileIndex( profile )] = wanted;
+             return false;
+         }
+     }

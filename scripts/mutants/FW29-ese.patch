@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW29-ese: *ESE refuses 255, the window's upper end.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -1390,7 +1390,7 @@
+         failParameter( call.params, kUsage );
+         return;
+     }
+-    if ( value > 255U ) {
++    if ( value >= 255U ) {
+         failText( scpi::err::kDataOutOfRange, kUsage );
+         return;
+     }

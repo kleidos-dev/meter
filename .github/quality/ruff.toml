@@ -1,0 +1,70 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: MIT
+#
+# The Kleidos quality kit's ruff base (kleidos-dev/.github quality/ruff/ruff.toml).
+# A repository copies it to .github/quality/ruff.toml with the kit's sync.py
+# and extends it from its own config:
+#
+#   [tool.ruff]
+#   extend = ".github/quality/ruff.toml"
+#   target-version = "py312"           # a fact about the repository: local
+#   [tool.ruff.lint]
+#   extend-select = ["D"]              # adding is free
+#
+# A local `select` replaces this list and is refused; a local ignore, exclude
+# or per-file ignore is a weakening and needs a waiver
+# (.github/quality/waivers.toml). Paths below resolve against this file's
+# directory, .github/quality/, hence the "./" and "../../" prefixes.
+
+line-length = 100
+# Excludes apply to files pre-commit names on the command line too.
+force-exclude = true
+# The byte copies, by name: the kit's own scripts (checked in
+# kleidos-dev/.github) and the commit-message checker copied from
+# kleidos-dev/agents. Any other Python file is linted wherever it is.
+extend-exclude = [
+  "./agent_docs.py",
+  "./check_quality.py",
+  "./md_nowrap.py",
+  "./spdx_headers.py",
+  "../commit-check/check_commit_msg.py",
+]
+
+[lint]
+select = [
+  "E",       # pycodestyle errors
+  "F",       # pyflakes
+  "W",       # pycodestyle warnings
+  "I",       # import order
+  "B",       # bugbear: likely bugs
+  "UP",      # pyupgrade, against the repository's target-version
+  "SIM",     # simplifications
+  "PLE",     # pylint errors
+  "PLW",     # pylint warnings: subprocess.run without check=, overwritten loop variables
+  "BLE001",  # a bare `except Exception`
+  "DTZ",     # naive datetimes
+  "ASYNC",   # blocking calls in async code
+  "RUF012",  # mutable class attributes without ClassVar
+  "RUF100",  # a noqa that silences nothing
+  "C4",      # comprehensions
+  "PIE",     # misc. lints
+  "RET",     # return statements
+  "PERF",    # performance anti-patterns
+  "S",       # bandit's security checks
+  "PGH003",  # a type: ignore without its error code (pairs with mypy's ignore-without-code)
+  "PGH004",  # a noqa without its rule code
+]
+ignore = [
+  # S603 flags every subprocess call made without a shell, so it cannot tell
+  # a safe call from an unsafe one; the shell forms (S602, S604, S605) stay on.
+  "S603",
+  # S607 flags every call that names a program by name (git, gh), which is how
+  # the estate's scripts call their tools on a runner they control.
+  "S607",
+]
+
+[lint.per-file-ignores]
+# Tests assert, and their fixtures hold fake passwords and tokens.
+"../../**/tests/**" = ["S101", "S105", "S106"]
+"test_*.py" = ["S101", "S105", "S106"]
+"conftest.py" = ["S101", "S105", "S106"]

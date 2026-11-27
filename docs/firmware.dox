@@ -1,0 +1,65 @@
+// SPDX-FileCopyrightText: 2026 José M. Requena Plens
+// SPDX-License-Identifier: GPL-3.0-or-later
+
+/**
+ * @page firmware_page The firmware
+ *
+ * The firmware of the INA228 bench power meter: an ESP32-S3-N16R8 on a
+ * DSX063-1 carrier reading a TI INA228 across an R100 shunt, built with
+ * ESP-IDF only. It measures what the Kleidos boards draw and speaks SCPI-1999
+ * over the CH343 line at 6 Mbps; @ref scpi_page is the protocol,
+ * @ref architecture_page the design, and @ref readme_page says how it is
+ * built, flashed and wired.
+ *
+ * This part of the site is for changing the firmware: every symbol of
+ * `firmware/src`, by topic. To measure with the instrument, @ref usage_page
+ * takes a session in order (the port, the line, the calibration, the null, a
+ * measurement, a capture, the relays, the end state), @ref scpi_page is every
+ * command and report, and the panel (`kleidos-meter serve`) is
+ * @ref panel_page. The host package the panel belongs to is
+ * @ref host_page, and its Python interface @ref python_api_page; both speak
+ * to the instrument over the cable, the one interface it has.
+ *
+ * @section firmware_boot The boot
+ *
+ * `app_main()` (@ref app_entry) does the whole boot, in this order: the relay
+ * inputs driven to released (every coil off, the DUT on the shunt), the LED
+ * blanked, the calibration loaded from its record log (@ref flash_log), the
+ * I2C bus and the INA228's bring-up, then the sampler and the console, so
+ * that every queue and semaphore both tasks may reach exists before either
+ * task does. Each step's reason is in `main.cpp`'s file comment.
+ *
+ * @section firmware_tasks The two tasks
+ *
+ * - **`meter-sample`, Core 1** (@ref sampling): paces and reads the INA228 for
+ *   the open capture and never prints. A streamed capture hands its samples to
+ *   the console through a queue, a ring capture writes the TRACE ring, a null
+ *   accumulates.
+ * - **`main`, Core 0** (@ref console_dispatch), the task ESP-IDF runs
+ *   `app_main()` on, which becomes the console once the boot is done and never
+ *   returns (FW-17): reads UART0
+ *   (@ref console_uart), parses
+ *   each program message (@ref scpi_parser), runs its units through the
+ *   command table, writes the responses and the stream, and owns the relays
+ *   (@ref relay_bank) and the calibration (@ref calibration_store).
+ *
+ * @section firmware_topics Topics
+ *
+ * | Topic | Files |
+ * |---|---|
+ * | @ref app_entry | `main.cpp` |
+ * | @ref ina228_driver | `ina228.h`, `ina228_regs.h`, `ina228.cpp` |
+ * | @ref i2c_bus | `i2c_bus.h`, `i2c_bus.cpp` |
+ * | @ref sampling | `sampler.h`, `sampler.cpp`, `scale.h` |
+ * | @ref scpi_parser | `scpi.h`, `scpi.cpp` |
+ * | @ref console_dispatch | `console.h`, `console.cpp`, `console_commands.cpp` |
+ * | @ref console_uart | `uart0.h`, `uart0.cpp` |
+ * | @ref calibration_store | `calibration.h`, `calibration.cpp`, `calmath.h` |
+ * | @ref flash_log | `flash_log.h`, `flash_log.cpp`, `flash_port.h`, `flash_port.cpp` |
+ * | @ref relay_bank | `relay.h`, `relay.cpp` |
+ * | @ref instrument_identity | `identity.h`, `identity.cpp`, `sha256.h` |
+ * | @ref status_led | `status_led.h`, `status_led.cpp` |
+ * | @ref heap_monitor | `heap_monitor.h`, `heap_monitor.cpp` |
+ * | @ref interrupt_routing | `interrupt.h`, `interrupt.cpp` |
+ * | @ref watchdog_timer | `watchdog.h`, `watchdog.cpp` |
+ */

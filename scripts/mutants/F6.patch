@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant F6: a mark label may hold '='.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console_commands.cpp b/firmware/src/console_commands.cpp
+--- a/firmware/src/console_commands.cpp
++++ b/firmware/src/console_commands.cpp
+@@ -200,8 +200,7 @@
+         return false;
+     }
+     for ( const char c : text ) {
+-        if ( !chars::isGraphic( c ) || ( c == ',' ) || ( c == ';' ) || ( c == '"' ) || ( c == '\'' )
+-             || ( c == '=' ) ) {
++        if ( !chars::isGraphic( c ) || ( c == ',' ) || ( c == ';' ) || ( c == '"' ) || ( c == '\'' ) ) {
+             return false;
+         }
+     }

@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW28-leaddue: a lead cycle already due waits as if it were not.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -432,7 +432,7 @@
+         return kReadTimeoutMs;
+     }
+     const std::int64_t left = ( leadCycleDueUs_ - esp_timer_get_time() ) / 1000;
+-    return ( left < 0 ) ? 0U
++    return ( left < -1000000 ) ? 0U
+                         : ( ( left < static_cast<std::int64_t>( kReadTimeoutMs ) )
+                                 ? static_cast<std::uint32_t>( left )
+                                 : kReadTimeoutMs );

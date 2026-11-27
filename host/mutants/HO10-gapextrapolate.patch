@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant HO10-gapextrapolate: The line runs on past the last sample, at whatever the window still holds.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && METER_BROWSER_REQUIRED=1 ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_panel_browser.py -k 'stops_with_the_data'
+
+diff --git a/host/kleidos_meter/panel/static/js/chart-math.js b/host/kleidos_meter/panel/static/js/chart-math.js
+--- a/host/kleidos_meter/panel/static/js/chart-math.js
++++ b/host/kleidos_meter/panel/static/js/chart-math.js
+@@ -674,7 +674,7 @@
+     const held = columns.count;
+     // The next buffer column that holds data, at or after each view column,
+     // kept in `mean` until the forward pass replaces it.
+-    let next = Number.POSITIVE_INFINITY;
++    let next = total;
+     for (let i = total - 1; i >= offset; i -= 1) {
+         if (held[i] > 0) {
+             next = i;

@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW02-pendlive: SYSTem:PINS:PENDing? judges the live map, not the staged one.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -1848,7 +1848,7 @@
+ }
+
+ void Console::cmdPinsPending( Call& ) noexcept {
+-    const pinmap::Verdict verdict = pinmap::validate( pinsPending_ );
++    const pinmap::Verdict verdict = pinmap::validate( pins_->map );
+     const bool            valid   = verdict.problem == pinmap::Problem::None;
+     text::Writer          w       = openUnit();
+     writePinMap( w, pinsPending_ );

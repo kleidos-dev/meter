@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# LeakSanitizer suppressions for the host tests (Makefile, LEAKS on Linux).
+# Each entry is an allocation of the harness's own that lives as long as the
+# process by design and is never freed, matched by a harness function on its
+# allocation stack; no entry names the firmware's code. Everything else a test
+# allocates and loses is a leak and fails the run, so the firmware, which
+# allocates nothing (docs/misra.md, tests/firmware/test_no_dynamic_memory.py),
+# has nothing here.
+#
+# A simulated board per test, whose tasks are frozen and never joined
+# (harness/sim.h), and the firmware objects Bench boots on it the way
+# app_main() does, for the life of the process.
+leak:bench::Scope::Scope
+leak:bench::Bench::Bench
+leak:bench::Bench::boot
+# The objects the fakes of ESP-IDF hand the firmware for good (a bus, a device,
+# a queue or semaphore under a static create), as
+# ESP-IDF allocates them on the device: all made by sim::hold() (harness/sim.cpp).
+leak:sim::hold

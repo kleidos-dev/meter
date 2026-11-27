@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW06-word: the override's word keeps the profile's own conversion time.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/sampler.cpp b/firmware/src/sampler.cpp
+--- a/firmware/src/sampler.cpp
++++ b/firmware/src/sampler.cpp
+@@ -346,7 +346,7 @@
+     ProfileSpec spec = own;
+     spec.avg         = averaging.avg;
+     spec.vShCt       = averaging.vShCt;
+-    spec.adcConfig   = adcConfigWord( own.mode, own.vbusCt, spec.vShCt, own.vtCt, spec.avg );
++    spec.adcConfig   = adcConfigWord( own.mode, own.vbusCt, own.vShCt, own.vtCt, spec.avg );
+     spec.periodUs    = periodMicroseconds( own.mode, own.vbusCt, spec.vShCt, own.vtCt, spec.avg );
+     return spec;
+ }

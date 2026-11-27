@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW07-path: A path outside the four reads as one of them.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/relay.cpp b/firmware/src/relay.cpp
+--- a/firmware/src/relay.cpp
++++ b/firmware/src/relay.cpp
+@@ -121,3 +121,3 @@ const char* pathName( Path path ) noexcept {
+     }
+-    return "none";
++    return "shunt";
+ }

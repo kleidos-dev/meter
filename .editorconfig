@@ -1,0 +1,34 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 4
+
+[*.{yml,yaml,json,svg,css}]
+indent_size = 2
+
+# Make needs a tab before every recipe line.
+[Makefile]
+indent_style = tab
+
+# KiCad writes its schematics, its symbol library and the symbol-library table
+# with tabs, and hardware/gen_rig.py writes them as KiCad does.
+[{*.kicad_sch,*.kicad_sym,sym-lib-table}]
+indent_style = tab
+
+# Markdown: one line per paragraph, and a trailing space can be a line break.
+[*.md]
+trim_trailing_whitespace = false
+
+# Files kept byte for byte: the license text, and the quality kit's base
+# configurations (.github/quality/SOURCE.json).
+[{LICENSE,LICENSES/**,.github/quality/**}]
+trim_trailing_whitespace = unset
+insert_final_newline = unset
+indent_size = unset

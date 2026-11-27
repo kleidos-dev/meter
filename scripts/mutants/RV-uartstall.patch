@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant RV-uartstall: write() keeps the stall clock running after the FIFO takes bytes, so stalls that each clear in time add up and truncate the output.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/uart0.cpp b/firmware/src/uart0.cpp
+--- a/firmware/src/uart0.cpp
++++ b/firmware/src/uart0.cpp
+@@ -248,7 +248,6 @@
+                 uart_ll_write_txfifo( &UART0, &byte, 1 );
+             }
+             placed += chunk;
+-            fullSinceUs = -1;
+         } else {
+             const std::int64_t now = esp_timer_get_time();
+             if ( fullSinceUs < 0 ) {

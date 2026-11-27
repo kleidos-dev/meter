@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant F2: a TRACE capture's opening boundary no longer notes the die temperature.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/sampler.cpp b/firmware/src/sampler.cpp
+--- a/firmware/src/sampler.cpp
++++ b/firmware/src/sampler.cpp
+@@ -704,7 +704,6 @@
+     // The boundary temperature reaches the one value `q=` is judged against,
+     // unconditionally -- with the sentinel when the read failed -- so a
+     // reading never outlives the capture that took it.
+-    noteDieMilliCelsius( info.dieMilliCelsiusStart );
+
+     info.chargeRawStart      = readChargeRaw( info.chargeValidStart );
+     captureChargeStartUs_    = static_cast<std::uint64_t>( esp_timer_get_time() );

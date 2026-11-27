@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW30-relay: ROUTe:RELay3 with no state is refused as unwired, not as a missing parameter.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -2265,10 +2265,7 @@
+     // What the order asks is read before the rig's wiring refuses it: an
+     // order that names no state is a missing parameter on any rig.
+     bool on = false;
+-    if ( !call.params.boolean( 0, on ) ) {
+-        failParameter( call.params, kUsage );
+-        return;
+-    }
++    (void)call.params.boolean( 0, on );
+     // 0.13.0: the rig wires neither spare (relay.h, ChannelSpec::wired), so
+     // the order is refused by name; before, it answered and no relay moved.
+     text::Writer w = openError();

@@ -1,0 +1,8 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Text files are stored with LF line ends.
+* text=auto eol=lf
+
+*.png binary
+*.jpg binary
+*.pdf binary

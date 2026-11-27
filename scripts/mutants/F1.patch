@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant F1: the error queue's overflow keeps the newest code instead of -350.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/scpi.cpp b/firmware/src/scpi.cpp
+--- a/firmware/src/scpi.cpp
++++ b/firmware/src/scpi.cpp
+@@ -445,7 +445,7 @@
+     if ( count_ == kErrorQueueDepth ) {
+         ErrorEntry& newest = entries_[( head_ + kErrorQueueDepth - 1U ) % kErrorQueueDepth];
+         newest             = ErrorEntry{};
+-        newest.code        = err::kQueueOverflow;
++        newest.code        = code;
+         return;
+     }
+     ErrorEntry& entry = entries_[( head_ + count_ ) % kErrorQueueDepth];

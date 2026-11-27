@@ -1,0 +1,60 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Secret scan (gitleaks 8.30.1, as the Kleidos firmware repository pins it):
+# gitleaks' own rules, plus the bench data this repository must never hold
+# (AGENTS.md, "Private bench data"): a serial port name that carries the
+# CH343 bridge's USB serial number, that serial as ioreg prints it, and a MAC
+# address. The meter's own serial (`KM-` and ten hex digits) is a digest of
+# the MAC, and the bench's is written as the placeholder KM-0000000000
+# (calibration/README.md); tests/ci/test_instrument_serials.py holds that.
+#
+#   gitleaks git . --config .gitleaks.toml    # every commit (CI)
+#   gitleaks dir . --config .gitleaks.toml    # the working tree (CI)
+#
+# tests/ci/test_gitleaks_rules.py holds each rule to samples it must catch
+# and to the placeholders the documents use instead (`usbmodem<serial>1`,
+# `usbmodemXXXX1`), which it must not.
+
+title = "Kleidos meter gitleaks configuration"
+
+[extend]
+useDefault = true
+
+# macOS names a CDC-ACM bridge `cu.usbmodem<serial><interface>` (the CH343)
+# and a vendor-driver one `cu.usbserial-<serial>` or `cu.wchusbserial<serial>`;
+# Linux names it under /dev/serial/by-id/ with the vendor id 1a86 (WCH) and
+# the serial. Five or more hex digits after the prefix are a real serial; a
+# placeholder (`<serial>`, `XXXX`) is not hex.
+[[rules]]
+id = "kleidos-usb-serial-port"
+description = "A serial port name that carries a USB serial number (private bench data)"
+regex = '''(?:(?:cu|tty)\.(?:usbmodem|usbserial-?|wchusbserial)[0-9A-Fa-f]{5,}|usb-1a86_[A-Za-z0-9_]*_[0-9A-Fa-f]{5,})'''
+keywords = ["usbmodem", "usbserial", "wchusbserial", "usb-1a86"]
+
+# The bridge's serial as `ioreg -p IOUSB -l` or `system_profiler` prints it.
+[[rules]]
+id = "kleidos-usb-serial-number"
+description = "A USB serial number as macOS prints it (private bench data)"
+regex = '''(?i)(?:"USB Serial Number"\s*=\s*"|Serial Number:\s*)[0-9A-Za-z]{5,}'''
+keywords = ["serial number"]
+
+# A MAC address, colon- or hyphen-separated: the ESP32-S3's factory eFuse MAC
+# never enters a tracked file (calibration/README.md, "Identity").
+[[rules]]
+id = "kleidos-mac-address"
+description = "A MAC address (private bench data)"
+regex = '''\b[0-9A-Fa-f]{2}(?:(?::[0-9A-Fa-f]{2}){5}|(?:-[0-9A-Fa-f]{2}){5})\b'''
+
+# Build output and the virtual environments, never committed: skipped by
+# this repository's own rules only (the quality kit allows no global
+# allowlist, so gitleaks' default rules read every path).
+[[allowlists]]
+description = "Build output and the virtual environments, never committed"
+targetRules = ["kleidos-usb-serial-port", "kleidos-usb-serial-number", "kleidos-mac-address"]
+paths = [
+  '''(^|/)\.pio/''',
+  '''(^|/)\.venv/''',
+  '''(^|/)build/''',
+  '''(^|/)__pycache__/''',
+]

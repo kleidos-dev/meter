@@ -1,0 +1,39 @@
+{
+  "schema": "kleidos.meter.configuration/1",
+  "id": "mjkdz-r100-hw316",
+  "description": "The bench rig until 2026-11-20: the MJKDZ INA228 breakout and its R100 shunt, with both the DUT lead (K1) and the bypass on the HW-316 four-relay module; since 2026-10-31 the bypass ran on K3, driven from GPIO15 (docs/rig-wiring.md section 8).",
+  "sense": {
+    "adc": { "part": "TI INA228", "mfg": "0x5449", "die": "0x228" },
+    "breakout": { "id": "mjkdz-ina228", "marking": "MJKDZ", "revision": null },
+    "shunt": {
+      "id": "r100-unmarked",
+      "marking": "R100",
+      "nominal_nohm": 100000000,
+      "tolerance_ppm": null,
+      "plausible_ppm": 20000,
+      "tcr_ppm_per_c": null
+    },
+    "wiring": {
+      "schematic_rev": "C1",
+      "kelvin": "the sense lands on the shunt's own pins; the R100 is a two-terminal part, so the screws' share is inside the measured value (docs/rig-wiring.md section 1)",
+      "vbus_side": "source"
+    }
+  },
+  "routing": {
+    "lead": {
+      "part": "hw316",
+      "channel": "K1",
+      "gpio": 7,
+      "description": "HW-316 K1 (SRD-05VDC-SL-C), NC in series with the DUT's lead, active low"
+    },
+    "bypass": {
+      "part": "hw316",
+      "channel": "K3",
+      "gpio": 15,
+      "description": "HW-316 K3 (SRD-05VDC-SL-C), NO across the shunt and K1, active low; its silver contacts do not close the ~10 mV dry circuit"
+    }
+  },
+  "controller": "ESP32-S3-N16R8 on a DSX063-1 screw-terminal carrier (WCH CH343P)",
+  "firmware": { "image": "meter", "min_version": "0.4.0", "max_version": "0.7.0" },
+  "expected": { "adc_gain_error_ppm": 500, "range_split_max_ppm": 1000, "recalibration_days": 365 }
+}

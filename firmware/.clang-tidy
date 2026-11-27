@@ -1,0 +1,86 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# clang-tidy for the Kleidos bench meter's firmware: the quality kit's base
+# (the root .clang-tidy, kleidos-dev/.github quality/clang-tidy/base.yaml,
+# never edited here) and, on top of it, what is the meter's own. clang-tidy
+# appends this file's Checks to the base's (InheritParentConfig), so nothing
+# here turns a kit check off. The base brings the Kleidos firmware
+# repository's set, misc-no-recursion,
+# cppcoreguidelines-avoid-non-const-global-variables, Clang's static analyzer
+# (clang-analyzer-*) and concurrency-mt-unsafe; every warning is an error.
+#
+# The meter's own, each for the MISRA C++:2023 rule it serves
+# (docs/misra.md), all of them clean when adopted: misc-unused-parameters
+# (0.2.2), readability-implicit-bool-conversion (7.0.1, 7.0.2),
+# cppcoreguidelines-pro-type-reinterpret-cast (8.2.5),
+# readability-uppercase-literal-suffix (5.13.5),
+# readability-isolate-declaration (10.0.1),
+# readability-inconsistent-declaration-parameter-name (13.3.3),
+# google-explicit-constructor (15.1.3), cppcoreguidelines-pro-type-member-init
+# (15.1.4), cppcoreguidelines-macro-usage (19.0.2) and
+# cppcoreguidelines-special-member-functions (15.0.1), met by deleting the
+# moves of the four unmovable classes. From FW-26 (2026-11-23), with the
+# formatter rewrite done: cppcoreguidelines-pro-type-vararg and cert-dcl50-cpp
+# (no C variadic call and no varargs function: 21.10.1 and 30.0.1, D2 gone
+# from docs/misra.md), and cppcoreguidelines-pro-bounds-array-to-pointer-decay
+# (no implicit decay of an array to a pointer outside a string literal:
+# 7.11.2, docs/misra.md D3). bugprone-unused-return-value is taught every
+# function (0.1.2), and cppcoreguidelines-no-malloc ESP-IDF's heap_caps_*
+# names, which it does not know by default.
+#
+# It runs twice per image (scripts/run_static_analysis.sh tidy, through
+# scripts/clang_tidy_gate.py): over the sources as the device compiles them
+# (firmware/compile_commands.json, the Xtensa target, the toolchain's libstdc++
+# and picolibc), and as the host tests compile them (the fake ESP-IDF of
+# firmware/test/native/harness/idf). Free tooling, best effort: not a
+# compliance audit, and no conformance claim.
+#
+# A static local takes no s_ prefix and a global (there is none left) the
+# meter's g.
+---
+InheritParentConfig: true
+
+Checks: >
+  misc-unused-parameters,
+  readability-implicit-bool-conversion,
+  cppcoreguidelines-pro-type-reinterpret-cast,
+  readability-uppercase-literal-suffix,
+  readability-isolate-declaration,
+  readability-inconsistent-declaration-parameter-name,
+  google-explicit-constructor,
+  cppcoreguidelines-pro-type-member-init,
+  cppcoreguidelines-macro-usage,
+  cppcoreguidelines-pro-type-vararg,
+  cert-dcl50-cpp,
+  cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  cppcoreguidelines-special-member-functions,
+
+WarningsAsErrors: '*'
+
+CheckOptions:
+  # --- Mutable globals ---
+  # External-linkage mutable globals take the g prefix and camelBack (there is
+  # none left), so a global named like a static is blocked by the naming gate.
+  - key: readability-identifier-naming.GlobalVariableCase
+    value: camelBack
+  - key: readability-identifier-naming.GlobalVariablePrefix
+    value: g
+
+  # Every function's result is used or cast to void (MISRA C++:2023 0.1.2),
+  # not only the list the check keeps by default. A cast to void is the
+  # rule's own way of saying a result is deliberately discarded.
+  - key: bugprone-unused-return-value.CheckedFunctions
+    value: '.*'
+  - key: bugprone-unused-return-value.AllowCastToVoid
+    value: true
+
+  - key: cppcoreguidelines-no-malloc.Allocations
+    value: '::malloc;::calloc;::heap_caps_malloc;::heap_caps_calloc;::heap_caps_aligned_alloc;::heap_caps_malloc_prefer;::pvPortMalloc'
+  - key: cppcoreguidelines-no-malloc.Reallocations
+    value: '::realloc;::heap_caps_realloc'
+  - key: cppcoreguidelines-no-malloc.Deallocations
+    value: '::free;::heap_caps_free;::vPortFree'
+
+HeaderFilterRegex: 'firmware/src/.*\.h$'
+...

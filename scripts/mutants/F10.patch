@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant F10: a clip flag never raises the QUEStionable CURRent bit.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -1250,7 +1250,7 @@
+ std::uint32_t Console::questionableCondition() const noexcept {
+     std::uint32_t condition = 0;
+     if ( bits::hasBit( sampler_->flags(), kDiagMathOf | kDiagShntOl | kDiagShntUl ) ) {
+-        condition = kQuesCurrent;
++        condition = kQuesCurrent & 0U;
+     }
+     if ( liveQuality() != Quality::Cal ) {
+         condition |= kQuesCalibration;

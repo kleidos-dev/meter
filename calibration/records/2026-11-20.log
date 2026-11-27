@@ -1,0 +1,547 @@
+>> *CLS
+ERR '*CLS;:*CLS;:SYST:ERR:ALL?': no response within 3 s
+>> *IDN?
+KLEIDOS,KLEIDOS-METER,0,0.3.0
+>> ROUT:BYP ON
+
+>> ROUT:STAT?
+k1=lead:closed k2=bypass:closed k3=spare:off k4=spare:off path=both check=- pads=ok operate_settle_ms=20 release_settle_ms=50 hold_s=- hold_released=0 bypass_part=relay2click
+>> ROUT:BYP OFF
+
+>> ROUT:STAT?
+k1=lead:closed k2=bypass:open k3=spare:off k4=spare:off path=shunt check=- pads=ok operate_settle_ms=20 release_settle_ms=50 hold_s=- hold_released=0 bypass_part=relay2click
+>> MEAS:CURR?
+0.000025578913
+>> ROUT:BYP ON
+
+>> MEAS:CURR?
+ERR 'MEAS:CURR?': 101,"Shunt bypassed;shunt bypassed (path=both: ROUTe:NULLpath OFF first)"
+>> ROUT:BYP OFF
+
+>> MEAS:CURR?
+0.000028223096
+>> ROUT:BYP ON
+
+>> MEAS:CURR?
+ERR 'MEAS:CURR?': 101,"Shunt bypassed;shunt bypassed (path=both: ROUTe:NULLpath OFF first)"
+>> ROUT:BYP OFF
+
+>> MEAS:CURR?
+0.000018157105
+>> ROUT:STAT?
+k1=lead:closed k2=bypass:open k3=spare:off k4=spare:off path=shunt check=- pads=ok operate_settle_ms=20 release_settle_ms=50 hold_s=- hold_released=0 bypass_part=relay2click
+>> MEAS:CURR?
+0.000039040336
+>> MEAS:VOLT?
+ERR 'MEAS:VOLT?': -230,"Data corrupt or stale;the acquisition converted no bus voltage (SENSe:PROFile STATe or SLEep)"
+>> MEAS:CURR?
+0.000050218163
+>> SENS:PROF STATE
+
+>> MEAS:VOLT?
+4.12276563
+>> MEAS:CURR?
+0.00005738875
+>> MEAS:CURR?
+0.08827401375
+>> MEAS:VOLT?
+4.0924709
+>> MEAS:CURR?
+0.087991795
+>> ROUT:NULL ON
+ERR 'ROUT:NULL ON': 104,"Lead check failed;lead check failed (the shunt still conducts: vs_pv=9000000000,1891250000,1833437500; released to path=shunt)"
+>> ROUT:RES?
+k1=lead:closed k2=bypass:open k3=spare:off k4=spare:off path=shunt check=- moved=- settle_us=0 live=0 marked=0 vs_pv=- hold_s=- q=cal
+>> ROUT:STAT?
+k1=lead:closed k2=bypass:open k3=spare:off k4=spare:off path=shunt check=- pads=ok operate_settle_ms=20 release_settle_ms=50 hold_s=- hold_released=0 bypass_part=relay2click
+>> ROUT:BYP ON
+
+>> ROUT:LEAD OPEN,FORCE,LIVE
+
+>> ROUT:RES?
+k1=lead:open k2=bypass:closed k3=spare:off k4=spare:off path=bypass check=- moved=k1 settle_us=20654 live=0 marked=0 vs_pv=- hold_s=120 q=invalid
+>> ROUT:LEAD CLOS
+
+>> ROUT:BYP OFF
+
+>> ROUT:STAT?
+k1=lead:closed k2=bypass:open k3=spare:off k4=spare:off path=shunt check=- pads=ok operate_settle_ms=20 release_settle_ms=50 hold_s=- hold_released=0 bypass_part=relay2click
+>> MEAS:CURR?
+0.0895492325
+>> ROUT:NULL ON
+
+>> ROUT:RES?
+k1=lead:open k2=bypass:closed k3=spare:off k4=spare:off path=bypass check=ok moved=k2,k1 settle_us=71965 live=0 marked=0 vs_pv=9013750000,2294687500,4062500 hold_s=120 q=invalid
+>> CAL:ZERO 60
+
+>> CAL:ZERO:RES?
+running=1 profile=STATE over_s=60 n_expect=52083 samples=52083 k1=lead:open k2=bypass:closed k3=spare:off k4=spare:off path=bypass check=ok
+>> ROUT:NULL OFF
+
+>> ROUT:RES?
+k1=lead:closed k2=bypass:open k3=spare:off k4=spare:off path=shunt check=- moved=k1,k2 settle_us=61615 live=0 marked=0 vs_pv=- hold_s=- q=cal
+>> MEAS:CURR?
+ERR 'MEAS:CURR?': -221,"Settings conflict;capture running (ABORt first)"
+>> ABOR
+
+>> CAL:ZERO:RES?
+running=0 range=0 offset_pv=1858853 sd_pv=1900625 over_s=60 die_mc=25460 n=52083 k1=lead:open k2=bypass:closed k3=spare:off k4=spare:off path=bypass check=ok stored=1
+>> SYST:ERR:ALL?
+0,"No error"
+>> MEAS:CURR?
+0.0881260985
+>> MEAS:CURR?
+0.00000269268
+>> CAL:ZERO 60
+
+>> ABOR
+
+>> CAL:ZERO:RES?
+running=0 range=0 offset_pv=1978194 sd_pv=1951250 over_s=60 die_mc=26617 n=52083 k1=lead:closed k2=bypass:open k3=spare:off k4=spare:off path=shunt check=- stored=1
+>> SYST:ERR:ALL?
+0,"No error"
+>> MEAS:CURR?
+0.08778949925
+>> ROUT:NULL ON
+
+>> ROUT:RES?
+k1=lead:open k2=bypass:closed k3=spare:off k4=spare:off path=bypass check=ok moved=k2,k1 settle_us=71968 live=0 marked=0 vs_pv=8726250000,2235937500,3750000 hold_s=120 q=invalid
+>> CAL:ZERO 60
+
+>> ABOR
+
+>> CAL:ZERO:RES?
+running=0 range=0 offset_pv=2055547 sd_pv=2000937 over_s=60 die_mc=25539 n=52083 k1=lead:open k2=bypass:closed k3=spare:off k4=spare:off path=bypass check=ok stored=1
+>> ROUT:NULL OFF
+
+>> MEAS:CURR?
+0.08790141275
+>> MEAS:CURR?
+0.00000131952
+>> CAL:ZERO 60
+
+>> ABOR
+
+>> CAL:ZERO:RES?
+running=0 range=0 offset_pv=2320868 sd_pv=1951250 over_s=60 die_mc=25539 n=52083 k1=lead:closed k2=bypass:open k3=spare:off k4=spare:off path=shunt check=- stored=1
+>> CAL:DATA?
+shunt_uohm=100000 shunt_measured=1 off_pv_r0=2320868 off_pv_r1=-919552 nulled_r0=1 nulled_r1=1 off_die_mc_r0=25539 off_die_mc_r1=23625 vbus_side=source cal_tag=R100_0.10ohm_1pct_1028
+>> SENS:PROF STATE
+
+>> MEAS:CURR?
+-0.00000055225
+>> SENS:CURR:RANG:IND 0
+
+>> CAL:ZERO 10
+
+>> ABOR
+
+>> CAL:ZERO:RES?
+running=0 range=0 offset_pv=2217093 sd_pv=1926250 over_s=10 die_mc=25281 n=8680 k1=lead:closed k2=bypass:open k3=spare:off k4=spare:off path=shunt check=- stored=1
+>> SENS:CURR:RANG:IND 1
+
+>> CAL:ZERO 10
+
+>> ABOR
+
+>> CAL:ZERO:RES?
+running=0 range=1 offset_pv=2192612 sd_pv=1899218 over_s=10 die_mc=26382 n=8680 k1=lead:closed k2=bypass:open k3=spare:off k4=spare:off path=shunt check=- stored=1
+>> SYST:ERR:ALL?
+0,"No error"
+>> MEAS:CURR?
+ERR write failed: [Errno 6] Device not configured
+>> CAL:SHUN:REF 100.0
+ERR write failed: [Errno 6] Device not configured
+>> SAMP:COUN 2000
+ERR write failed: [Errno 6] Device not configured
+>> SENS:CURR:RANG:IND 0
+ERR write failed: [Errno 6] Device not configured
+>> CAL:SHUN
+ERR write failed: [Errno 6] Device not configured
+>> CAL:SHUN:RES?
+ERR write failed: [Errno 6] Device not configured
+>> CAL:SHUN
+ERR write failed: [Errno 6] Device not configured
+>> CAL:SHUN:RES?
+ERR write failed: [Errno 6] Device not configured
+>> SENS:CURR:RANG:IND 1
+ERR write failed: [Errno 6] Device not configured
+>> CAL:SHUN
+ERR write failed: [Errno 6] Device not configured
+>> CAL:SHUN:RES?
+ERR write failed: [Errno 6] Device not configured
+>> CAL:SHUN
+ERR write failed: [Errno 6] Device not configured
+>> CAL:SHUN:RES?
+ERR write failed: [Errno 6] Device not configured
+>> SYST:ERR:ALL?
+ERR write failed: [Errno 6] Device not configured
+=== new session 02:30
+>> *CLS
+ERR '*CLS;:*CLS;:SYST:ERR:ALL?': no response within 3 s
+>> *IDN?
+KLEIDOS,KLEIDOS-METER,0,0.3.0
+>> SYST:STAT?
+running=0 sink=idle profile=TRACE period_us=0 pace=timer pace_fallback=0 range=0 samples=0 dropped=0 read_err=0 i_na=0 vbus_uv=0 die_mc=unknown die_age_us=0 flags=0x0000 scl_hz=400000 q=cal
+>> CAL:DATA?
+shunt_uohm=100000 shunt_measured=1 off_pv_r0=2217093 off_pv_r1=2192612 nulled_r0=1 nulled_r1=1 off_die_mc_r0=25281 off_die_mc_r1=26382 vbus_side=source cal_tag=R100_0.10ohm_1pct_1028
+>> SENS:PROF STATE
+
+>> MEAS:CURR?
+-0.00004182626
+>> MEAS:VOLT?
+4.11382784
+>> ROUT:STAT?
+k1=lead:closed k2=bypass:open k3=spare:off k4=spare:off path=shunt check=- pads=ok operate_settle_ms=20 release_settle_ms=50 hold_s=- hold_released=0 bypass_part=relay2click
+>> MEAS:CURR?
+-0.00003657627
+>> MEAS:CURR?
+ERR write failed: [Errno 6] Device not configured
+>> MEAS:VOLT?
+ERR write failed: [Errno 6] Device not configured
+=== session 02:49
+>> *CLS
+ERR '*CLS;:*CLS;:SYST:ERR:ALL?': no response within 3 s
+>> *IDN?
+KLEIDOS,KLEIDOS-METER,0,0.3.0
+>> SENS:PROF STATE
+
+>> MEAS:CURR?
+0.040283204
+>> MEAS:VOLT?
+4.02709712
+>> CAL:DATA?
+shunt_uohm=100000 shunt_measured=1 off_pv_r0=2217093 off_pv_r1=2192612 nulled_r0=1 nulled_r1=1 off_die_mc_r0=25281 off_die_mc_r1=26382 vbus_side=source cal_tag=R100_0.10ohm_1pct_1028
+>> CAL:SHUN:REF 100.0
+
+>> SAMP:COUN 2000
+
+>> SENS:CURR:RANG:IND 0
+
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100035634 r_uohm=100036 dev_ppm=356 i_na=40242200 vsh_nv=4025654 vref_uv=4024220 ref_uohm=100000000 n=2000 die_mc=26953 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100046072 r_uohm=100046 dev_ppm=460 i_na=40241230 vsh_nv=4025977 vref_uv=4024123 ref_uohm=100000000 n=2000 die_mc=27710 check=ok
+>> SENS:CURR:RANG:IND 1
+
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=1 r_nohm=100046169 r_uohm=100046 dev_ppm=461 i_na=40243720 vsh_nv=4026230 vref_uv=4024372 ref_uohm=100000000 n=2000 die_mc=27039 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=1 r_nohm=100043185 r_uohm=100043 dev_ppm=431 i_na=40245900 vsh_nv=4026328 vref_uv=4024590 ref_uohm=100000000 n=2000 die_mc=27867 check=ok
+>> SYST:ERR:ALL?
+0,"No error"
+>> SENS:CURR:SHUN 0.100043
+
+>> CAL:TAG "R100_20261120"
+
+>> CAL:DATA?
+shunt_uohm=100043 shunt_measured=1 off_pv_r0=2217093 off_pv_r1=2192612 nulled_r0=1 nulled_r1=1 off_die_mc_r0=25281 off_die_mc_r1=26382 vbus_side=source cal_tag=R100_20261120
+>> SYST:ERR:ALL?
+0,"No error"
+>> SENS:PROF:REP?
+profile=STATE adc_config=0xF140 period_us=1152 vshct_us=1052 avg=1
+>> SYST:ERR:ALL?
+0,"No error"
+>> SENS:PROF SLEEP
+
+>> SENS:PROF:REP?
+profile=SLEEP adc_config=0xF1C2 period_us=67520 vshct_us=4120 avg=16
+>> SENS:CURR:RANG:IND 0
+
+>> ROUT:LEAD OPEN,FORCE
+
+>> MEAS:CURR?
+ERR 'MEAS:CURR?;:SYST:ERR:ALL?': no response within 15 s
+=== session hr 03:00
+>> *CLS
+ERR '*CLS;:*CLS;:SYST:ERR:ALL?': no response within 3 s
+>> *IDN?
+KLEIDOS,KLEIDOS-METER,0,0.3.0
+>> ABOR
+ERR 'ABOR': 111,"Not running;no capture or null window is open"
+>> ROUT:STAT?
+k1=lead:closed k2=bypass:open k3=spare:off k4=spare:off path=shunt check=- pads=ok operate_settle_ms=20 release_settle_ms=50 hold_s=- hold_released=0 bypass_part=relay2click
+>> CAL:DATA?
+shunt_uohm=100043 shunt_measured=1 off_pv_r0=2217093 off_pv_r1=2192612 nulled_r0=1 nulled_r1=1 off_die_mc_r0=25281 off_die_mc_r1=26382 vbus_side=source cal_tag=R100_20261120
+>> SENS:PROF SLEEP
+
+>> SENS:CURR:RANG:IND 0
+
+>> ROUT:LEAD OPEN,FORCE
+
+>> CAL:ZERO 30
+
+>> ABOR
+
+>> CAL:ZERO:RES?
+running=0 range=0 offset_pv=2940596 sd_pv=312500 over_s=30 die_mc=26632 n=444 k1=lead:open k2=bypass:open k3=spare:off k4=spare:off path=none check=- stored=1
+>> ROUT:LEAD CLOS
+
+>> SENS:PROF SLEEP
+
+>> SENS:CURR:RANG:IND 1
+
+>> ROUT:LEAD OPEN,FORCE
+
+>> CAL:ZERO 30
+
+>> ABOR
+
+>> CAL:ZERO:RES?
+running=0 range=1 offset_pv=2883586 sd_pv=292265 over_s=30 die_mc=26601 n=444 k1=lead:open k2=bypass:open k3=spare:off k4=spare:off path=none check=- stored=1
+>> ROUT:LEAD CLOS
+
+>> SENS:PROF SLEEP
+
+>> SAMP:COUN 300
+
+>> SENS:CURR:RANG:IND 0
+
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100162979 r_uohm=100163 dev_ppm=1629 i_na=40655450 vsh_nv=4072171 vref_uv=4065545 ref_uohm=100000000 n=300 die_mc=26820 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100152904 r_uohm=100153 dev_ppm=1529 i_na=40581130 vsh_nv=4064318 vref_uv=4058113 ref_uohm=100000000 n=300 die_mc=26843 check=ok
+>> SENS:CURR:RANG:IND 1
+
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=1 r_nohm=100169178 r_uohm=100169 dev_ppm=1691 i_na=40578600 vsh_nv=4064725 vref_uv=4057860 ref_uohm=100000000 n=300 die_mc=27148 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=1 r_nohm=100177433 r_uohm=100177 dev_ppm=1774 i_na=40612590 vsh_nv=4068465 vref_uv=4061259 ref_uohm=100000000 n=300 die_mc=26890 check=ok
+>> SENS:PROF:REP?
+profile=SLEEP adc_config=0xF1C2 period_us=67520 vshct_us=4120 avg=16
+>> SYST:ERR:ALL?
+0,"No error"
+>> HRDONE
+ERR 'HRDONE': -113,"Undefined header;HRDONE"
+>> SENS:PROF STATE
+
+>> SAMP:COUN 2000
+
+>> SENS:CURR:RANG:IND 0
+
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100212292 r_uohm=100212 dev_ppm=2122 i_na=40613870 vsh_nv=4070009 vref_uv=4061387 ref_uohm=100000000 n=2000 die_mc=26882 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100211523 r_uohm=100212 dev_ppm=2115 i_na=40615010 vsh_nv=4070092 vref_uv=4061501 ref_uohm=100000000 n=2000 die_mc=27867 check=ok
+>> SENS:PROF SLEEP
+
+>> SAMP:COUN 300
+
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100209388 r_uohm=100209 dev_ppm=2093 i_na=40613530 vsh_nv=4069857 vref_uv=4061353 ref_uohm=100000000 n=300 die_mc=26804 check=ok
+>> SENS:PROF STATE
+
+>> SAMP:COUN 2000
+
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100210103 r_uohm=100210 dev_ppm=2101 i_na=40613330 vsh_nv=4069866 vref_uv=4061333 ref_uohm=100000000 n=2000 die_mc=27789 check=ok
+>> STATEDONE
+ERR 'STATEDONE': -113,"Undefined header;STATEDONE"
+=== drift 03:34:07
+>> SENS:PROF STATE
+
+>> SAMP:COUN 1000
+
+>> SENS:CURR:RANG:IND 0
+
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100159299 r_uohm=100159 dev_ppm=1592 i_na=40527620 vsh_nv=4059218 vref_uv=4052762 ref_uohm=100000000 n=1000 die_mc=27289 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100170391 r_uohm=100170 dev_ppm=1703 i_na=40524370 vsh_nv=4059342 vref_uv=4052437 ref_uohm=100000000 n=1000 die_mc=27460 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100155605 r_uohm=100156 dev_ppm=1556 i_na=40532160 vsh_nv=4059523 vref_uv=4053216 ref_uohm=100000000 n=1000 die_mc=26718 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100155906 r_uohm=100156 dev_ppm=1559 i_na=40530860 vsh_nv=4059405 vref_uv=4053086 ref_uohm=100000000 n=1000 die_mc=27460 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100163018 r_uohm=100163 dev_ppm=1630 i_na=40529330 vsh_nv=4059540 vref_uv=4052933 ref_uohm=100000000 n=1000 die_mc=26789 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100168242 r_uohm=100168 dev_ppm=1682 i_na=40524910 vsh_nv=4059309 vref_uv=4052491 ref_uohm=100000000 n=1000 die_mc=26703 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100149305 r_uohm=100149 dev_ppm=1493 i_na=40527820 vsh_nv=4058833 vref_uv=4052782 ref_uohm=100000000 n=1000 die_mc=26789 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100146147 r_uohm=100146 dev_ppm=1461 i_na=40527590 vsh_nv=4058682 vref_uv=4052759 ref_uohm=100000000 n=1000 die_mc=27531 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100154109 r_uohm=100154 dev_ppm=1541 i_na=40523310 vsh_nv=4058576 vref_uv=4052331 ref_uohm=100000000 n=1000 die_mc=26875 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100167486 r_uohm=100167 dev_ppm=1674 i_na=40522800 vsh_nv=4059067 vref_uv=4052280 ref_uohm=100000000 n=1000 die_mc=26875 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100163000 r_uohm=100163 dev_ppm=1630 i_na=40521450 vsh_nv=4058750 vref_uv=4052145 ref_uohm=100000000 n=1000 die_mc=27445 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100154638 r_uohm=100155 dev_ppm=1546 i_na=40526880 vsh_nv=4058955 vref_uv=4052688 ref_uohm=100000000 n=1000 die_mc=26695 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100171817 r_uohm=100172 dev_ppm=1718 i_na=40519890 vsh_nv=4058951 vref_uv=4051989 ref_uohm=100000000 n=1000 die_mc=26281 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100164837 r_uohm=100165 dev_ppm=1648 i_na=40518900 vsh_nv=4058569 vref_uv=4051890 ref_uohm=100000000 n=1000 die_mc=26789 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100178932 r_uohm=100179 dev_ppm=1789 i_na=40518090 vsh_nv=4059059 vref_uv=4051809 ref_uohm=100000000 n=1000 die_mc=27289 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100161035 r_uohm=100161 dev_ppm=1610 i_na=40525460 vsh_nv=4059072 vref_uv=4052546 ref_uohm=100000000 n=1000 die_mc=26695 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100145384 r_uohm=100145 dev_ppm=1453 i_na=40527100 vsh_nv=4058602 vref_uv=4052710 ref_uohm=100000000 n=1000 die_mc=26031 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100152486 r_uohm=100152 dev_ppm=1524 i_na=40521860 vsh_nv=4058365 vref_uv=4052186 ref_uohm=100000000 n=1000 die_mc=27554 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100158643 r_uohm=100159 dev_ppm=1586 i_na=40518540 vsh_nv=4058282 vref_uv=4051854 ref_uohm=100000000 n=1000 die_mc=26695 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100158674 r_uohm=100159 dev_ppm=1586 i_na=40516970 vsh_nv=4058126 vref_uv=4051697 ref_uohm=100000000 n=1000 die_mc=26117 check=ok
+=== long 03:45:17
+>> SENS:PROF SLEEP
+
+>> SENS:CURR:RANG:IND 0
+
+>> ROUT:LEAD OPEN,FORCE
+
+>> CAL:ZERO 60
+
+>> ABOR
+
+>> CAL:ZERO:RES?
+running=0 range=0 offset_pv=4382038 sd_pv=441875 over_s=60 die_mc=26195 n=888 k1=lead:open k2=bypass:open k3=spare:off k4=spare:off path=none check=- stored=1
+>> ROUT:LEAD CLOS
+
+>> SENS:PROF SLEEP
+
+>> SENS:CURR:RANG:IND 1
+
+>> ROUT:LEAD OPEN,FORCE
+
+>> CAL:ZERO 60
+
+>> ABOR
+
+>> CAL:ZERO:RES?
+running=0 range=1 offset_pv=3941001 sd_pv=340468 over_s=60 die_mc=26093 n=888 k1=lead:open k2=bypass:open k3=spare:off k4=spare:off path=none check=- stored=1
+>> ROUT:LEAD CLOS
+
+>> SENS:PROF SLEEP
+
+>> SAMP:COUN 600
+
+>> SENS:CURR:RANG:IND 0
+
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100104667 r_uohm=100105 dev_ppm=1046 i_na=40509370 vsh_nv=4055177 vref_uv=4050937 ref_uohm=100000000 n=600 die_mc=26125 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100077748 r_uohm=100078 dev_ppm=777 i_na=40477050 vsh_nv=4050852 vref_uv=4047705 ref_uohm=100000000 n=600 die_mc=26289 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100078437 r_uohm=100078 dev_ppm=784 i_na=40478100 vsh_nv=4050985 vref_uv=4047810 ref_uohm=100000000 n=600 die_mc=26093 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=0 r_nohm=100091723 r_uohm=100092 dev_ppm=917 i_na=40480700 vsh_nv=4051783 vref_uv=4048070 ref_uohm=100000000 n=600 die_mc=26171 check=ok
+>> SENS:CURR:RANG:IND 1
+
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=1 r_nohm=100132213 r_uohm=100132 dev_ppm=1322 i_na=40502830 vsh_nv=4055638 vref_uv=4050283 ref_uohm=100000000 n=600 die_mc=26406 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=1 r_nohm=100147473 r_uohm=100147 dev_ppm=1474 i_na=40522580 vsh_nv=4058234 vref_uv=4052258 ref_uohm=100000000 n=600 die_mc=26289 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=1 r_nohm=100151308 r_uohm=100151 dev_ppm=1513 i_na=40520120 vsh_nv=4058143 vref_uv=4052012 ref_uohm=100000000 n=600 die_mc=26437 check=ok
+>> CAL:SHUN
+
+>> CAL:SHUN:RES?
+range=1 r_nohm=100146675 r_uohm=100147 dev_ppm=1466 i_na=40511430 vsh_nv=4057085 vref_uv=4051143 ref_uohm=100000000 n=600 die_mc=26484 check=ok
+>> LONGPTS
+ERR 'LONGPTS': -113,"Undefined header;LONGPTS"
+>> SENS:CURR:RANG:IND 0
+
+>> ROUT:LEAD OPEN,FORCE
+
+>> CAL:ZERO 60
+
+>> ABOR
+
+>> CAL:ZERO:RES?
+running=0 range=0 offset_pv=4609023 sd_pv=312500 over_s=60 die_mc=26062 n=888 k1=lead:open k2=bypass:open k3=spare:off k4=spare:off path=none check=- stored=1
+>> ROUT:LEAD CLOS
+
+>> SYST:ERR:ALL?
+0,"No error"
+>> LONGDONE
+ERR 'LONGDONE': -113,"Undefined header;LONGDONE"
+>> SENS:PROF STATE
+
+>> SENS:CURR:SHUN 0.100116
+
+>> CAL:TAG "R100_20261120_HR"
+
+>> CAL:DATA?
+shunt_uohm=100116 shunt_measured=1 off_pv_r0=4609023 off_pv_r1=3941001 nulled_r0=1 nulled_r1=1 off_die_mc_r0=26062 off_die_mc_r1=26093 vbus_side=source cal_tag=R100_20261120_HR
+>> SYST:ERR:ALL?
+0,"No error"

@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW08-backfails: A map put back that fails its own proof does not say so.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_sim_pins.py::test_a_revert_whose_own_proof_fails_leaves_no_ina228_and_the_console_answering
+
+diff --git a/host/kleidos_meter/sim.py b/host/kleidos_meter/sim.py
+--- a/host/kleidos_meter/sim.py
++++ b/host/kleidos_meter/sim.py
+@@ -1576,7 +1576,7 @@
+                     f" addr={pins.address_text(target.addr)}"
+                 )
+             back = pins.prove(self.pins_live, self.wiring, fitted=self.device_ready)
+-            also = "" if back.passed else f"; it fails too (tst={back.tst})"
++            also = "" if back.reason else f"; it fails too (tst={back.tst})"
+             self._fail(117, f"{found}: the last good map is back{also}")
+             return
+         moved = target.relays() != self.pins_live.relays()

@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW29-spaces: parameters keep the spaces before them.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/scpi.cpp b/firmware/src/scpi.cpp
+--- a/firmware/src/scpi.cpp
++++ b/firmware/src/scpi.cpp
+@@ -637,9 +637,6 @@
+     if ( text == nullptr ) {
+         return true;
+     }
+-    while ( chars::isSpace( *text ) ) {
+-        ++text;
+-    }
+     if ( *text == '\0' ) {
+         return true;
+     }

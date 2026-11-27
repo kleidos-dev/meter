@@ -1,0 +1,769 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# The golden transcript of firmware/test/native/test_golden.cpp: every byte the
+# instrument wrote to its sessions. Generated; never edit it by hand
+# (METER_GOLDEN_WRITE=1, test_golden.cpp says how).
+## every query
+> *IDN?
+< KLEIDOS,KLEIDOS-METER,KM-EE529C1B03,0.18.0
+> *ESR?;*ESR?
+< 128;0
+> *ESE 36;*SRE 48
+> *ESE?;*SRE?
+< 36;48
+> *STB?
+< 0
+> *OPC;*OPC?
+< 1
+> *WAI;*ESR?
+< 1
+> *TST?
+< 0
+> *CLS;*ESE 0;*SRE 0
+> SYST:ERR?
+< 0,"No error"
+> SYST:ERR:COUN?
+< 0
+> SYST:ERR:ALL?
+< 0,"No error"
+> SYST:VERS?
+< 1999.0
+> SYST:INF?
+< model=kleidos-meter fw=0.18.0 chip=ina228 addr=0x40 mfg=0x5449 die=0x228 rev=0x1 shunt_uohm=100000 cal_tag=- q=uncal relays=1 bypass_part=relay2click serial=KM-EE529C1B03 image=meter elf=5e1f0ba47c2291d3 pins_src=default pins_table=0x90072FE9
+> SYST:STAT?
+< running=0 sink=idle profile=TRACE period_us=0 pace=timer pace_fallback=0 range=0 samples=0 dropped=0 read_err=0 i_na=0 vbus_uv=0 die_mc=unknown die_age_us=0 flags=0x0000 scl_hz=400000 q=uncal trig=-
+> SYST:HEAL?
+< reset=poweron uptime_us=796575 elf=5e1f0ba47c2291d3 fw=0.18.0 stack_console=2048 stack_sampler=2048 allocs_after_init=0 frees_after_init=0 hold_released=0 errors=0 reset_released=- pins_src=default pins_table=0x90072FE9
+> SYST:LED?
+< blanked=48,38 pixels=4 held=low blanked=48,38 pixels=4 t0h_ns=300 t0l_ns=950 res_us=1000 held=low
+> SYST:COMM:I2C:FREQ?
+< 400000
+> SYST:COMM:I2C:FREQ 137000;:SYST:COMM:I2C:FREQ?
+< 137000
+> SYST:COMM:I2C:FREQ 400000;:SYST:COMM:I2C:FREQ?
+< 400000
+> STAT:OPER?
+< 0
+> STAT:OPER:COND?
+< 0
+> STAT:OPER:ENAB 16;:STAT:OPER:ENAB?
+< 16
+> STAT:QUES?
+< 0
+> STAT:QUES:COND?
+< 256
+> STAT:QUES:ENAB 256;:STAT:QUES:ENAB?
+< 256
+> STAT:QUES:PTR 32767;:STAT:QUES:PTR?
+< 32767
+> STAT:QUES:NTR 256;:STAT:QUES:NTR?
+< 256
+> STAT:OPER:PTR 32767;:STAT:OPER:PTR?
+< 32767
+> STAT:OPER:NTR 16;:STAT:OPER:NTR?
+< 16
+> *SRE 255;*STB?
+< 0
+> STAT:PRES;:STAT:QUES:ENAB?;:STAT:OPER:ENAB?;*SRE 0
+< 0;0
+> SENS:PROF STATE;:SENS:PROF?
+< STATE
+> SENS:PROF:REP?
+< profile=STATE adc_config=0xF140 period_us=1152 vshct_us=1052 avg=1 avg_state=off vbusct_us=50
+> SENS:CURR:RANG?
+< 1.6384
+> SENS:CURR:RANG 0.04;:SENS:CURR:RANG?;:SENS:CURR:RANG:IND?
+< 0.4096;1
+> SENS:CURR:RANG:IND 0;:SENS:CURR:RANG:IND?
+< 0
+> SENS:CURR:RANG:REP?
+< range=0 current_lsb_pa=3125000 ceiling_ma=1638 rstacc=1 discard_us=1152 cnvrf=1 q=uncal
+> SENS:CURR:SHUN?
+< 0.1
+> SENS:CURR:SHUN 0.100116;:SENS:CURR:SHUN?
+< 0.100116
+> SENS:CURR:SHUN:RANG1 0.100144;:SENS:CURR:SHUN:RANG1?;:SENS:CURR:SHUN:RANG0?
+< 0.100144;0.100116
+> SENS:CURR:APER?
+< 0.001052
+> SENS:VOLT:APER?
+< 0.00005
+> SENS:TEMP:APER?
+< 0.00005
+> SENS:AVER:COUN?
+< 1
+> SENS:FUNC:ON "CURR","VOLT","POW","TEMP";:SENS:FUNC:ON?
+< "CURR","VOLT","POW","TEMP"
+> SENS:FUNC:ON:DEF;:SENS:FUNC:ON?
+< "CURR"
+> SENS:CHAR?
+< raw=350 nc_nom=1093750 dur_us=219023 of=0 shunt_uohm=100116 osc_tol_ppm=10000
+> SENS:CHAR:RES;:SENS:CHAR?
+< raw=0 nc_nom=0 dur_us=309 of=0 shunt_uohm=100116 osc_tol_ppm=10000
+> SENS:CAPT?
+< DATA
+> SENS:CAPT STAT;:SENS:CAPT?;:SENS:CAPT DATA
+< STAT
+> SENS:CAPT:LIM?
+< 0
+> SENS:CAPT:LIM ON;:SENS:CAPT:LIM?;:SENS:CAPT:LIM OFF
+< 1
+> SENS:CURR:THR?
+< OFF
+> SENS:CURR:THR 0.002;:SENS:CURR:THR?
+< 0.002
+> SENS:CURR:THR:HYST?
+< 0.0
+> SENS:CURR:THR:HYST 0.0005;:SENS:CURR:THR:HYST?
+< 0.0005
+> SENS:CURR:THR:MARK?
+< 0
+> SENS:CURR:THR:MARK ON;:SENS:CURR:THR:MARK?
+< 1
+> SENS:CURR:THR:MARK OFF;:SENS:CURR:THR OFF;:SENS:CURR:THR?
+< OFF
+> SAMP:TIM?
+< 0.001152
+> SAMP:COUN?
+< 100
+> SAMP:COUN 20;:SAMP:COUN?
+< 20
+> FORM?
+< TEXT
+> FORM CSV;:FORM?;:FORM TEXT
+< CSV
+> TRIG:SOUR?;:TRIG:LEV?;:TRIG:SLOP?;:TRIG:PRET?
+< IMM;0.0;POS;0
+> TRIG:SOUR LEV;:TRIG:LEV -0.0125;:TRIG:SLOP NEG;:TRIG:PRET 1000
+> TRIG:SOUR?;:TRIG:LEV?;:TRIG:SLOP?;:TRIG:PRET?
+< LEV;-0.0125;NEG;1000
+> TRIG:SOUR IMM;:TRIG:LEV 0;:TRIG:SLOP POS;:TRIG:PRET 0
+> CONF?
+< "CURR"
+> CONF:VOLT;:CONF?
+< "VOLT"
+> CONF:POW;:CONF?
+< "POW"
+> CONF:ENER;:CONF?
+< "ENER"
+> CONF:TEMP;:CONF?
+< "TEMP"
+> CONF:CURR;:CONF?
+< "CURR"
+> MEAS:CURR?
+< 0.005000449
+> MEAS:VOLT?
+< 3.899499
+> MEAS:POW?
+< 0.019499
+> MEAS:ENER?
+< 0.00044797
+> MEAS:TEMP?
+< 25.0
+> CONF:CURR
+> READ?
+< 0.005000449
+> READ:CURR?
+< 0.005000449
+> READ:VOLT?
+< 3.899499
+> READ:POW?
+< 0.019499
+> READ:ENER?
+< 0.00044797
+> READ:TEMP?
+< 25.0
+> FETC?
+< 0.005000449
+> FETC:CURR?
+< 0.005000449
+> FETC:VOLT?
+< 3.899499
+> FETC:POW?
+< 0.019499
+> FETC:ENER?
+< 0.00044797
+> FETC:CHAR?
+< 0.000168554
+> FETC:TEMP?
+< 25.0
+> FETC:STAT?
+< samples=20 dropped=0 read_err=0 pace_fallback=0 pace_err_ppm=0 pace_unmet=0 dur_us=22974 mean_na=5000449.000 min_na=5000449 max_na=5000449 die_mc_end=25000 flags=0xC003 charge_raw_start=34787 charge_raw_end=34841 osc_tol_ppm=10000 q=uncal stale_edges=0 sd_na=0.000 max_n=0 max_t_us=24389247 vmin_uv=3899499 vmax_uv=3899499 pmin_uw=19499 pmax_uw=19499 mean_charge_na=4973268.027 charge_us=33892 thr_na=- above_n=- above_us=- rises=- batches=20 batch_samples=1 trig_n=- trig_t_us=- thr_marks=0 rebased=0 hold_teardowns=0
+> FETC:STAT:BATC?
+< batches=20 batch_samples=1 means_na=5000449.000,5000449.000,5000449.000,5000449.000,5000449.000,5000449.000,5000449.000,5000449.000,5000449.000,5000449.000,5000449.000,5000449.000,5000449.000,5000449.000,5000449.000,5000449.000,5000449.000,5000449.000,5000449.000,5000449.000
+> SENS:PROF STATE;:INIT;:FETC:HEAD?
+< fw=0.18.0 chip=ina228 addr=0x40 mfg=0x5449 die=0x228 rev=0x1 config=0x0000 adc_config=0xF140 shunt_cal=4096 range=0 diag_cfg=0xC001 alatch=1 sovl=0x7FF8 suvl=0x8008 mode=0xF vbusct_us=50 vshct_us=1052 vtct_us=50 avg=1 period_us=1152 pace=alert pace_edges=8 pace_expect=8 osc_tol_ppm=10000 shunt_lsb_pv=312500 bus_lsb_pv=195312500 temp_lsb_nc=7812500 current_lsb_pa=3125000 power_lsb_pw=10000000 charge_lsb_pc=3125000 charge_raw_start=38275 shunt_uohm=100116 shunt_measured=1 offset_pv=0 off_die_mc=0 vbus_side=unknown cal_tag=- q=uncal die_mc_start=25000 vs_cur_delta=0 scl_hz=400000 sink=stream ring=0 anchor_every=1024 t0_us=26568161 format=text relays=1 k1=lead:closed k2=bypass:open k3=spare:unwired k4=spare:unwired path=shunt check=- trig_source=imm trig_level_na=- trig_slope=- trig_pre=0 limit=0 avg_state=off pins_src=default
+> TRAC:MARK golden
+< METER_MARK mark=golden n=0 t=26568575
+< METER t=26569247 ch=i_ua v=5000.449
+< METER t=26570399 ch=i_ua v=5000.449
+< METER t=26571551 ch=i_ua v=5000.449
+< METER t=26572703 ch=i_ua v=5000.449
+> ABOR;:FETC:STAT?
+< METER t=26573855 ch=i_ua v=5000.449
+< samples=5 dropped=0 read_err=0 pace_fallback=0 pace_err_ppm=0 pace_unmet=0 dur_us=5694 mean_na=5000449.000 min_na=5000449 max_na=5000449 die_mc_end=25000 flags=0xC003 charge_raw_start=38275 charge_raw_end=38301 osc_tol_ppm=10000 q=uncal stale_edges=0 sd_na=0.000 max_n=0 max_t_us=26569247 vmin_uv=3899499 vmax_uv=3899499 pmin_uw=19499 pmax_uw=19499 mean_charge_na=4885323.862 charge_us=16612 thr_na=- above_n=- above_us=- rises=- batches=5 batch_samples=1 trig_n=- trig_t_us=- thr_marks=0 rebased=0 hold_teardowns=0
+> FETC:STAT:BATC?
+< batches=5 batch_samples=1 means_na=5000449.000,5000449.000,5000449.000,5000449.000,5000449.000
+> FORM CSV;:INIT:FORC
+> TRAC:MARK csv
+< K,0,26626575,csv
+< S,26627247,5000.449,,,
+< S,26628399,5000.449,,,
+< S,26629551,5000.449,,,
+< S,26630703,5000.449,,,
+> ABOR;:FORM TEXT
+< S,26631855,5000.449,,,
+> TRAC:POIN?;:TRAC:POIN:MAX?
+< 0;4096
+> SENS:PROF TRAC;:INIT
+> TRAC:POIN?
+< 4096
+> TRAC:DATA? RAW,0,20
+< #3233METER_DUMP count=20 t0_us=26675262 period_us=280 fmt=raw20
+< A n=0 t=26675690
+< R n=0 c=1602,1602,1602,1602,1602,1602,1602,1602,1602,1602,1602,1602,1602,1602,1602,1602
+< R n=16 c=1602,1602,1602,1602
+< METER_DUMP_END crc32=32830763 bytes=193
+<
+> TRAC:DATA? SCAL,100,5
+< #3295METER_DUMP count=5 t0_us=26675262 period_us=280 ring=4096
+< A n=0 t=26675690
+< METER t=26703262 ch=i_ua v=5000.449
+< METER t=26703542 ch=i_ua v=5000.449
+< METER t=26703822 ch=i_ua v=5000.449
+< METER t=26704102 ch=i_ua v=5000.449
+< METER t=26704382 ch=i_ua v=5000.449
+< METER_DUMP_END crc32=36b3aab0 bytes=255
+<
+> TRAC:DATA? RAW,1020,8
+< #3186METER_DUMP count=8 t0_us=26675262 period_us=280 fmt=raw20
+< A n=0 t=26675690
+< A n=1024 t=26962410
+< R n=1020 c=1602,1602,1602,1602,1602,1602,1602,1602
+< METER_DUMP_END crc32=8082af6b bytes=146
+<
+> TRAC:DATA? SCAL,4090,10
+< #3391METER_DUMP count=6 t0_us=26675262 period_us=280 ring=4096
+< A n=0 t=26675690
+< A n=1024 t=26962410
+< A n=2048 t=27249130
+< A n=3072 t=27535850
+< METER t=27820462 ch=i_ua v=5000.449
+< METER t=27820742 ch=i_ua v=5000.449
+< METER t=27821022 ch=i_ua v=5000.449
+< METER t=27821302 ch=i_ua v=5000.449
+< METER t=27821582 ch=i_ua v=5000.449
+< METER t=27821862 ch=i_ua v=5000.449
+< METER_DUMP_END crc32=557caa76 bytes=351
+<
+> ABOR;:SENS:PROF STATE
+> CAL:DATA?
+< shunt_uohm=100116 shunt_measured=1 off_pv_r0=0 off_pv_r1=0 nulled_r0=0 nulled_r1=0 off_die_mc_r0=0 off_die_mc_r1=0 vbus_side=unknown cal_tag=- shunt_uohm_r0=100116 shunt_uohm_r1=100144 cal_date=-
+> CAL:TAG?
+< ""
+> CAL:TAG "KM-GOLDEN";:CAL:TAG?
+< "KM-GOLDEN"
+> CAL:DATE?
+< 0,0,0
+> CAL:DATE 2026,11,22;:CAL:DATE?
+< 2026,11,22
+> CAL:VBUS?
+< UNKNOWN
+> CAL:VBUS SOUR;:CAL:VBUS?
+< SOURCE
+> CAL:SHUN:REF?
+< 100.0
+> CAL:SHUN:REF 100;:CAL:SHUN:REF?
+< 100.0
+> CAL:ZERO:RES?
+> ROUT:NULL ON
+> CAL:ZERO 1
+> ABOR;:CAL:ZERO:RES?
+< running=0 range=0 offset_pv=625000 sd_pv=0 over_s=1 die_mc=25000 n=868 k1=lead:open k2=bypass:closed k3=spare:unwired k4=spare:unwired path=bypass check=ok stored=1
+> ROUT:NULL OFF
+> CAL:SHUN:RES?
+> SAMP:COUN 200;:CAL:SHUN
+> CAL:SHUN:RES?
+< range=0 r_nohm=0 r_uohm=0 dev_ppm=0 i_na=0 vsh_nv=500000 vref_uv=3900000 ref_uohm=100000000 n=200 die_mc=25000 check=signal_low
+> CAL:DATA?
+< shunt_uohm=100116 shunt_measured=1 off_pv_r0=625000 off_pv_r1=0 nulled_r0=1 nulled_r1=0 off_die_mc_r0=25000 off_die_mc_r1=0 vbus_side=source cal_tag=KM-GOLDEN shunt_uohm_r0=100116 shunt_uohm_r1=100144 cal_date=2026-11-22
+> DIAG:ALER?
+< raw=0xC003 memstat=1 mathof=0 energyof=0 chargeof=0 cnvrf=1
+> DIAG:I2C:SCAN?
+< expected=0x40 found=0x40 n=1
+> DIAG:REG? #H0;:DIAG:REG? #H4;:DIAG:REG? #H3E;:DIAG:REG? #H3F
+< addr=0x00 bytes=2 raw=0x0000;addr=0x04 bytes=3 raw=0x006420;addr=0x3E bytes=2 raw=0x5449;addr=0x3F bytes=2 raw=0x2281
+> DIAG:HEAP?
+< armed=1 allocs_after_init=0 frees_after_init=0 maint_allocs=0 maint_frees=0 free_internal=307200 min_free_internal=286720 largest_internal=204800 free_spiram=4194304 pre_main_allocs=0 pre_main_frees=0 allocs_since_main=0 frees_since_main=0
+> DIAG:WATC?
+< console=1 sampler=1 timeout_s=5 panic=1 stalls=0
+> ROUT:STAT?
+< k1=lead:closed k2=bypass:open k3=spare:unwired k4=spare:unwired path=shunt check=- pads=ok operate_settle_ms=20 release_settle_ms=50 hold_s=- hold_released=0 bypass_part=relay2click relay1_gpio=7 relay1_active=low relay2_gpio=15 relay2_active=high
+> ROUT:RES?
+< k1=lead:closed k2=bypass:open k3=spare:unwired k4=spare:unwired path=shunt check=- moved=k1,k2 settle_us=60125 live=0 marked=0 vs_pv=- hold_s=- q=cal
+> ROUT:BYP ON;:ROUT:STAT?
+< k1=lead:closed k2=bypass:closed k3=spare:unwired k4=spare:unwired path=both check=- pads=ok operate_settle_ms=20 release_settle_ms=50 hold_s=120 hold_released=0 bypass_part=relay2click relay1_gpio=7 relay1_active=low relay2_gpio=15 relay2_active=high
+> ROUT:BYP OFF;:ROUT:RES?
+< k1=lead:closed k2=bypass:open k3=spare:unwired k4=spare:unwired path=shunt check=- moved=k2 settle_us=10024 live=0 marked=0 vs_pv=- hold_s=- q=cal
+> ROUT:LEAD OPEN,FORC;:ROUT:STAT?
+< k1=lead:open k2=bypass:open k3=spare:unwired k4=spare:unwired path=none check=- pads=ok operate_settle_ms=20 release_settle_ms=50 hold_s=120 hold_released=0 bypass_part=relay2click relay1_gpio=7 relay1_active=low relay2_gpio=15 relay2_active=high
+> ROUT:LEAD CLOS;:ROUT:RES?
+< k1=lead:closed k2=bypass:open k3=spare:unwired k4=spare:unwired path=shunt check=- moved=k1 settle_us=50104 live=0 marked=0 vs_pv=- hold_s=- q=cal
+> ROUT:LEAD:CYCL 100,FORC
+> ROUT:RES?
+< k1=lead:closed k2=bypass:open k3=spare:unwired k4=spare:unwired path=shunt check=- moved=k1 settle_us=50104 live=0 marked=0 vs_pv=- hold_s=- q=cal
+> ROUT:REL2 ON;:ROUT:REL2 OFF;:ROUT:RES?
+< k1=lead:closed k2=bypass:open k3=spare:unwired k4=spare:unwired path=shunt check=- moved=k1 settle_us=50104 live=0 marked=0 vs_pv=- hold_s=- q=cal
+> *RST
+> SENS:PROF?;:FORM?;:SAMP:COUN?;:CONF?;:SYST:ERR:ALL?
+< TRACE;TEXT;100;"CURR";-230,"Data corrupt or stale;no null taken since boot",-230,"Data corrupt or stale;no shunt point measured since boot (CALibration:SHUNt)",-114,"Header suffix out of range;k2 is the bypass (use ROUTe:BYPass ON|OFF)",-114,"Header suffix out of range;k2 is the bypass (use ROUTe:BYPass ON|OFF)"
+## errors
+> *CLS;CAL:TAG "a\x7Fb"
+> SYST:ERR?
+< -101,"Invalid character;byte 0x7F is not printable ASCII (program message discarded)"
+> SAMP:COUN 1,,2;:SYST:ERR?
+< -102,"Syntax error;SAMP:COUN"
+> SENS:PROF 7;:SYST:ERR?
+< -104,"Data type error;use SENSe:PROFile TRACe|STATe|SLEep|BURSt"
+> *IDN? 1;:SYST:ERR?
+< -108,"Parameter not allowed;*IDN? takes no parameter"
+> SAMP:COUN;:SYST:ERR?
+< -109,"Missing parameter;use SAMPle:COUNt <n>"
+> BOGUS;:FOO:BAR?;:SYST:ERR:ALL?
+< -113,"Undefined header;BOGUS",-113,"Undefined header;FOO:BAR?"
+> ROUT:REL1 ON;:ROUT:REL5 ON;:SYST:ERR:ALL?
+< -114,"Header suffix out of range;k1 is the lead (use ROUTe:LEAD OPEN|CLOSe)",-114,"Header suffix out of range;use ROUTe:RELay3|RELay4 ON|OFF[,LIVE]"
+> SAMP:COUN 1x;:SYST:ERR?
+< -120,"Numeric data error;use SAMPle:COUNt <n>"
+> CAL:TAG "open;:SYST:ERR?
+> SYST:ERR?
+< -150,"String data error;CAL:TAG"
+> SAMP:COUN 0;:SYST:ERR?
+< -222,"Data out of range;use SAMPle:COUNt <1..1000000>"
+> SENS:PROF FAST;:SYST:ERR?
+< -224,"Illegal parameter value;use SENSe:PROFile TRACe|STATe|SLEep|BURSt"
+> *RST;FETC:STAT?;:SYST:ERR?
+< -230,"Data corrupt or stale;no capture closed since boot"
+> ROUT:REL3 ON;:SYST:ERR?
+< -241,"Hardware missing;k3 is not wired on this rig (docs/rig-wiring.md)"
+> SENS:PROF STATE;:INIT;:SENS:PROF SLEEP;:SYST:ERR?
+< -221,"Settings conflict;capture running (ABORt first)"
+< METER t=409247 ch=i_ua v=5006.250
+< METER t=410399 ch=i_ua v=5006.250
+< METER t=411551 ch=i_ua v=5006.250
+< METER t=412703 ch=i_ua v=5006.250
+> ABOR;:ABOR;:SYST:ERR?
+< METER t=413855 ch=i_ua v=5006.250
+< METER t=415007 ch=i_ua v=5006.250
+< METER t=416159 ch=i_ua v=5006.250
+< 111,"Not running;no capture or null window is open"
+> SYST:COMM:I2C:FREQ 50000;:SENS:PROF TRAC;:INIT;:SYST:ERR:ALL?
+< -221,"Settings conflict;TRACE needs a faster bus (a 280 us period needs a read under 140 us; it is 760 us at 50000 Hz)"
+> SYST:COMM:I2C:FREQ 400000;:SENS:PROF STATE
+! the bus's core refuses its IPC call
+> SYST:COMM:I2C:FREQ 400000;:SYST:ERR?
+< -240,"Hardware error;i2c ESP_ERR_INVALID_STATE"
+! the bus's core takes its IPC calls again
+> SYST:ERR?
+< 0,"No error"
+! a 300-byte program message
+> SYST:ERR:ALL?
+< -363,"Input buffer overrun;program message longer than 255 bytes"
+> NOPE;NOPE;NOPE;NOPE;NOPE;NOPE;NOPE;NOPE;NOPE;NOPE;NOPE;NOPE
+> SYST:ERR:ALL?
+< -113,"Undefined header;NOPE",-113,"Undefined header;NOPE",-113,"Undefined header;NOPE",-113,"Undefined header;NOPE",-113,"Undefined header;NOPE",-113,"Undefined header;NOPE",-113,"Undefined header;NOPE",-113,"Undefined header;NOPE",-113,"Undefined header;NOPE",-350,"Queue overflow"
+! the flash refuses to program
+> CAL:TAG unsaved;:SYST:ERR?
+< 106,"Calibration not saved;calibration write failed (live until reboot)"
+! the flash programs again
+> SYST:ERR?
+< 0,"No error"
+> ROUT:BYP ON
+> INIT;:SYST:ERR?
+< 101,"Shunt bypassed;shunt bypassed (path=both: ROUTe:BYPass OFF, or INITiate:FORCe)"
+> ROUT:BYP OFF
+> ROUT:LEAD OPEN;:SYST:ERR?
+< 109,"Order disconnects the DUT;order disconnects the dut (k1 open, k2 open: add FORCe)"
+> SENS:PROF STATE;:INIT
+< METER t=2319247 ch=i_ua v=5006.250
+< METER t=2320399 ch=i_ua v=5006.250
+< METER t=2321551 ch=i_ua v=5006.250
+> TRAC:MARK m1;:TRAC:MARK m2;:TRAC:MARK m3;:TRAC:MARK m4;:TRAC:MARK m5;:TRAC:MARK m6
+< METER t=2322703 ch=i_ua v=5006.250
+< METER t=2323855 ch=i_ua v=5006.250
+< METER t=2325007 ch=i_ua v=5006.250
+< METER_MARK mark=m1 n=6 t=2326575
+< METER_MARK mark=m2 n=6 t=2326576
+< METER_MARK mark=m3 n=6 t=2326577
+< METER_MARK mark=m4 n=6 t=2326578
+< METER_MARK mark=m5 n=6 t=2326579
+< METER_MARK mark=m6 n=6 t=2326580
+< METER t=2326159 ch=i_ua v=5006.250
+< METER t=2327311 ch=i_ua v=5006.250
+< METER t=2328463 ch=i_ua v=5006.250
+< METER t=2329615 ch=i_ua v=5006.250
+< METER t=2330767 ch=i_ua v=5006.250
+< METER t=2331919 ch=i_ua v=5006.250
+< METER t=2333071 ch=i_ua v=5006.250
+< METER t=2334223 ch=i_ua v=5006.250
+< METER t=2335375 ch=i_ua v=5006.250
+< METER t=2336527 ch=i_ua v=5006.250
+< METER t=2337679 ch=i_ua v=5006.250
+< METER t=2338831 ch=i_ua v=5006.250
+< METER t=2339983 ch=i_ua v=5006.250
+< METER t=2341135 ch=i_ua v=5006.250
+> TRAC:MARK m7;:TRAC:MARK m8;:TRAC:MARK m9;:TRAC:MARK m10;:TRAC:MARK m11;:TRAC:MARK m12
+< METER t=2342287 ch=i_ua v=5006.250
+< METER t=2343439 ch=i_ua v=5006.250
+< METER t=2344591 ch=i_ua v=5006.250
+< METER t=2345743 ch=i_ua v=5006.250
+< METER_MARK mark=m7 n=24 t=2346575
+< METER_MARK mark=m8 n=24 t=2346576
+< METER_MARK mark=m9 n=24 t=2346577
+< METER_MARK mark=m10 n=24 t=2346578
+< METER_MARK mark=m11 n=24 t=2346579
+< METER_MARK mark=m12 n=24 t=2346580
+< METER t=2346895 ch=i_ua v=5006.250
+< METER t=2348047 ch=i_ua v=5006.250
+< METER t=2349199 ch=i_ua v=5006.250
+< METER t=2350351 ch=i_ua v=5006.250
+< METER t=2351503 ch=i_ua v=5006.250
+< METER t=2352655 ch=i_ua v=5006.250
+< METER t=2353807 ch=i_ua v=5006.250
+< METER t=2354959 ch=i_ua v=5006.250
+< METER t=2356111 ch=i_ua v=5006.250
+< METER t=2357263 ch=i_ua v=5006.250
+< METER t=2358415 ch=i_ua v=5006.250
+< METER t=2359567 ch=i_ua v=5006.250
+< METER t=2360719 ch=i_ua v=5006.250
+> TRAC:MARK m13;:TRAC:MARK m14;:TRAC:MARK m15;:TRAC:MARK m16;:TRAC:MARK m17
+< METER t=2361871 ch=i_ua v=5006.250
+< METER t=2363023 ch=i_ua v=5006.250
+< METER t=2364175 ch=i_ua v=5006.250
+< METER t=2365327 ch=i_ua v=5006.250
+< METER_MARK mark=m13 n=41 t=2366575
+< METER_MARK mark=m14 n=41 t=2366576
+< METER_MARK mark=m15 n=41 t=2366577
+< METER_MARK mark=m16 n=41 t=2366578
+< METER t=2366479 ch=i_ua v=5006.250
+< METER t=2367631 ch=i_ua v=5006.250
+< METER t=2368783 ch=i_ua v=5006.250
+< METER t=2369935 ch=i_ua v=5006.250
+< METER t=2371087 ch=i_ua v=5006.250
+< METER t=2372239 ch=i_ua v=5006.250
+< METER t=2373391 ch=i_ua v=5006.250
+< METER t=2374543 ch=i_ua v=5006.250
+< METER t=2375695 ch=i_ua v=5006.250
+< METER t=2376847 ch=i_ua v=5006.250
+< METER t=2377999 ch=i_ua v=5006.250
+< METER t=2379151 ch=i_ua v=5006.250
+< METER t=2380303 ch=i_ua v=5006.250
+> ROUT:BYP ON;:SYST:ERR:ALL?
+< 105,"Marks full;marks full (16)",-221,"Settings conflict;capture running (ABORt first, or add LIVE)"
+< METER t=2381455 ch=i_ua v=5006.250
+< METER t=2382607 ch=i_ua v=5006.250
+< METER t=2383759 ch=i_ua v=5006.250
+< METER t=2384911 ch=i_ua v=5006.250
+< METER t=2386063 ch=i_ua v=5006.250
+< METER t=2387215 ch=i_ua v=5006.250
+< METER t=2388367 ch=i_ua v=5006.250
+< METER t=2389519 ch=i_ua v=5006.250
+< METER t=2390671 ch=i_ua v=5006.250
+< METER t=2391823 ch=i_ua v=5006.250
+< METER t=2392975 ch=i_ua v=5006.250
+< METER t=2394127 ch=i_ua v=5006.250
+< METER t=2395279 ch=i_ua v=5006.250
+< METER t=2396431 ch=i_ua v=5006.250
+< METER t=2397583 ch=i_ua v=5006.250
+< METER t=2398735 ch=i_ua v=5006.250
+< METER t=2399887 ch=i_ua v=5006.250
+< METER t=2401039 ch=i_ua v=5006.250
+< METER t=2402191 ch=i_ua v=5006.250
+< METER t=2403343 ch=i_ua v=5006.250
+< METER t=2404495 ch=i_ua v=5006.250
+< METER t=2405647 ch=i_ua v=5006.250
+< METER t=2406799 ch=i_ua v=5006.250
+< METER t=2407951 ch=i_ua v=5006.250
+< METER t=2409103 ch=i_ua v=5006.250
+< METER t=2410255 ch=i_ua v=5006.250
+< METER t=2411407 ch=i_ua v=5006.250
+< METER t=2412559 ch=i_ua v=5006.250
+< METER t=2413711 ch=i_ua v=5006.250
+< METER t=2414863 ch=i_ua v=5006.250
+< METER t=2416015 ch=i_ua v=5006.250
+< METER t=2417167 ch=i_ua v=5006.250
+< METER t=2418319 ch=i_ua v=5006.250
+< METER t=2419471 ch=i_ua v=5006.250
+< METER t=2420623 ch=i_ua v=5006.250
+< METER t=2421775 ch=i_ua v=5006.250
+< METER t=2422927 ch=i_ua v=5006.250
+< METER t=2424079 ch=i_ua v=5006.250
+< METER t=2425231 ch=i_ua v=5006.250
+< METER t=2426383 ch=i_ua v=5006.250
+< METER t=2427535 ch=i_ua v=5006.250
+< METER t=2428687 ch=i_ua v=5006.250
+< METER t=2429839 ch=i_ua v=5006.250
+< METER t=2430991 ch=i_ua v=5006.250
+> ABOR;:SYST:ERR:ALL?
+< METER t=2432143 ch=i_ua v=5006.250
+< METER t=2433295 ch=i_ua v=5006.250
+< METER t=2434447 ch=i_ua v=5006.250
+< METER t=2435599 ch=i_ua v=5006.250
+< 0,"No error"
+> SENS:PROF SLEEP;:CAL:ZERO 5;:ROUT:BYP ON;:SYST:ERR?
+> ABOR
+> ROUT:NULL ON;:SYST:ERR:ALL?
+< 112,"Null window running;null window running (ABORt first)"
+< 108,"Null took no samples;the null window took no samples"
+! the hold's 120 s run out
+> SYST:ERR:ALL?
+< 113,"Null path released;the hold released the null path after 120 s (ROUTe:NULLpath ON again)"
+> ROUT:LEAD OPEN,FORC
+! the hold's 120 s run out
+> SYST:ERR:ALL?
+< 114,"Lead reclosed;the hold reclosed the lead after 120 s (ROUTe:LEAD OPEN again)"
+> ROUT:BYP ON
+! the hold's 120 s run out
+> SYST:ERR:ALL?;:ROUT:STAT?
+< 115,"Bypass opened;the hold opened the bypass after 120 s (ROUTe:BYPass ON again)";k1=lead:closed k2=bypass:open k3=spare:unwired k4=spare:unwired path=shunt check=- pads=ok operate_settle_ms=20 release_settle_ms=50 hold_s=- hold_released=3 bypass_part=relay2click relay1_gpio=7 relay1_active=low relay2_gpio=15 relay2_active=high
+## a level trigger
+> SYST:COMM:I2C:FREQ 1000000;:SENS:PROF TRAC;:TRIG:SOUR LEV;:TRIG:LEV 0.05;:TRIG:PRET 1000;:INIT
+> FETC:HEAD?;:SYST:STAT?
+< fw=0.18.0 chip=ina228 addr=0x40 mfg=0x5449 die=0x228 rev=0x1 config=0x0000 adc_config=0xA0C0 shunt_cal=4096 range=0 diag_cfg=0xC001 alatch=1 sovl=0x7FF8 suvl=0x8008 mode=0xA vbusct_us=0 vshct_us=280 vtct_us=0 avg=1 period_us=280 pace=timer pace_edges=0 pace_expect=0 osc_tol_ppm=10000 shunt_lsb_pv=312500 bus_lsb_pv=195312500 temp_lsb_nc=7812500 current_lsb_pa=3125000 power_lsb_pw=10000000 charge_lsb_pc=3125000 charge_raw_start=4 shunt_uohm=100000 shunt_measured=0 offset_pv=0 off_die_mc=0 vbus_side=unknown cal_tag=- q=uncal die_mc_start=25000 vs_cur_delta=0 scl_hz=1000000 sink=ring ring=4096 anchor_every=1024 t0_us=18419 format=text relays=1 k1=lead:closed k2=bypass:open k3=spare:unwired k4=spare:unwired path=shunt check=- trig_source=level trig_level_na=50000000 trig_slope=pos trig_pre=1000 limit=0 avg_state=off pins_src=default;running=1 sink=ring profile=TRACE period_us=280 pace=timer pace_fallback=0 range=0 samples=28 dropped=0 read_err=0 i_na=1006250 vbus_uv=0 die_mc=25000 die_age_us=8281 flags=0x0000 scl_hz=1000000 q=uncal trig=armed
+! the burst at 2 s and the samples after it
+> SYST:STAT?;:TRAC:POIN?
+< running=0 sink=ring profile=TRACE period_us=0 pace=timer pace_fallback=0 range=0 samples=10172 dropped=0 read_err=0 i_na=1006250 vbus_uv=0 die_mc=25000 die_age_us=3128281 flags=0x0000 scl_hz=1000000 q=uncal trig=fired;4096
+> TRAC:DATA? RAW,0,24
+< #3237METER_DUMP count=24 t0_us=18419 period_us=280 fmt=raw20 first=6076 trig_n=7076
+< R n=6076 c=322,322,322,322,322,322,322,322,322,322,322,322,322,322,322,322
+< R n=6092 c=322,322,322,322,322,322,322,322
+< METER_DUMP_END crc32=3f67107f bytes=197
+<
+> TRAC:DATA? SCAL,0,4
+< #3258METER_DUMP count=4 t0_us=18419 period_us=280 ring=4096 first=6076 trig_n=7076
+< METER t=1719699 ch=i_ua v=1006.250
+< METER t=1719979 ch=i_ua v=1006.250
+< METER t=1720259 ch=i_ua v=1006.250
+< METER t=1720539 ch=i_ua v=1006.250
+< METER_DUMP_END crc32=6529c17e bytes=218
+<
+> ABOR;:FETC:STAT?
+< samples=10172 dropped=0 read_err=0 pace_fallback=0 pace_err_ppm=0 pace_unmet=0 dur_us=2848221 mean_na=1045180.397 min_na=1006250 max_na=100006250 die_mc_end=25000 flags=0xC003 charge_raw_start=4 charge_raw_end=1203 osc_tol_ppm=10000 q=uncal stale_edges=0 sd_na=1962896.875 max_n=7076 max_t_us=2000040 vmin_uv=- vmax_uv=- pmin_uw=- pmax_uw=- mean_charge_na=999612.360 charge_us=3748328 thr_na=- above_n=- above_us=- rises=- batches=39 batch_samples=256 trig_n=7076 trig_t_us=2000040 thr_marks=0 rebased=0 hold_teardowns=0
+## threshold marks
+> SENS:CURR:THR 0.04;:SENS:CURR:THR:MARK ON;:SENS:PROF STAT;:INIT
+< METER t=29247 ch=i_ua v=2006.250
+< METER t=30399 ch=i_ua v=2006.250
+< METER t=31551 ch=i_ua v=2006.250
+< METER t=32703 ch=i_ua v=2006.250
+< METER t=33855 ch=i_ua v=2006.250
+< METER t=35007 ch=i_ua v=2006.250
+< METER t=36159 ch=i_ua v=2006.250
+< METER t=37311 ch=i_ua v=2006.250
+< METER t=38463 ch=i_ua v=2006.250
+< METER t=39615 ch=i_ua v=2006.250
+< METER t=40767 ch=i_ua v=80006.250
+< METER_MARK mark=thr_rise n=10 t=40767
+< METER t=41919 ch=i_ua v=80006.250
+< METER t=43071 ch=i_ua v=80006.250
+< METER t=44223 ch=i_ua v=80006.250
+< METER t=45375 ch=i_ua v=2006.250
+< METER_MARK mark=thr_fall n=14 t=45375
+< METER t=46527 ch=i_ua v=2006.250
+< METER t=47679 ch=i_ua v=2006.250
+< METER t=48831 ch=i_ua v=2006.250
+< METER t=49983 ch=i_ua v=2006.250
+< METER t=51135 ch=i_ua v=2006.250
+< METER t=52287 ch=i_ua v=2006.250
+< METER t=53439 ch=i_ua v=2006.250
+< METER t=54591 ch=i_ua v=2006.250
+< METER t=55743 ch=i_ua v=2006.250
+< METER t=56895 ch=i_ua v=2006.250
+< METER t=58047 ch=i_ua v=2006.250
+< METER t=59199 ch=i_ua v=2006.250
+< METER t=60351 ch=i_ua v=80006.250
+< METER_MARK mark=thr_rise n=27 t=60351
+< METER t=61503 ch=i_ua v=80006.250
+< METER t=62655 ch=i_ua v=80006.250
+< METER t=63807 ch=i_ua v=80006.250
+< METER t=64959 ch=i_ua v=2006.250
+< METER_MARK mark=thr_fall n=31 t=64959
+< METER t=66111 ch=i_ua v=2006.250
+< METER t=67263 ch=i_ua v=2006.250
+< METER t=68415 ch=i_ua v=2006.250
+< METER t=69567 ch=i_ua v=2006.250
+< METER t=70719 ch=i_ua v=2006.250
+< METER t=71871 ch=i_ua v=2006.250
+> ABOR;:FETC:STAT?
+< METER t=73023 ch=i_ua v=2006.250
+< METER t=74175 ch=i_ua v=2006.250
+< METER t=75327 ch=i_ua v=2006.250
+< METER t=76479 ch=i_ua v=2006.250
+< samples=42 dropped=0 read_err=0 pace_fallback=0 pace_err_ppm=0 pace_unmet=0 dur_us=48318 mean_na=16863392.857 min_na=2006250 max_na=80006250 die_mc_end=25000 flags=0xC003 charge_raw_start=8 charge_raw_end=46 osc_tol_ppm=10000 q=uncal stale_edges=0 sd_na=31000053.125 max_n=10 max_t_us=40767 vmin_uv=3891999 vmax_uv=3899799 pmin_uw=7823 pmax_uw=311384 mean_charge_na=2026035.624 charge_us=58612 thr_na=40000000 above_n=8 above_us=9216 rises=2 batches=42 batch_samples=1 trig_n=- trig_t_us=- thr_marks=4 rebased=0 hold_teardowns=0
+> FORM CSV;:INIT
+< S,139247,2006.250,,,
+< S,140399,80006.250,,,
+< K,1,140399,thr_rise
+< S,141551,80006.250,,,
+< S,142703,80006.250,,,
+< S,143855,80006.250,,,
+< S,145007,2006.250,,,
+< K,5,145007,thr_fall
+< S,146159,2006.250,,,
+< S,147311,2006.250,,,
+< S,148463,2006.250,,,
+< S,149615,2006.250,,,
+< S,150767,2006.250,,,
+< S,151919,2006.250,,,
+< S,153071,2006.250,,,
+< S,154223,2006.250,,,
+< S,155375,2006.250,,,
+< S,156527,2006.250,,,
+< S,157679,2006.250,,,
+< S,158831,2006.250,,,
+< S,159983,80006.250,,,
+< K,18,159983,thr_rise
+< S,161135,80006.250,,,
+< S,162287,80006.250,,,
+< S,163439,80006.250,,,
+< S,164591,80006.250,,,
+< S,165743,2006.250,,,
+< K,23,165743,thr_fall
+< S,166895,2006.250,,,
+< S,168047,2006.250,,,
+< S,169199,2006.250,,,
+< S,170351,2006.250,,,
+< S,171503,2006.250,,,
+< S,172655,2006.250,,,
+< S,173807,2006.250,,,
+< S,174959,2006.250,,,
+< S,176111,2006.250,,,
+< S,177263,2006.250,,,
+< S,178415,2006.250,,,
+< S,179567,2006.250,,,
+< S,180719,80006.250,,,
+< K,36,180719,thr_rise
+< S,181871,80006.250,,,
+> ABOR;:FETC:STAT?
+< S,183023,80006.250,,,
+< S,184175,80006.250,,,
+< S,185327,2006.250,,,
+< K,40,185327,thr_fall
+< S,186479,2006.250,,,
+< samples=42 dropped=0 read_err=0 pace_fallback=0 pace_err_ppm=0 pace_unmet=0 dur_us=48318 mean_na=26149107.142 min_na=2006250 max_na=80006250 die_mc_end=25000 flags=0xC003 charge_raw_start=79 charge_raw_end=116 osc_tol_ppm=10000 q=uncal stale_edges=0 sd_na=36496287.500 max_n=1 max_t_us=140399 vmin_uv=3891999 vmax_uv=3899799 pmin_uw=7823 pmax_uw=311384 mean_charge_na=1972718.897 charge_us=58612 thr_na=40000000 above_n=13 above_us=14976 rises=3 batches=42 batch_samples=1 trig_n=- trig_t_us=- thr_marks=6 rebased=0 hold_teardowns=0
+## no INA228
+> SYST:ERR:ALL?
+< -241,"Hardware missing;no device (scan found none)"
+> *TST?;:SYST:INF?
+< 1;model=kleidos-meter fw=0.18.0 chip=none addr=0x40 mfg=0x0000 die=0x000 rev=0x0 shunt_uohm=100000 cal_tag=- q=uncal relays=1 bypass_part=relay2click serial=KM-EE529C1B03 image=meter elf=5e1f0ba47c2291d3 pins_src=default pins_table=0x90072FE9
+> SENS:PROF STATE;:MEAS:CURR?;:SYST:ERR:ALL?
+< -241,"Hardware missing;no device (scan found none)",-241,"Hardware missing;no device (scan found none)"
+## a sampler and relays that did not start
+> SYST:ERR:ALL?
+< 107,"Sampler not running;sampler engine failed to start (reboot)",100,"Relays unavailable;relays unavailable (gpio config failed at boot)"
+> *TST?
+< 6
+> ROUT:STAT?;:ROUT:RES?;:ROUT:REL2 ON;:SENS:PROF STATE;:INIT;:SYST:ERR:ALL?
+< 100,"Relays unavailable;relays unavailable (gpio config failed at boot)",100,"Relays unavailable;relays unavailable (gpio config failed at boot)",-114,"Header suffix out of range;k2 is the bypass (use ROUTe:BYPass ON|OFF)",107,"Sampler not running;sampler engine failed to start (reboot)"
+## a lead that does not open
+> ROUT:NULL ON;:SYST:ERR:ALL?
+< 104,"Lead check failed;lead check failed (the shunt still conducts: vs_pv=500625000,200625000,200625000; released to path=shunt)"
+> ROUT:BYP ON;:ROUT:LEAD OPEN
+> SENS:PROF SLEEP;:CAL:ZERO 1
+> ABOR;:SYST:ERR:ALL?;:CAL:ZERO:RES?
+< 102,"Null not stored;null not stored (a relay null beyond 50 uV: k1 may not have opened; the stored null stands)";running=0 range=0 offset_pv=200625000 sd_pv=0 over_s=1 die_mc=25000 n=14 k1=lead:open k2=bypass:closed k3=spare:unwired k4=spare:unwired path=bypass check=- stored=0
+> ROUT:NULL OFF
+> CAL:ZERO 10;:ABOR;:SYST:ERR:ALL?
+< 108,"Null took no samples;the null window took no samples"
+## a bypass that does not close
+> ROUT:NULL ON;:SYST:ERR:ALL?;:ROUT:STAT?
+< 103,"Bypass check failed;bypass check failed (k2 took no current: vs_pv=500625000,500625000; released to path=shunt)";k1=lead:closed k2=bypass:open k3=spare:unwired k4=spare:unwired path=shunt check=- pads=ok operate_settle_ms=20 release_settle_ms=50 hold_s=- hold_released=0 bypass_part=relay2click relay1_gpio=7 relay1_active=low relay2_gpio=15 relay2_active=high
+## a warm boot that released K1 and K2
+> SYST:ERR:ALL?
+< 116,"Relays released by reset;a reset (task_wdt) released k1,k2 (path=bypass); the dut is back on its shunt"
+> SYST:HEAL?;:ROUT:STAT?
+< reset=task_wdt uptime_us=36575 elf=5e1f0ba47c2291d3 fw=0.18.0 stack_console=2048 stack_sampler=2048 allocs_after_init=0 frees_after_init=0 hold_released=0 errors=0 reset_released=k1,k2 pins_src=default pins_table=0x90072FE9;k1=lead:closed k2=bypass:open k3=spare:unwired k4=spare:unwired path=shunt check=- pads=ok operate_settle_ms=20 release_settle_ms=50 hold_s=- hold_released=0 bypass_part=relay2click relay1_gpio=7 relay1_active=low relay2_gpio=15 relay2_active=high
+## the pin map
+> SYST:PINS?
+< sda=4 scl=5 alert=6 addr=auto scl_hz=400000 pull_sda=up pull_scl=up pull_alert=up relay1=7 relay1_active=low relay2=15 relay2_active=high src=default verified=1 table=0x90072FE9
+> SYST:PINS:PEND?
+< sda=4 scl=5 alert=6 addr=auto scl_hz=400000 pull_sda=up pull_scl=up pull_alert=up relay1=7 relay1_active=low relay2=15 relay2_active=high valid=1 problem=- at=-
+> SYST:PINS:STAG SDA,45;:SYST:PINS:PEND?
+< sda=45 scl=5 alert=6 addr=auto scl_hz=400000 pull_sda=up pull_scl=up pull_alert=up relay1=7 relay1_active=low relay2=15 relay2_active=high valid=0 problem=reserved at=sda
+> SYST:PINS:CLE;:SYST:PINS:STAG SDA,5;:SYST:PINS:PEND?
+< sda=5 scl=5 alert=6 addr=auto scl_hz=400000 pull_sda=up pull_scl=up pull_alert=up relay1=7 relay1_active=low relay2=15 relay2_active=high valid=0 problem=shared at=scl
+> SYST:PINS:CLE;:SYST:PINS:STAG ALER,39;:SYST:PINS:PEND?
+< sda=4 scl=5 alert=39 addr=auto scl_hz=400000 pull_sda=up pull_scl=up pull_alert=up relay1=7 relay1_active=low relay2=15 relay2_active=high valid=0 problem=too_high at=alert
+> SYST:PINS:CLE;:SYST:PINS:STAG REL2,16,LOW;:SYST:PINS:ADDR #H41;:SYST:PINS:PEND?
+< sda=4 scl=5 alert=6 addr=0x41 scl_hz=400000 pull_sda=up pull_scl=up pull_alert=up relay1=7 relay1_active=low relay2=16 relay2_active=low valid=1 problem=- at=-
+> SYST:PINS:CLE;:SYST:PINS:RES?
+< result=none reason=- mfg=- die=- tst=- saved=0
+> SYST:PINS:STAG SDA,64;:SYST:PINS:ADDR 0;:SYST:ERR:ALL?
+< -222,"Data out of range;use SYSTem:PINS:STAGe SDA|SCL|ALERt|RELay1|RELay2,<gpio>|NONE[,HIGH|LOW|UP|OFF]",-222,"Data out of range;use SYSTem:PINS:ADDRess AUTO|<1..255> (the INA228 answers at #H40..#H4F)"
+> SYST:PINS:STAG SDA,18;:SYST:PINS:APPL;:SYST:ERR:ALL?;:SYST:PINS:RES?
+< 117,"Pin map reverted;the INA228 did not answer on sda=18 scl=5 addr=auto: the last good map is back";result=reverted reason=no_chip mfg=- die=- tst=1 saved=0
+> SYST:PINS:STAG SDA,45;:SYST:PINS:APPL;:SYST:ERR:ALL?;:SYST:PINS:RES?
+< -221,"Settings conflict;the staged map breaks a rule: reserved at sda (SYSTem:PINS:PENDing?)";result=refused reason=invalid mfg=- die=- tst=- saved=0
+> SYST:PINS:CLE;:SYST:PINS:CLOC 100000;:SYST:PINS:APPL;:SYST:PINS:RES?;:SYST:PINS?
+< result=ok reason=- mfg=0x5449 die=0x228 tst=0 saved=1;sda=4 scl=5 alert=6 addr=auto scl_hz=100000 pull_sda=up pull_scl=up pull_alert=up relay1=7 relay1_active=low relay2=15 relay2_active=high src=stored verified=1 table=0x90072FE9
+> SYST:PINS:DEF;:SYST:PINS:RES?;:SYST:PINS?;:SYST:ERR:ALL?
+< result=ok reason=- mfg=0x5449 die=0x228 tst=0 saved=1;sda=4 scl=5 alert=6 addr=auto scl_hz=400000 pull_sda=up pull_scl=up pull_alert=up relay1=7 relay1_active=low relay2=15 relay2_active=high src=default verified=1 table=0x90072FE9;0,"No error"
+> SENS:AVER?;:SENS:AVER:COUN 4;:SENS:CURR:APER 0.00028;:SENS:PROF:REP?;:SYST:ERR:ALL?
+< 0;profile=TRACE adc_config=0xA0C0 period_us=280 vshct_us=280 avg=1 avg_state=off vbusct_us=0;0,"No error"
+> SENS:AVER ON;:SENS:PROF:REP?;:SENS:AVER:COUN 1024;:SENS:CURR:APER 0.002074;:SYST:ERR:ALL?
+< profile=TRACE adc_config=0xA0C1 period_us=1120 vshct_us=280 avg=4 avg_state=on vbusct_us=0;-221,"Settings conflict;averaging 1024 x 280 us gives 286720 us a sample, over the 200000 us its pacing allows"
+> SENS:PROF BURS;:SENS:AVER ON;:SENS:PROF STAT;:SENS:AVER:COUN 4;:SENS:AVER ON;:SYST:ERR:ALL?
+< -221,"Settings conflict;BURSt has no averaging override: its 50 us conversion is its definition"
+> INIT
+< METER t=6302655 ch=i_ua v=50006.250
+< METER t=6307263 ch=i_ua v=50006.250
+< METER t=6311871 ch=i_ua v=50006.250
+< METER t=6316479 ch=i_ua v=50006.250
+< METER t=6321087 ch=i_ua v=50006.250
+< METER t=6325695 ch=i_ua v=50006.250
+< METER t=6330303 ch=i_ua v=50006.250
+< METER t=6334911 ch=i_ua v=50006.250
+< METER t=6339519 ch=i_ua v=50006.250
+< METER t=6344127 ch=i_ua v=50006.250
+< METER t=6348735 ch=i_ua v=50006.250
+< METER t=6353343 ch=i_ua v=50006.250
+< METER t=6357951 ch=i_ua v=50006.250
+< METER t=6362559 ch=i_ua v=50006.250
+< METER t=6367167 ch=i_ua v=50006.250
+< METER t=6371775 ch=i_ua v=50006.250
+< METER t=6376383 ch=i_ua v=50006.250
+< METER t=6380991 ch=i_ua v=50006.250
+< METER t=6385599 ch=i_ua v=50006.250
+< METER t=6390207 ch=i_ua v=50006.250
+< METER t=6394815 ch=i_ua v=50006.250
+< METER t=6399423 ch=i_ua v=50006.250
+< METER t=6404031 ch=i_ua v=50006.250
+< METER t=6408639 ch=i_ua v=50006.250
+< METER t=6413247 ch=i_ua v=50006.250
+< METER t=6417855 ch=i_ua v=50006.250
+< METER t=6422463 ch=i_ua v=50006.250
+< METER t=6427071 ch=i_ua v=50006.250
+< METER t=6431679 ch=i_ua v=50006.250
+< METER t=6436287 ch=i_ua v=50006.250
+< METER t=6440895 ch=i_ua v=50006.250
+< METER t=6445503 ch=i_ua v=50006.250
+< METER t=6450111 ch=i_ua v=50006.250
+< METER t=6454719 ch=i_ua v=50006.250
+> ABOR;:FETC:HEAD?
+< fw=0.18.0 chip=ina228 addr=0x40 mfg=0x5449 die=0x228 rev=0x1 config=0x0000 adc_config=0xF141 shunt_cal=4096 range=0 diag_cfg=0xC001 alatch=1 sovl=0x7FF8 suvl=0x8008 mode=0xF vbusct_us=50 vshct_us=1052 vtct_us=50 avg=4 period_us=4608 pace=alert pace_edges=8 pace_expect=8 osc_tol_ppm=10000 shunt_lsb_pv=312500 bus_lsb_pv=195312500 temp_lsb_nc=7812500 current_lsb_pa=3125000 power_lsb_pw=10000000 charge_lsb_pc=3125000 charge_raw_start=33039 shunt_uohm=100000 shunt_measured=0 offset_pv=0 off_die_mc=0 vbus_side=unknown cal_tag=- q=uncal die_mc_start=25000 vs_cur_delta=0 scl_hz=400000 sink=stream ring=0 anchor_every=1024 t0_us=6299265 format=text relays=1 k1=lead:closed k2=bypass:open k3=spare:unwired k4=spare:unwired path=shunt check=- trig_source=imm trig_level_na=- trig_slope=- trig_pre=0 limit=0 avg_state=on pins_src=default
+> SENS:AVER OFF;:SENS:PROF:REP?;:SYST:ERR:ALL?
+< profile=STATE adc_config=0xF140 period_us=1152 vshct_us=1052 avg=1 avg_state=off vbusct_us=50;0,"No error"
+## a stored bus that falls back
+> SYST:ERR:ALL?
+< 117,"Pin map reverted;the stored bus (sda=18 scl=21 addr=auto) did not answer: the default bus is back (the record is kept)"
+> SYST:PINS?;:SYST:PINS:PEND?
+< sda=4 scl=5 alert=6 addr=auto scl_hz=400000 pull_sda=up pull_scl=up pull_alert=up relay1=10 relay1_active=low relay2=15 relay2_active=high src=fallback verified=0 table=0x90072FE9;sda=4 scl=5 alert=6 addr=auto scl_hz=400000 pull_sda=up pull_scl=up pull_alert=up relay1=10 relay1_active=low relay2=15 relay2_active=high valid=1 problem=- at=-
+> SYST:INF?;:ROUT:STAT?
+< model=kleidos-meter fw=0.18.0 chip=ina228 addr=0x40 mfg=0x5449 die=0x228 rev=0x1 shunt_uohm=100000 cal_tag=- q=uncal relays=1 bypass_part=relay2click serial=KM-EE529C1B03 image=meter elf=5e1f0ba47c2291d3 pins_src=fallback pins_table=0x90072FE9;k1=lead:closed k2=bypass:open k3=spare:unwired k4=spare:unwired path=shunt check=- pads=ok operate_settle_ms=20 release_settle_ms=50 hold_s=- hold_released=0 bypass_part=relay2click relay1_gpio=10 relay1_active=low relay2_gpio=15 relay2_active=high
+## a stored bus with nothing to fall back to
+> SYST:ERR:ALL?
+< 117,"Pin map reverted;the stored bus (sda=18 scl=21 addr=auto) did not answer and a role holds the default bus pins: no INA228"
+> SYST:PINS?;:SYST:PINS:PEND?
+< sda=18 scl=21 alert=6 addr=auto scl_hz=400000 pull_sda=up pull_scl=up pull_alert=up relay1=4 relay1_active=low relay2=15 relay2_active=high src=stored verified=0 table=0x90072FE9;sda=18 scl=21 alert=6 addr=auto scl_hz=400000 pull_sda=up pull_scl=up pull_alert=up relay1=4 relay1_active=low relay2=15 relay2_active=high valid=1 problem=- at=-
+> SYST:INF?;:ROUT:STAT?
+< model=kleidos-meter fw=0.18.0 chip=none addr=0x40 mfg=0x0000 die=0x000 rev=0x0 shunt_uohm=100000 cal_tag=- q=uncal relays=1 bypass_part=relay2click serial=KM-EE529C1B03 image=meter elf=5e1f0ba47c2291d3 pins_src=stored pins_table=0x90072FE9;k1=lead:closed k2=bypass:open k3=spare:unwired k4=spare:unwired path=shunt check=- pads=ok operate_settle_ms=20 release_settle_ms=50 hold_s=- hold_released=0 bypass_part=relay2click relay1_gpio=4 relay1_active=low relay2_gpio=15 relay2_active=high

@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW29-marks: a threshold mark that found the queue full is counted as written.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/sampler.cpp b/firmware/src/sampler.cpp
+--- a/firmware/src/sampler.cpp
++++ b/firmware/src/sampler.cpp
+@@ -1235,9 +1235,8 @@
+     record.kind        = kind;
+     record.index       = index;
+     record.timestampUs = sample.timestampUs;
+-    if ( xQueueSend( streamQueue_, &record, 0 ) == pdTRUE ) {
+-        ++thresholdMarksQueued_;
+-    }
++    (void)xQueueSend( streamQueue_, &record, 0 );
++    ++thresholdMarksQueued_;
+ }
+
+ IRAM_ATTR void Sampler::accumulate( const Sample& sample, std::int64_t currentNa,

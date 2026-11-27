@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW05-nopark: the pins the old map leaves are not parked.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/pin_apply.cpp b/firmware/src/pin_apply.cpp
+--- a/firmware/src/pin_apply.cpp
++++ b/firmware/src/pin_apply.cpp
+@@ -39,5 +39,5 @@
+     // (relay::Bank::move()).
+     const pinmap::PinSet freed = pinmap::parkedSet( to ) & ~pinmap::parkedSet( *move.from );
+-    relay::Bank::park( freed & ~pinmap::relayPins( *move.from ) );
++    (void)freed;
+     move.result = pin_boot::bringUpOn( *move.device, to );
+ }

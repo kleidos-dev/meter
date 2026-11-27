@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant HO10-meanedge: The moving mean loses its window's last column.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && METER_BROWSER_REQUIRED=1 ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_panel_browser.py -k 'step_moves_the_line or uneven_timestamps'
+
+diff --git a/host/kleidos_meter/panel/static/js/chart-math.js b/host/kleidos_meter/panel/static/js/chart-math.js
+--- a/host/kleidos_meter/panel/static/js/chart-math.js
++++ b/host/kleidos_meter/panel/static/js/chart-math.js
+@@ -691,7 +691,7 @@
+     }
+     let sum = 0;
+     let weight = 0;
+-    for (let i = Math.max(0, offset - half); i <= Math.min(total - 1, offset + half); i += 1) {
++    for (let i = Math.max(0, offset - half); i < Math.min(total - 1, offset + half); i += 1) {
+         sum += columns.sum[i];
+         weight += held[i];
+     }
+@@ -703,7 +703,7 @@
+                 sum -= columns.sum[leaving];
+                 weight -= held[leaving];
+             }
+-            const entering = i + half;
++            const entering = i + half - 1;
+             if (entering < total) {
+                 sum += columns.sum[entering];
+                 weight += held[entering];

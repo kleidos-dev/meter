@@ -1,0 +1,129 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# The floors of the page's modules (host/kleidos_meter/panel/static/js), read
+# by host/tests/js_coverage.py and held by the last test of
+# host/tests/test_panel_browser.py: the smallest percentage of a module's
+# functions and blocks, as Chromium's precise coverage counts them, that the
+# browser tests may run. A floor only rises (host/tests/test_js_coverage.py
+# reads this file's history).
+#
+# The pure modules (no DOM: chart-math.js, pins-math.js) are held whole: a
+# block no test can run lowers the floor and is listed with why. The drawn
+# modules are held to their floors, two points under the least of two runs of
+# 2026-11-26 since an event-driven page runs a little more or less from one run
+# to the next; the gate prints the blocks they leave, and may list one with
+# why, by its text as the gate prints it:
+#
+#   [[uncovered]]
+#   module = "chart-math.js"
+#   block  = "{ return null; }"
+#   reason = "..."
+
+[floors."chart-math.js"]
+functions = 100
+blocks = 100
+
+[floors."pins-math.js"]
+functions = 100
+blocks = 100
+
+[floors."api.js"]
+functions = 90.31
+blocks = 79.13
+
+[floors."chart.js"]
+functions = 88.2
+blocks = 83.58
+
+[floors."console.js"]
+functions = 69.43
+blocks = 56.33
+
+[floors."dialogs.js"]
+functions = 100
+blocks = 89.43
+
+[floors."dom.js"]
+functions = 83.71
+blocks = 78
+
+[floors."health.js"]
+functions = 83.71
+blocks = 61.28
+
+[floors."live.js"]
+functions = 87.71
+blocks = 79.81
+
+[floors."main.js"]
+functions = 85.5
+blocks = 79.36
+
+[floors."noise.js"]
+functions = 100
+blocks = 91.16
+
+[floors."pins.js"]
+functions = 100
+blocks = 96.06
+
+[floors."relays.js"]
+functions = 80.61
+blocks = 71.64
+
+[floors."runs.js"]
+functions = 100
+blocks = 83.71
+
+[floors."sequences.js"]
+functions = 83
+blocks = 78.17
+
+[floors."session.js"]
+functions = 100
+blocks = 85.5
+
+[floors."settings.js"]
+functions = 60.5
+blocks = 82.25
+
+[floors."status.js"]
+functions = 100
+blocks = 79.72
+
+[floors."views.js"]
+functions = 100
+blocks = 92.44
+
+# What the drawn modules this release changed leave, each with why.
+
+[[uncovered]]
+module = "pins.js"
+block = "{ return; }"
+reason = "describe(), draw(), open(), the dialog's judgment and apply() are reached from pin events, answers and buttons that exist only once the first GET /api/pins has set the board, the live map and the draft"
+
+[[uncovered]]
+module = "pins.js"
+block = ": []"
+reason = "the null-path check's answer always carries an errors list (schema.py's relay order); the guard is for an answer without one"
+
+[[uncovered]]
+module = "noise.js"
+block = "?? []"
+reason = "GET /api/schema always declares the settings and the profiles (schema.py); the defaults are for a schema without them"
+
+[[uncovered]]
+module = "noise.js"
+block = "?? \"\""
+reason = "the averaging settings always carry their flags and the report its profile; the defaults are for an answer without them"
+
+[[uncovered]]
+module = "noise.js"
+block = "{ this.missing.push(`${FIELDS.state} of ${profile.name}`); continue; }"
+reason = "index.html has a card for every profile the schema declares (test_panel_schema.py holds the two); the branch names a card the page lacks"
+
+[[uncovered]]
+module = "noise.js"
+block = "?? {}"
+reason = "SENSe:PROFile:REPort? always answers one report of fields; the default is for an answer with none"

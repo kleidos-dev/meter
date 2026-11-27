@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant HO10-gapbefore: The line starts before the first sample, at whatever the window already holds.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && METER_BROWSER_REQUIRED=1 ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_panel_browser.py -k 'stops_with_the_data'
+
+diff --git a/host/kleidos_meter/panel/static/js/chart-math.js b/host/kleidos_meter/panel/static/js/chart-math.js
+--- a/host/kleidos_meter/panel/static/js/chart-math.js
++++ b/host/kleidos_meter/panel/static/js/chart-math.js
+@@ -683,7 +683,7 @@
+             mean[i - offset] = next;
+         }
+     }
+-    let previous = Number.NEGATIVE_INFINITY;
++    let previous = -1;
+     for (let i = 0; i < offset; i += 1) {
+         if (held[i] > 0) {
+             previous = i;

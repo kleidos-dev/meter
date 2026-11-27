@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW03-onestate: both logs share one state, buffer and Acceptor.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+# The second log's state is the first's, as before FW-03.
+diff --git a/firmware/src/flash_log.cpp b/firmware/src/flash_log.cpp
+index 395f367..09688f8 100644
+--- a/firmware/src/flash_log.cpp
++++ b/firmware/src/flash_log.cpp
+@@ -85,7 +85,7 @@ struct State {
+ /// @return That log's state.
+ State& state( Log log ) noexcept {
+     static constinit std::array<State, kLogCount> instance;
+-    return instance[static_cast<std::size_t>( log )];
++    return instance[0U * static_cast<std::size_t>( log )];
+ }
+
+ /// What one place of a sector holds.

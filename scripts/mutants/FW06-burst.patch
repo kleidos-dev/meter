@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW06-burst: BURST takes an override.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/sampler.cpp b/firmware/src/sampler.cpp
+--- a/firmware/src/sampler.cpp
++++ b/firmware/src/sampler.cpp
+@@ -735,7 +735,7 @@
+     }
+     const Profile      profile = profile_.load();
+     const ProfileSpec& own     = profileSpec( profile );
+-    if ( static_cast<std::uint32_t>( own.conversionsPerSample ) > 1U ) {
++    if ( static_cast<std::uint32_t>( own.conversionsPerSample ) > 2U ) {
+         error = "BURSt has no averaging override: its 50 us conversion is its definition";
+         return false;
+     }

@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW29-pace: the pacing probe is asked of a loop that never acknowledged its stop.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/sampler.cpp b/firmware/src/sampler.cpp
+--- a/firmware/src/sampler.cpp
++++ b/firmware/src/sampler.cpp
+@@ -507,9 +507,7 @@
+         // would not see the request until it ends, then run the probe on its
+         // own, over whatever the console set up by then. Asked only of a task
+         // waiting for a start, as beginCapture() starts one.
+-        if ( xSemaphoreTake( doneSem_, 0 ) != pdTRUE ) {
+-            return Pace::Timer;
+-        }
++        (void)xSemaphoreTake( doneSem_, 0 );
+         awaitingDone_ = false;
+     }
+     probePeriodUs_.store( spec.periodUs );

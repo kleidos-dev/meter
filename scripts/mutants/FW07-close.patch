@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW07-close: ABORt closes the window with nothing computed of it.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console_commands.cpp b/firmware/src/console_commands.cpp
+--- a/firmware/src/console_commands.cpp
++++ b/firmware/src/console_commands.cpp
+@@ -1498,7 +1498,6 @@ void Console::cmdAbort( Call& ) noexcept {
+         return;
+     }
+     CaptureStats stats = {};
+-    sampler_->closeCapture( stats );
+     // Anything still queued belongs to this window: written now, before any
+     // response of this message, so no sample is lost to the stop itself.
+     pumpStream();

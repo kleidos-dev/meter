@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW29-dieage: a die noted this instant is a microsecond old.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/sampler.cpp b/firmware/src/sampler.cpp
+--- a/firmware/src/sampler.cpp
++++ b/firmware/src/sampler.cpp
+@@ -401,7 +401,7 @@
+         return 0;
+     }
+     const auto now = static_cast<std::uint64_t>( esp_timer_get_time() );
+-    return ( now > stamp ) ? ( now - stamp ) : 0U;
++    return ( now > stamp ) ? ( now - stamp ) : 1U;
+ }
+
+ IRAM_ATTR void Sampler::noteDieMilliCelsius( std::int32_t milliCelsius ) noexcept {

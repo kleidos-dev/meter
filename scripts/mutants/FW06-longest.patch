@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW06-longest: a sample longer than the pacing allows is taken.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/sampler.cpp b/firmware/src/sampler.cpp
+--- a/firmware/src/sampler.cpp
++++ b/firmware/src/sampler.cpp
+@@ -758,7 +758,7 @@
+     const std::uint32_t sclHz    = device_->busSpeedHz();
+     const std::uint32_t shortest = shortestPeriodUs( spec, sclHz );
+     const bool          tooShort = spec.periodUs < shortest;
+-    if ( !tooShort && spec.periodUs <= kLongestAveragedPeriodUs ) {
++    if ( !tooShort ) {
+         return true;
+     }
+     text::Writer w( errorText_ );

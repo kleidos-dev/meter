@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW05-energized: an apply is taken with a relay energized.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -2090,7 +2090,7 @@
+ bool Console::refusePins( const pinmap::PinMap& target ) noexcept {
+     pinsOutcome_        = {};
+     pinsOutcome_.result = "refused";
+-    if ( relays_->path() != relay::Path::Shunt ) {
++    if ( relays_->path() == relay::Path::Bypass ) {
+         pinsOutcome_.reason = "relays";
+         const bool   held   = relays_->path() == relay::Path::Bypass;
+         text::Writer w      = openError();

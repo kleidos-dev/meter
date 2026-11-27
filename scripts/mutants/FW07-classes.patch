@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW07-classes: A refusal for want of a device is queued as a settings conflict.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -435,7 +435,7 @@ std::int16_t samplerRefusalCode( std::string_view error ) noexcept {
+     static constexpr std::array<Class, 4> kClasses = { {
+         { "sampler engine", scpi::err::kSamplerFailed },
+         { "i2c", scpi::err::kHardware },
+-        { "no device", scpi::err::kHardwareMissing },
++        { "no device", scpi::err::kSettingsConflict },
+         { "use ", scpi::err::kDataOutOfRange },
+     } };
+     const auto                            isOf     = [error]( const Class& known ) noexcept {

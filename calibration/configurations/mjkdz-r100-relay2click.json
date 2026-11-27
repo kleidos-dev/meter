@@ -1,0 +1,39 @@
+{
+  "schema": "kleidos.meter.configuration/1",
+  "id": "mjkdz-r100-relay2click",
+  "description": "The bench rig since 2026-11-20: the MJKDZ INA228 breakout and its R100 shunt, K1 of the HW-316 as the DUT lead, and the bypass on channel RL2 of a MikroE Relay 2 Click driven from GPIO15 (docs/relay2-click-wiring.md). From 2026-11-21 the breakout sits about 5 cm from the ESP32-S3 carrier instead of stacked under its antenna, the same wiring (docs/rig-wiring.md section 3, 'Where the breakout sits').",
+  "sense": {
+    "adc": { "part": "TI INA228", "mfg": "0x5449", "die": "0x228" },
+    "breakout": { "id": "mjkdz-ina228", "marking": "MJKDZ", "revision": null },
+    "shunt": {
+      "id": "r100-unmarked",
+      "marking": "R100",
+      "nominal_nohm": 100000000,
+      "tolerance_ppm": null,
+      "plausible_ppm": 20000,
+      "tcr_ppm_per_c": null
+    },
+    "wiring": {
+      "schematic_rev": "D",
+      "kelvin": "the sense lands on the shunt's own pins; the R100 is a two-terminal part, so the screws' share is inside the measured value (docs/rig-wiring.md section 1)",
+      "vbus_side": "source"
+    }
+  },
+  "routing": {
+    "lead": {
+      "part": "hw316",
+      "channel": "K1",
+      "gpio": 7,
+      "description": "HW-316 K1 (SRD-05VDC-SL-C), NC in series with the DUT's lead, active low"
+    },
+    "bypass": {
+      "part": "relay2click",
+      "channel": "RL2",
+      "gpio": 15,
+      "description": "MikroE Relay 2 Click (MIKROE-1899), the LCA717 PhotoMOS on RL2's terminals, its input on the Click's RL2 control pin, active high"
+    }
+  },
+  "controller": "ESP32-S3-N16R8 on a DSX063-1 screw-terminal carrier (WCH CH343P)",
+  "firmware": { "image": "meter_relay2", "min_version": "0.4.0", "image_aliases": [{ "image": "meter", "min_version": "0.8.0" }] },
+  "expected": { "adc_gain_error_ppm": 500, "range_split_max_ppm": 1000, "recalibration_days": 365 }
+}

@@ -1,0 +1,106 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# clang-format configuration for the Kleidos bench meter's firmware: the
+# Kleidos firmware repository's .clang-format, with its include categories
+# adapted to this tree (no Arduino, M5 or third-party libraries; the ESP-IDF
+# headers this firmware includes). Pinned to clang-format 23 in CI and
+# pre-commit, because each major release formats a little differently.
+#
+# Usage:
+#   clang-format -i firmware/src/*.cpp firmware/src/*.h
+
+---
+Language: Cpp
+# clang-format has no explicit c++23 token; Latest parses the newest standard.
+Standard: Latest
+BasedOnStyle: Google
+
+# Indentation
+IndentWidth: 4
+TabWidth: 4
+UseTab: Never
+IndentCaseLabels: true
+IndentPPDirectives: BeforeHash
+NamespaceIndentation: None
+
+# Braces
+BreakBeforeBraces: Attach
+AllowShortBlocksOnASingleLine: Empty
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortEnumsOnASingleLine: false
+
+# Line width
+ColumnLimit: 100
+PenaltyBreakComment: 300
+PenaltyBreakString: 1000
+PenaltyExcessCharacter: 1000000
+
+# Alignment
+AlignAfterOpenBracket: Align
+AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+AlignEscapedNewlines: Right
+AlignOperands: Align
+AlignTrailingComments: true
+
+# Spaces
+SpaceAfterCStyleCast: false
+SpaceAfterTemplateKeyword: true
+SpaceBeforeAssignmentOperators: true
+SpaceBeforeParens: ControlStatements
+SpaceInEmptyBlock: false
+SpaceInEmptyParentheses: false
+SpacesBeforeTrailingComments: 2
+SpacesInAngles: false
+SpacesInContainerLiterals: false
+SpacesInParentheses: true
+SpacesInSquareBrackets: false
+
+# Includes
+SortIncludes: CaseSensitive
+IncludeBlocks: Regroup
+# The translation unit's own header is the implicit "main" include and is always
+# sorted first (priority 0), above the project-header group below.
+IncludeIsMainRegex: '([-_](test|unittest))?$'
+IncludeCategories:
+  # Project headers first
+  - Regex: '".*"'
+    Priority: 1
+  # ESP-IDF and FreeRTOS
+  - Regex: '<(esp_|freertos/|driver/|soc/|hal/|rom/|nvs)'
+    Priority: 2
+  # Standard library
+  - Regex: '<[a-z_]+>'
+    Priority: 4
+  # Catch-all
+  - Regex: '<.*>'
+    Priority: 5
+
+# Pointer / Reference alignment
+PointerAlignment: Left
+ReferenceAlignment: Left
+DerivePointerAlignment: false
+
+# Other
+AllowAllArgumentsOnNextLine: true
+AllowAllParametersOfDeclarationOnNextLine: true
+BinPackArguments: true
+BinPackParameters: true
+BreakBeforeBinaryOperators: NonAssignment
+BreakConstructorInitializers: BeforeColon
+ConstructorInitializerIndentWidth: 4
+Cpp11BracedListStyle: true
+EmptyLineBeforeAccessModifier: Always
+FixNamespaceComments: true
+# Doxygen blocks are structured text; clang-format must not collapse blank
+# lines between adjacent /** */ blocks. Keep ReflowComments: false so that
+# each /** ... */ block stays visually separated by the author.
+MaxEmptyLinesToKeep: 2
+PackConstructorInitializers: NextLine
+ReflowComments: false
+SeparateDefinitionBlocks: Leave
+...

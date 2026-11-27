@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW03-flag: a pull or a drive byte of 2 is taken (read as off or active low).
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+# The flag bytes' bound moved by one.
+diff --git a/firmware/src/pinmap_store.cpp b/firmware/src/pinmap_store.cpp
+index ea9de40..4dbda5a 100644
+--- a/firmware/src/pinmap_store.cpp
++++ b/firmware/src/pinmap_store.cpp
+@@ -115,7 +115,7 @@ bool acceptBlob( const std::uint8_t* blob, std::size_t length ) noexcept {
+     }
+     for ( const std::uint8_t flag : { stored.pullSda, stored.pullScl, stored.pullAlert,
+                                       stored.relay1Drive, stored.relay2Drive } ) {
+-        if ( flag > 1U ) {
++        if ( flag > 2U ) {
+             return false;
+         }
+     }

@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant HO10-applycapture: A pin map is applied under a capture.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_panel_pins.py::test_an_order_is_refused_while_a_capture_runs
+
+diff --git a/host/kleidos_meter/panel/pins.py b/host/kleidos_meter/panel/pins.py
+--- a/host/kleidos_meter/panel/pins.py
++++ b/host/kleidos_meter/panel/pins.py
+@@ -215,8 +215,6 @@
+             raise SettingsRefused(423, "held", f"the line is held by {holder}", holder=holder)
+         if self.sequences is not None and self.sequences.running:
+             raise SettingsRefused(409, "sequence_running", "a sequence is running: abort it first")
+-        if self.recorder is not None and self.recorder.state != "idle":
+-            raise SettingsRefused(409, "capture_running", "a capture is running: stop it first")
+         if self.session.foreign_window is not None:
+             raise SettingsRefused(
+                 409, "window_open", "a window serve did not open is open: it is left alone"

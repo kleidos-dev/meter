@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW07-noshunt: A MODE that skips the shunt is timed as if it converted it.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/ina228_regs.h b/firmware/src/ina228_regs.h
+--- a/firmware/src/ina228_regs.h
++++ b/firmware/src/ina228_regs.h
+@@ -303,7 +303,7 @@ constexpr std::uint32_t periodMicroseconds( std::uint8_t mode, std::uint8_t vbus
+     if ( modeConvertsBus( mode ) ) {
+         sequence += kConversionTimeUs[vbusCt & 0x7U];
+     }
+-    if ( modeConvertsShunt( mode ) ) {
++    if ( mode != 0U ) {
+         sequence += kConversionTimeUs[vShCt & 0x7U];
+     }
+     if ( modeConvertsTemperature( mode ) ) {

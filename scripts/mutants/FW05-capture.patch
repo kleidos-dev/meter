@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW05-capture: an apply is taken under a capture.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -881,7 +881,7 @@
+         { "SYSTem:PINS:ADDRess", takes( 1U ), &Console::cmdPinsAddress },
+         { "SYSTem:PINS:CLOCk", takes( 1U ), &Console::cmdPinsClock },
+         { "SYSTem:PINS:CLEar", N, &Console::cmdPinsClear },
+-        { "SYSTem:PINS:APPLy", R | C, &Console::cmdPinsApply },
++        { "SYSTem:PINS:APPLy", C, &Console::cmdPinsApply },
+         { "SYSTem:PINS:DEFault", R | C, &Console::cmdPinsDefault },
+         { "SYSTem:PINS:RESult?", N, &Console::cmdPinsResult },
+         // STATus

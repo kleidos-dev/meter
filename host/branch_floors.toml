@@ -1,0 +1,52 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# The host package's branch floors, read by scripts/test_report.py --gate
+# (docs/testing.md): the smallest percentage of its branch sides each module's
+# tests may take. Every module of kleidos_meter has one, a new module gets its
+# own in the commit that adds it, and a floor only rises (tests/ci/
+# test_host_floors.py reads this file's history). A module more than three
+# sides over its floor is printed as a note: raise it.
+#
+# Each is what the suite measured, the same on Python 3.13 and 3.14
+# (2026-11-25): every side of every module. A side that only a race between
+# threads decides is staged by a test (a held read, a barrier, an injected
+# clock), so no floor leaves room for a lost race. A side no test could take
+# would lower its module's floor and be named here with its reason; there is
+# none. A module with no branch is at 100.
+
+[floors]
+"kleidos_meter/__init__.py" = 100
+"kleidos_meter/calibrate.py" = 100
+"kleidos_meter/calibration_cli.py" = 100
+"kleidos_meter/capture_cli.py" = 100
+"kleidos_meter/cli.py" = 100
+"kleidos_meter/client.py" = 100
+"kleidos_meter/identity.py" = 100
+"kleidos_meter/invariant.py" = 100
+"kleidos_meter/panel/__init__.py" = 100
+"kleidos_meter/panel/executor.py" = 100
+"kleidos_meter/panel/guards.py" = 100
+"kleidos_meter/panel/http.py" = 100
+"kleidos_meter/panel/live.py" = 100
+"kleidos_meter/panel/local_elf.py" = 100
+"kleidos_meter/panel/lockinfo.py" = 100
+"kleidos_meter/panel/passthrough.py" = 100
+"kleidos_meter/panel/paths.py" = 100
+"kleidos_meter/panel/pins.py" = 100
+"kleidos_meter/panel/recorder.py" = 100
+"kleidos_meter/panel/reports.py" = 100
+"kleidos_meter/panel/schema.py" = 100
+"kleidos_meter/panel/sequences.py" = 100
+"kleidos_meter/panel/serve.py" = 100
+"kleidos_meter/panel/settings.py" = 100
+"kleidos_meter/panel/shaping.py" = 100
+"kleidos_meter/panel/static.py" = 100
+"kleidos_meter/panel/steps.py" = 100
+"kleidos_meter/pins.py" = 100
+"kleidos_meter/pins_cli.py" = 100
+"kleidos_meter/protocol.py" = 100
+"kleidos_meter/registry.py" = 100
+"kleidos_meter/relay_timing.py" = 100
+"kleidos_meter/sim.py" = 100
+"kleidos_meter/sim_table.py" = 100

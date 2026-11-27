@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant HO10-pytoohigh: The Python rules take a role's limit for a GPIO it can have.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_pins.py
+
+diff --git a/host/kleidos_meter/pins.py b/host/kleidos_meter/pins.py
+--- a/host/kleidos_meter/pins.py
++++ b/host/kleidos_meter/pins.py
+@@ -239,7 +239,7 @@
+             return "no_pin", key
+         if row["class"] == "reserved":
+             return "reserved", key
+-        if gpio >= role["below"]:
++        if gpio > role["below"]:
+             return "too_high", key
+         if any(pins.pin(earlier["key"]) == gpio for earlier in roles[:index]):
+             return "shared", key

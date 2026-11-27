@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW07-lonequote: A lone quote inside a string is taken as a character.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/scpi.cpp b/firmware/src/scpi.cpp
+--- a/firmware/src/scpi.cpp
++++ b/firmware/src/scpi.cpp
+@@ -920,10 +920,9 @@ bool Parameters::string( std::size_t index, char* out, std::size_t capacity ) no
+         if ( c == doubled[0] ) {
+             // Only a doubled quote can sit inside: Parameters::parse() would
+             // otherwise have ended the string here.
+-            if ( !inside.starts_with( pair ) ) {
+-                return fail( err::kStringData );
++            if ( inside.starts_with( pair ) ) {
++                inside.remove_prefix( 1 );
+             }
+-            inside.remove_prefix( 1 );
+         }
+         if ( used + 1U >= capacity ) {
+             return fail( err::kStringData );

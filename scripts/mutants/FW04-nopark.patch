@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW04-nopark: the stored bus's pads stay on the controller after a fallback.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/pin_boot.cpp b/firmware/src/pin_boot.cpp
+--- a/firmware/src/pin_boot.cpp
++++ b/firmware/src/pin_boot.cpp
+@@ -89,7 +89,7 @@
+     // The stored bus's pads first, off the controller and parked, so that they
+     // carry nothing of the bus that takes its place.
+     device.closeBus();
+-    relay::Bank::park( pinmap::parkedSet( fallback ) & ~pinmap::parkedSet( pins.map ) );
++    relay::Bank::park( pinmap::parkedSet( fallback ) & pinmap::parkedSet( pins.map ) );
+     pins.map    = fallback;
+     pins.source = Source::Fallback;
+     pins.bus    = Bus::FellBack;

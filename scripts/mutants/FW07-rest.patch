@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW07-rest: What a flush leaves of a unit is appended over the one before it.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -1166,5 +1166,5 @@ void Console::appendResponse( std::string_view text ) noexcept {
+         room = units.size();
+     }
+-    (void)std::copy_n( text.begin(), text.size(), units.subspan( responseLength_ ).begin() );
++    (void)std::copy_n( text.begin(), text.size(), units.begin() );
+     responseLength_ += text.size();
+ }

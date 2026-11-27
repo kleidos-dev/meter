@@ -1,0 +1,178 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# The hooks: the Kleidos quality kit's own (kleidos-dev/.github at a release
+# tag), the third-party hooks the kit holds to its canonical list, word for
+# word, and this repository's own hooks after them. CI runs every one of them
+# in the lint job of the kit's quick.yml (.github/workflows/check.yml), except
+# the ones named in its skip input, which need a toolchain or the host
+# package and run in a job of check.yml of their own. Install once per clone:
+#   pre-commit install --hook-type pre-commit --hook-type commit-msg
+default_install_hook_types: [pre-commit, commit-msg]
+
+repos:
+  # The quality kit's hooks (kleidos-dev/.github, docs/quality.md): nothing of
+  # them is held here, and Dependabot moves the rev. kleidos-mypy runs the
+  # kit's mypy groups (pyproject.toml) with the mypy of the environment the
+  # hook finds, where the host package and its stubs are installed.
+  - repo: https://github.com/kleidos-dev/.github
+    rev: v3.1.1
+    hooks:
+      - id: kleidos-kit
+      - id: kleidos-commit-msg
+      - id: kleidos-mypy
+  - repo: https://github.com/crate-ci/typos
+    rev: 276087d9a4f06398b3e04825487805e2d7375888  # frozen: v1.52.2
+    hooks:
+      - id: typos
+        # Report, never rewrite: a spelling "fix" inside code (a regex, an
+        # identifier) is a bug, so a person makes each change.
+        args: ["--force-exclude"]
+        # The byte copies are checked where they come from.
+        exclude: '^(LICENSE[^/]*|LICENSES/.*|\.github/quality/.*|\.github/commit-check/.*|\.github/workflows/commit-check(-comment)?\.yml|\.gitleaks-mac\.toml)$'
+  # Secrets: the default rules (.gitleaks.toml), then the MAC rules
+  # (.gitleaks-mac.toml, which extends nothing so no file type is skipped);
+  # inline allow comments are ignored. The history scan is in CI.
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: 83d9cd684c87d95d656c1458ef04895a7f1cbd8e  # frozen: v8.30.1
+    hooks:
+      - id: gitleaks
+        args: ["--config", ".gitleaks.toml", "--ignore-gitleaks-allow"]
+      - id: gitleaks
+        alias: gitleaks-mac
+        name: Detect MAC addresses
+        args: ["--config", ".gitleaks-mac.toml", "--ignore-gitleaks-allow"]
+  - repo: https://github.com/fsfe/reuse-tool
+    rev: ea739bff9c6daa1c4c8a5c5dfd069f3fb0374728  # frozen: v6.3.0
+    hooks:
+      - id: reuse
+  # Broken tables only (MD055, MD056, MD058): .markdownlint-cli2.jsonc
+  # extends the kit's .github/quality/markdownlint.jsonc.
+  - repo: https://github.com/DavidAnson/markdownlint-cli2
+    rev: d4df4cec471ce155946474590d7b95920f623ccb  # frozen: v0.24.2
+    hooks:
+      - id: markdownlint-cli2
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: 9026c9127e153371d7a78dfcb0c45ae2046a3d10  # frozen: v0.17.6
+    hooks:
+      - id: ruff-check
+      - id: ruff-format
+        types_or: [python, pyi]
+  - repo: https://github.com/rhysd/actionlint
+    rev: 914e7df21a07ef503a81201c76d2b11c789d3fca  # frozen: v1.7.12
+    hooks:
+      - id: actionlint
+  # Offline audits here; the lint workflow adds the online ones.
+  - repo: https://github.com/zizmorcore/zizmor-pre-commit
+    rev: c7d31dc612dffdd4d3b2f2b88b9660d3ab057ee8  # frozen: v1.33.1
+    hooks:
+      - id: zizmor
+        args: ["--no-progress", "--offline"]
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: 745eface02aef23e168a8afb6b5737818efbea95  # frozen: v0.11.0.1
+    hooks:
+      - id: shellcheck
+        args: ["--severity=warning"]
+  # This repository's own hooks.
+  # The generic hygiene hooks, at the Kleidos firmware repository's pin. Files
+  # kept byte for byte are left alone: the license texts, the copies of other
+  # repositories (the quality kit's base configurations and comment caller,
+  # the ESP-IDF installer, the brand repository's KiCad kit), the byte-for-byte fixtures
+  # and records, the generated schematic and its renders.
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
+    hooks:
+      - id: trailing-whitespace
+        args: [--markdown-linebreak-ext=md]
+        exclude: &bytes '^(LICENSE|LICENSES/.*|\.github/quality/.*|\.github/workflows/commit-check-comment\.yml|\.gitleaks-mac\.toml|\.shellcheckrc|\.github/zizmor\.yml|\.clang-tidy|scripts/install_idf\.(sh|json)|scripts/published_reference/.*|hardware/kicad/.*|tests/hardware/fixtures/.*|calibration/records/.*|hardware/(rig(-calibration)?\.kicad_sch|rig\.kicad_(pro|sym)|sym-lib-table|rig\.pdf|rig(-calibration)?\.svg))$'
+      - id: end-of-file-fixer
+        exclude: *bytes
+      - id: mixed-line-ending
+        args: ['--fix=lf']
+        exclude: *bytes
+      - id: check-yaml
+      - id: check-toml
+      - id: check-json
+      # Every file it is given, not only the staged ones, so that CI's hooks
+      # job, which stages nothing, holds the limit too; the rig's two SVG
+      # renders are generated, and held to their bytes by CI's schematic job.
+      - id: check-added-large-files
+        args: ['--maxkb=512', '--enforce-all']
+        exclude: '^hardware/rig(-calibration)?\.svg$'
+      - id: check-merge-conflict
+
+  # EditorConfig conformance (.editorconfig, .ecrc). The wrapper bundles the
+  # ec binary at the version CI downloads.
+  - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
+    rev: 3.0.3
+    hooks:
+      - id: editorconfig-checker
+        alias: ec
+
+  # The firmware's format (.clang-format), at the pin of
+  # scripts/analysis_toolchain.sh's clang-format.
+  - repo: https://github.com/pre-commit/mirrors-clang-format
+    rev: v23.1.5
+    hooks:
+      - id: clang-format
+        files: '^firmware/(src|test/native)/.*\.(cpp|h)$'
+  - repo: local
+    hooks:
+      - id: spdx-headers
+        name: every file names its copyright holder and license
+        entry: python3 scripts/check_spdx.py
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-commit]
+      - id: doc-paths
+        name: every path a document writes is here, or names its owner (scripts/check_doc_paths.py)
+        entry: python3 scripts/check_doc_paths.py
+        language: system
+        files: '(\.md$|^scripts/check_doc_paths\.py$)'
+        stages: [pre-commit]
+      - id: calibration-registry
+        name: the calibration registry and its index (schemas, arithmetic, coherence)
+        entry: python3 scripts/check_calibration_registry.py
+        language: system
+        pass_filenames: false
+        files: '^(calibration/|host/kleidos_meter/registry\.py|scripts/check_calibration_registry\.py)'
+        stages: [pre-commit]
+      - id: pin-table
+        name: the board's pin table and its two generated copies (scripts/gen_pin_table.py --check)
+        entry: python3 scripts/gen_pin_table.py --check
+        language: system
+        pass_filenames: false
+        files: '^(firmware/board/pins\.toml|firmware/src/pin_table\.h|host/kleidos_meter/board_pins\.json|scripts/gen_pin_table\.py)$'
+        stages: [pre-commit]
+      - id: native-tests
+        name: the firmware's host tests (sanitizers on)
+        entry: make -C firmware/test/native -j8 test
+        language: system
+        pass_filenames: false
+        files: '^firmware/(src|test/native)/'
+        stages: [pre-commit]
+      - id: static-analysis
+        name: clang-tidy (device and harness legs) and cppcheck over the firmware (scripts/run_static_analysis.sh)
+        entry: sh -c 'scripts/run_static_analysis.sh tidy && scripts/run_static_analysis.sh cppcheck'
+        language: system
+        pass_filenames: false
+        files: '^(firmware/(src|test/native/harness)/|firmware/(CMakeLists\.txt|platformio\.ini)$|\.clang-tidy$|\.cppcheck-suppress$|scripts/(run_static_analysis\.sh|clang_tidy_gate\.py|analysis_toolchain\.sh)$)'
+        stages: [pre-commit]
+      - id: doxygen
+        name: the documentation site and the firmware reference, zero warnings, its links, and the site as published (doxygen Doxyfile, scripts/check_doc_links.py, scripts/build_reference.py)
+        entry: sh -c 'mkdir -p build && doxygen Doxyfile && python3 scripts/check_doc_links.py --html build/doxygen/html && rm -rf build/reference && python3 scripts/build_reference.py --out build/reference'
+        language: system
+        pass_filenames: false
+        files: '^(firmware/src/|docs/|Doxyfile(\.public)?$|README\.md$|AGENTS\.md$|CHANGELOG\.md$|NOTICE\.md$|calibration/(README\.md$|records/.*\.md$)|hardware/(README|bom)\.md$|hardware/rig(-calibration)?\.svg$|host/README\.md$|scripts/(check_doc_links|doxygen_md_filter|build_reference|check_reference)\.py$|scripts/published_reference/)'
+        stages: [pre-commit]
+      # The conformance suite runs on the firmware's native bridge, built first
+      # and required; the panel's page in the browser runs where host[browser]
+      # is installed (CI's panel job requires it).
+      - id: host-tests
+        name: the host package (client, simulator, panel, conformance on the native bridge) and the firmware-source guards
+        entry: sh -c 'make -C firmware/test/native -j8 bridge && export KLEIDOS_METER_NATIVE_BRIDGE="$PWD/firmware/test/native/build/bridge" METER_BRIDGE_REQUIRED=1 && cd host && .venv/bin/python -m pytest -q -W error && cd .. && host/.venv/bin/python -m pytest -q -W error tests'
+        language: system
+        pass_filenames: false
+        files: '^(host|tests|firmware|docs|\.github)/'
+        stages: [pre-commit]

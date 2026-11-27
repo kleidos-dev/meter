@@ -1,0 +1,97 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Static application security testing of the firmware's C++ with CodeQL,
+# as the Kleidos firmware repository runs it (its codeql.yml): CodeQL cannot
+# build a PlatformIO and ESP-IDF project by itself, so the job builds the
+# device image between the init and analyze steps, as CI's firmware job builds
+# it (the pinned platform, scripts/install_idf.sh, the cached ESP-IDF
+# package), and CodeQL traces the compiler calls.
+#
+# Code scanning is not enabled on this private repository (the API answers
+# "Advanced Security must be enabled"), so nothing is uploaded: the SARIF is
+# kept as the `codeql-sarif` artifact and its result count goes to the job
+# summary. Advisory, as in the firmware repository: a workflow of its own,
+# beside CI (the project's CI convention), which no merge waits for. When the
+# repository is public, `upload` becomes `always` and the results go to the
+# Security tab.
+name: CodeQL
+
+on:
+  push:
+    branches: [main]
+  # Not on a draft pull request: the device build under CodeQL's tracer is the
+  # costliest job of the repository, so it runs when the pull request is marked
+  # ready for review and on each later push (tests/ci/test_draft_runs.py).
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+
+# The CodeQL action reads the run's metadata (get-a-workflow-run) on a
+# private repository; with nothing uploaded it needs no security-events.
+permissions:
+  contents: read
+  actions: read
+
+concurrency:
+  group: codeql-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: "🛡️ CodeQL (c-cpp, the device image)"
+    if: github.event.pull_request.draft != true
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      KLEIDOS_PIO_JOB_ALONE: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: Cache the installed ESP-IDF package
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.platformio/packages/framework-espidf@*
+          key: ${{ runner.os }}-espidf-${{ hashFiles('firmware/platformio.ini', 'scripts/install_idf.sh') }}
+      - name: Install PlatformIO, the platform and the pinned ESP-IDF
+        run: |
+          set -euo pipefail
+          pip install platformio==6.2.0
+          pio pkg install -g -p "platformio/espressif32@7.0.1"
+          bash scripts/install_idf.sh
+          rm -rf ~/.platformio/.cache/tmp
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4.39.4
+        with:
+          languages: c-cpp
+          build-mode: manual
+      # CodeQL traces the compiler calls of this build.
+      - name: Build meter
+        run: pio run --project-dir firmware -e meter
+      - name: Perform CodeQL analysis
+        uses: github/codeql-action/analyze@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4.39.4
+        with:
+          category: /language:c-cpp
+          upload: never
+          upload-database: false
+          output: ${{ runner.temp }}/codeql-sarif
+      - name: The result count
+        if: ${{ !cancelled() }}
+        run: |
+          set -euo pipefail
+          count=$(python3 -c 'import json, pathlib, sys; print(sum(len(r.get("results", [])) for p in pathlib.Path(sys.argv[1]).glob("*.sarif") for r in json.loads(p.read_text())["runs"]))' "$RUNNER_TEMP/codeql-sarif")
+          echo "CodeQL results: $count"
+          { echo "### CodeQL (c-cpp)"; echo; echo "- results: $count (SARIF in the \`codeql-sarif\` artifact)"; } >> "$GITHUB_STEP_SUMMARY"
+      - name: Keep the SARIF
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: codeql-sarif
+          path: ${{ runner.temp }}/codeql-sarif/
+          if-no-files-found: warn

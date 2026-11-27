@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Every MC/DC condition the host tests do not show independent, with the
+# written reason it cannot be, or need not be. scripts/test_report.py matches
+# each uncovered decision against these entries by file and by the decision's
+# own text (so a line moving does not orphan its reason); an uncovered
+# condition with no entry here is UNJUSTIFIED and fails the report's gate.
+#
+# Kinds:
+#   infeasible  - no input reaches the missing combination: the operands are
+#                 coupled, or an earlier guard already decided it.
+#   defensive   - a guard against a state the code never produces (a null
+#                 pointer, a buffer the caller always sizes); kept because the
+#                 firmware must not trust its callers, untestable by design.
+#
+# conditions lists the decision's conditions (1-based, left to right, as the
+# report's ✓/✗ column shows them) the entry justifies. A gap is justified only
+# when every condition it leaves uncovered is listed: another condition of the
+# same decision losing its pair is a new gap, and fails the gate.
+#
+# None since FW-07: what an invariant made dead was removed from the code (the
+# operand, or the test), and the rest is reached. An entry written here again
+# looks like this:
+#
+#   [[exclusion]]
+#   file       = "console.cpp"
+#   decision   = "first && second"
+#   conditions = [2]
+#   kind       = "infeasible"
+#   reason     = "..."

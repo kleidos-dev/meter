@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant HO10-gapwide: A gap one column wider than the window is bridged.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && METER_BROWSER_REQUIRED=1 ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_panel_browser.py -k 'gap_wider_than_the_window'
+
+diff --git a/host/kleidos_meter/panel/static/js/chart-math.js b/host/kleidos_meter/panel/static/js/chart-math.js
+--- a/host/kleidos_meter/panel/static/js/chart-math.js
++++ b/host/kleidos_meter/panel/static/js/chart-math.js
+@@ -712,7 +712,7 @@
+         if (held[i] > 0) {
+             previous = i;
+         }
+-        const bridged = held[i] > 0 || mean[c] - previous <= span;
++        const bridged = held[i] > 0 || mean[c] - previous <= span + 1;
+         if (!bridged || !(weight > 0)) {
+             mean[c] = Number.NaN;
+             count[c] = 0;

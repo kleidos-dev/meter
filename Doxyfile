@@ -1,0 +1,104 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# The meter's documentation, one site: the documents of docs/ and the other
+# Markdown pages (the README files, AGENTS.md, the changelog, the calibration
+# records) as its pages, docs/README.md as its main page, and the firmware's
+# reference. The Markdown files are the one source and still read on GitHub:
+# Doxygen reads each through scripts/doxygen_md_filter.py (FILTER_PATTERNS),
+# which keeps every line where it was, names the page, and turns the one link
+# form GitHub reads into the site's. The same gate covers the pages: a warning
+# in a document fails it as one in a comment does.
+#
+# The firmware's reference, and its gate: `doxygen Doxyfile` exits 0 only when
+# every symbol of firmware/src is documented and every function names each
+# parameter (@param) and its result (@return / @retval). Every symbol means
+# the private ones too: private class members, file-static functions and
+# constants, anonymous-namespace symbols and classes local to a function are
+# extracted (the four EXTRACT_ options below), so each is warned on when it
+# has no comment. The Kleidos firmware repository's settings
+# (kleidos:Doxyfile), stricter by those four and with undocumented symbols
+# shown from the first day: this tree reached zero in one pass, so the
+# coverage gate is the real one and no baseline or ratchet is kept. Pinned to
+# Doxygen 1.17.0.
+# What the warnings cannot see, a link to a page that was never generated or a
+# name an enclosing namespace also declares, is the second gate's:
+# `python3 scripts/check_doc_links.py --html build/doxygen/html`, run on the
+# finished build (the pre-commit hook and CI's docs job run both).
+PROJECT_NAME           = "Kleidos bench meter"
+PROJECT_BRIEF          = "INA228 bench power meter: usage, protocol, rig and firmware"
+OUTPUT_DIRECTORY       = build/doxygen
+CREATE_SUBDIRS         = NO
+OUTPUT_LANGUAGE        = English
+MARKDOWN_SUPPORT       = YES
+TOC_INCLUDE_HEADINGS   = 3
+AUTOLINK_SUPPORT       = YES
+EXTRACT_ALL            = NO
+EXTRACT_PRIVATE        = YES
+EXTRACT_STATIC         = YES
+EXTRACT_LOCAL_CLASSES  = YES
+EXTRACT_ANON_NSPACES   = YES
+HIDE_UNDOC_MEMBERS     = NO
+HIDE_UNDOC_CLASSES     = NO
+JAVADOC_AUTOBRIEF      = NO
+QT_AUTOBRIEF           = NO
+BUILTIN_STL_SUPPORT    = YES
+SORT_MEMBER_DOCS       = NO
+# The folders are read flat (RECURSIVE = NO): docs/ gives its .md pages and
+# its two .dox files, calibration/records its records; every other page is
+# named. scripts/doxygen_md_filter.py lists the same pages (PAGE_DIRS,
+# PAGE_FILES), and tests/firmware/test_doc_link_form.py holds the two equal.
+INPUT                  = docs \
+                         README.md \
+                         AGENTS.md \
+                         CHANGELOG.md \
+                         NOTICE.md \
+                         calibration/README.md \
+                         calibration/records \
+                         hardware/README.md \
+                         hardware/bom.md \
+                         host/README.md \
+                         firmware/src
+RECURSIVE              = NO
+FILE_PATTERNS          = *.cpp *.h *.dox *.md
+FILTER_PATTERNS        = "*.md=python3 scripts/doxygen_md_filter.py"
+USE_MDFILE_AS_MAINPAGE = docs/README.md
+# A heading's anchor is GitHub's, so `page.md#heading` reads the same in both;
+# a folder's README.md is a page of its own, not the folder's description.
+MARKDOWN_ID_STYLE      = GITHUB
+IMPLICIT_DIR_DOCS      = NO
+# Doxygen finds an image by its file name in these folders, not below them,
+# so each folder of images is named; the name of every image is unique across
+# them (tests/firmware/test_doc_link_form.py).
+IMAGE_PATH             = docs/images \
+                         docs/images/panel \
+                         docs/images/panel/bench \
+                         hardware
+INPUT_ENCODING         = UTF-8
+QUIET                  = YES
+WARNINGS               = YES
+WARN_IF_UNDOCUMENTED   = YES
+WARN_IF_DOC_ERROR      = YES
+WARN_IF_INCOMPLETE_DOC = YES
+WARN_NO_PARAMDOC       = YES
+WARN_AS_ERROR          = FAIL_ON_WARNINGS
+WARN_FORMAT            = "$file:$line: $text"
+WARN_LOGFILE           =
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+HTML_OUTPUT            = html
+GENERATE_TREEVIEW      = YES
+SEARCHENGINE           = YES
+HAVE_DOT               = NO
+# ESP-IDF's placement attributes expand to nothing: they say where the linker
+# puts a symbol, not what it is, and left alone they are read as part of the
+# type in every member signature (tests/firmware/test_doxygen_gate.py).
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = YES
+PREDEFINED             = DOXYGEN=1 \
+                         "__attribute__(x)=" \
+                         IRAM_ATTR= \
+                         DRAM_ATTR= \
+                         EXT_RAM_BSS_ATTR= \
+                         RTC_NOINIT_ATTR=

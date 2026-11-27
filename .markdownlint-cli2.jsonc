@@ -1,0 +1,12 @@
+// SPDX-FileCopyrightText: 2026 José M. Requena Plens
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// markdownlint-cli2's configuration: the Kleidos quality kit's base
+// (.github/quality/markdownlint.jsonc, a copy) plus this repository's own
+// additions. A kit rule turned off here needs a waiver.
+{
+  "config": {
+    "extends": ".github/quality/markdownlint.jsonc"
+  },
+  "ignores": ["node_modules/**"]
+}

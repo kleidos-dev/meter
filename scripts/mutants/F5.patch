@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant F5: *STB? never sets the OPERation summary bit.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -1297,7 +1297,6 @@
+         status |= scpi::stb::kEventSummary;
+     }
+     if ( bits::hasBit( operEvent_, operEnable_ ) ) {
+-        status |= scpi::stb::kOperationSummary;
+     }
+     if ( bits::hasBit( status & sre_, ~scpi::stb::kMasterSummary ) ) {
+         status |= scpi::stb::kMasterSummary;

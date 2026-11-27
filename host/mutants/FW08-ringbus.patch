@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW08-ringbus: A ring starts on a bus too slow for it.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_sim_pins.py::test_every_window_needs_a_ring_profiles_read_under_half_its_period
+
+diff --git a/host/kleidos_meter/sim.py b/host/kleidos_meter/sim.py
+--- a/host/kleidos_meter/sim.py
++++ b/host/kleidos_meter/sim.py
+@@ -1824,7 +1824,7 @@
+         refused = self._pace_refusal(averaging) if averaging.on else None
+         period = self._conversion(self.profile).period_us
+         read_us = _read_us(self.scl_hz)
+-        if refused is None and PROFILES[self.profile][1] and 2 * read_us >= period:
++        if refused is None and PROFILES[self.profile][1] and read_us >= period:
+             refused = (
+                 f"{self.profile} needs a faster bus (a {period} us period needs a read under"
+                 f" {period // 2} us; it is {read_us} us at {self.scl_hz} Hz)"

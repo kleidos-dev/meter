@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW29-width: POWER read as a reserved register.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/ina228_regs.h b/firmware/src/ina228_regs.h
+--- a/firmware/src/ina228_regs.h
++++ b/firmware/src/ina228_regs.h
+@@ -117,7 +117,6 @@
+         case kRegVShunt:
+         case kRegVBus:
+         case kRegCurrent:
+-        case kRegPower:
+             return kWidth24Bytes;
+         case kRegEnergy:
+         case kRegCharge:

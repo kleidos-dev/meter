@@ -1,0 +1,23 @@
+{
+  "$comment": "Copies of the Kleidos firmware repository's modules of its published API reference at the commit below (the links at the host's clean addresses, the shape of a page, the Markdown twins and llms.txt), byte for byte but for typing.patch, two lines that this repository's strict mypy asks for (the firmware runs no mypy on them). Never edit them here: change them there, copy them again, apply typing.patch or what is left of it, and update the commit and each digest (tests/firmware/test_published_reference_copies.py). scripts/build_reference.py imports them.",
+  "source": "https://github.com/jmrplens/kleidos",
+  "commit": "5b35aa5baa1b961e7275a5aedfa8ec3df5d2b853",
+  "patch": "scripts/published_reference/typing.patch",
+  "files": {
+    "scripts/api_reference_links.py": {
+      "path": "scripts/published_reference/api_reference_links.py",
+      "upstream_sha256": "2d7a3174db636b6f7d7ecb6e0028d5f97112a86b46f4532e263d0d9793b039c2",
+      "sha256": "2d7a3174db636b6f7d7ecb6e0028d5f97112a86b46f4532e263d0d9793b039c2"
+    },
+    "scripts/api_reference_pages.py": {
+      "path": "scripts/published_reference/api_reference_pages.py",
+      "upstream_sha256": "469179697284507318bc6c6d787339fc38f56a745275ea6b5b0e0353a30a71e4",
+      "sha256": "8ff1be21ba16c012491be7c0e924f6ae0104665159b2d1013f48a6997df24a56"
+    },
+    "scripts/api_reference_twins.py": {
+      "path": "scripts/published_reference/api_reference_twins.py",
+      "upstream_sha256": "2fdfa5e35901a73a49483ec8a251c484037a983ce9397b39b781cab7c93e1a28",
+      "sha256": "a6dbc70b777f3818334ceb8095f26ca97eaad070c399b0a91eaef619b8fb4337"
+    }
+  }
+}

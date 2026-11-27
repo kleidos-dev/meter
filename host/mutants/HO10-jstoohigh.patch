@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant HO10-jstoohigh: The page's rules take a role's limit for a GPIO it can have.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && METER_BROWSER_REQUIRED=1 ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_panel_browser.py -k 'pages_rules'
+
+diff --git a/host/kleidos_meter/panel/static/js/pins-math.js b/host/kleidos_meter/panel/static/js/pins-math.js
+--- a/host/kleidos_meter/panel/static/js/pins-math.js
++++ b/host/kleidos_meter/panel/static/js/pins-math.js
+@@ -155,7 +155,7 @@
+     if (row.class === "reserved") {
+         return "reserved";
+     }
+-    return gpio >= role.below ? "too_high" : null;
++    return gpio > role.below ? "too_high" : null;
+ }
+
+ /**

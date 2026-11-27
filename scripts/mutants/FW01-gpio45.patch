@@ -1,0 +1,22 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW01-gpio45: GPIO45, a strapping pin, is admitted for any role.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+# The build's static_asserts refuse GPIO45 for every role, so the defect is
+# hidden from constant evaluation: what is asked is whether the run-time tests,
+# which the vectors and every port of the rules rest on, catch it too.
+
+diff --git a/firmware/src/pinmap.h b/firmware/src/pinmap.h
+index d525d63..ffe5c6e 100644
+--- a/firmware/src/pinmap.h
++++ b/firmware/src/pinmap.h
+@@ -222,7 +222,8 @@ struct Verdict {
+         if ( !row.has_value() ) {
+             return { Problem::NoPin, at };
+         }
+-        if ( row->pinClass == pin_table::PinClass::Reserved ) {
++        if ( row->pinClass == pin_table::PinClass::Reserved
++             && ( std::is_constant_evaluated() || gpio != 45 ) ) {
+             return { Problem::Reserved, at };
+         }
+         if ( gpio >= pin_table::kRoleBelow[index] ) {

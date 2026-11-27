@@ -1,0 +1,21 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant HO10-gapmargin: A gap at the view's start is judged without the data beyond the edge.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && METER_BROWSER_REQUIRED=1 ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_panel_browser.py -k 'gap_at_a_view_edge'
+
+diff --git a/host/kleidos_meter/panel/static/js/chart-math.js b/host/kleidos_meter/panel/static/js/chart-math.js
+--- a/host/kleidos_meter/panel/static/js/chart-math.js
++++ b/host/kleidos_meter/panel/static/js/chart-math.js
+@@ -684,11 +684,6 @@
+         }
+     }
+     let previous = Number.NEGATIVE_INFINITY;
+-    for (let i = 0; i < offset; i += 1) {
+-        if (held[i] > 0) {
+-            previous = i;
+-        }
+-    }
+     let sum = 0;
+     let weight = 0;
+     for (let i = Math.max(0, offset - half); i <= Math.min(total - 1, offset + half); i += 1) {

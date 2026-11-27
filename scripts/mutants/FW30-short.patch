@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW30-short: SENSe:AVERage:COUNt? answers to SENS:AVE:COUN?, not to its short form.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -821,7 +821,7 @@
+         { "SENSe:CURRent:APERture?", N, &Console::cmdCurrentAperture },
+         { "SENSe:VOLTage:APERture?", N, &Console::cmdVoltageAperture },
+         { "SENSe:TEMPerature:APERture?", N, &Console::cmdTemperatureAperture },
+-        { "SENSe:AVERage:COUNt?", N, &Console::cmdAverageCount },
++        { "SENSe:AVErage:COUNt?", N, &Console::cmdAverageCount },
+         { "SENSe:AVERage:COUNt", D | R | C | takes( 1U ), &Console::cmdAverageCountSet },
+         { "SENSe:AVERage[:STATe]", D | R | C | takes( 1U ), &Console::cmdAverageSet },
+         { "SENSe:AVERage[:STATe]?", N, &Console::cmdAverageQuery },

@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW07-sinknames: The null and statistics sinks swap names.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/sampler.cpp b/firmware/src/sampler.cpp
+--- a/firmware/src/sampler.cpp
++++ b/firmware/src/sampler.cpp
+@@ -510,5 +510,5 @@ const char* Sampler::sinkName() const noexcept {
+     // In Sink's order: sink_ only ever holds one of its enumerators.
+     static constexpr std::array<const char*, kSinkCount> kNames = { "idle", "ring", "stream",
+-                                                                    "null", "stats" };
++                                                                    "stats", "null" };
+     return kNames[static_cast<std::size_t>( sink_.load() )];
+ }

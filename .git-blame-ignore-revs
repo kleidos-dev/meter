@@ -1,0 +1,12 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Commits that only reformat, which `git blame` should look through:
+#   git config blame.ignoreRevsFile .git-blame-ignore-revs
+# (GitHub's blame view reads this file by itself.)
+
+# Format the firmware sources with clang-format (clang-format 23.1.5)
+646be1986e1cee3616dca58524baf2c25098033f
+
+# Format the Python outside host/ with ruff 0.8.4
+a03b15507c41fe6b704b28939b5ac1bf20e44578

@@ -1,0 +1,265 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Kleidos bench power meter -- ESP-IDF defaults.
+# Every symbol below was confirmed to exist in the installed
+# framework-espidf@4.60003.0 tree (docs/architecture.md SS 10).
+
+# Silence. The firmware owns UART0 directly and prints one line per fact; a log
+# line inside a ring dump corrupts a capture (docs/architecture.md SS 10).
+CONFIG_ESP_CONSOLE_NONE=y
+CONFIG_LOG_DEFAULT_LEVEL_NONE=y
+CONFIG_BOOTLOADER_LOG_LEVEL_NONE=y
+
+# No radio. The meter needs neither, and both would share the 3.3 V rail the
+# INA228's front end sits on.
+#
+# Only Bluetooth is settable here. `CONFIG_ESP_WIFI_ENABLED` is **promptless**
+# -- `$IDF/components/esp_wifi/Kconfig:4-6` declares it `bool` with no prompt
+# string and `default y if SOC_WIFI_SUPPORTED` -- so a user assignment does not
+# reach it: esp_kconfiglib skips the invalidation for a symbol with no prompt
+# and only warns, and the warning does not fail the build. Writing the line
+# would therefore have looked like a hard exclusion while Wi-Fi stayed enabled
+# in the config. Nothing in src/CMakeLists.txt lists `esp_wifi` in REQUIRES, so the
+# linker never pulled it in, and from FW-16 the hard exclusion is made: the
+# project's component list (firmware/CMakeLists.txt, COMPONENTS) holds the
+# firmware's component and what it requires, so neither esp_wifi nor bt is in
+# the build, their options are not in the generated config at all, and this
+# line, like CONFIG_USJ_ENABLE_USB_SERIAL_JTAG=n below, states what an absent
+# symbol already means (tests/firmware/test_meter_sdkconfig_reaches_the_build.py
+# accepts an `=n` that is absent for that reason).
+CONFIG_BT_ENABLED=n
+
+# No USB-Serial-JTAG (0.16.6). The meter is serial-only by the owner's ruling
+# of 2026-11-21, its console is UART0 through the CH343 and its native USB
+# port is unplugged on the rig (docs/carrier-board.md SS 7), so nothing uses
+# the SoC's own USB peripheral on GPIO19/20. With ESP_CONSOLE_NONE above, the
+# secondary console still defaulted to it
+# ($IDF/components/esp_stdio/Kconfig:35-55, `default
+# ESP_CONSOLE_SECONDARY_USB_SERIAL_JTAG`), and that selects
+# USJ_ENABLE_USB_SERIAL_JTAG (Kconfig:57-61): the pad and its bus clock stayed
+# on, its VFS and a connection monitor were linked, and the monitor's
+# start-of-frame hook ran from the FreeRTOS tick at 1 kHz. Both are off now,
+# so esp_perip_clk_init() disables the pad and gates the clock at startup
+# after any reset that is not of the CPU alone
+# ($IDF/components/esp_system/port/soc/esp32s3/clk.c:235-297; the switch is
+# $IDF/components/esp_driver_usb_serial_jtag/Kconfig:4-17). What still works:
+# flashing, which is the ROM's download mode over UART0 and the CH343, and the
+# console. What is lost: the native port's console and its built-in JTAG,
+# neither ever used here. The ROM and the bootloader still bring the module up
+# before the app runs (the Kconfig's own note); only an eFuse would remove it
+# from them, and no eFuse is touched. scripts/check_radio_absent.py fails an
+# image that links the driver again.
+CONFIG_ESP_CONSOLE_SECONDARY_NONE=y
+CONFIG_USJ_ENABLE_USB_SERIAL_JTAG=n
+
+# A 280 us cadence is below the tick; the sampler paces on esp_timer
+# (docs/architecture.md SS 3.3).
+CONFIG_FREERTOS_HZ=1000
+
+# ESP-IDF's task watchdog off (FW-11): it kept its subscribers on the heap
+# (its object and Core 0's idle entry before app_main, one entry per task
+# after) and claimed its interrupt through the allocator (docs/misra.md D1).
+# The instrument runs its own on the same timer, Timer Group 0's MWDT
+# (src/watchdog.h): the console, the sampler and Core 0's idle task check in,
+# and a starved one resets the chip after 5 s, every relay releasing to the
+# measuring circuit, with SYSTem:HEALth? saying reset=task_wdt as before
+# (esp_reset_reason() reads the timer's reset of the digital core as
+# ESP_RST_TASK_WDT). Core 1's idle task is not supervised: the timer-paced
+# sampler spins there for the sub-millisecond remainder of each period
+# (docs/architecture.md SS 5.1). The interrupt watchdog, on Timer Group 1, is
+# deliberately left alone. With the option off, the task watchdog's own
+# options (its init at startup, its timeout, its panic, its idle checks) no
+# longer exist, and none is stated.
+CONFIG_ESP_TASK_WDT_EN=n
+
+# The boot's bring-up and the sampler's begin() run on Core 1 through the IPC
+# task (src/main.cpp), so that the own I2C master (src/i2c_bus.cpp, FW-14),
+# which serves the core it was begun on, and the ALERT pin's interrupt
+# (routed by src/interrupt.cpp, FW-09) are on the core the sampler runs on.
+# The console's transactions reach that core through the same task. Its
+# default stack (1,280 bytes) is sized for the short callbacks ESP-IDF itself
+# sends; the bring-up wants more.
+CONFIG_ESP_IPC_TASK_STACK_SIZE=4096
+
+# The console is ESP-IDF's main task (FW-17): app_main() runs the boot and then
+# the console's loop on it and never returns, so the task is never deleted and
+# the idle task frees nothing of it after app_main()'s first line. Its stack
+# is the console's 8192 bytes (src/console.h kConsoleStackBytes, which
+# src/console.cpp holds equal to this option), where ESP-IDF's default is
+# 3584, and it stays pinned to Core 0, the console's core (ESP-IDF's default,
+# stated because src/console.cpp holds that too). ESP-IDF allocates the task
+# before app_main() (docs/misra.md D1); the console's own static task and its
+# 8 KiB stack are gone.
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=8192
+CONFIG_ESP_MAIN_TASK_AFFINITY_CPU0=y
+
+# The measurement's hot path out of flash (0.16.1). The ESP32-S3's
+# instruction cache is one, shared by both cores: code run from flash on
+# Core 1 waits for every line Core 0's work has evicted, and a radio on
+# Core 0 evicts a great deal (the NW-00 spike lost up to 17 % of STATE's
+# conversions with the station sending, docs/architecture.md SS 5.2).
+# So everything a conversion executes is in IRAM: the sampler's own functions
+# and the own I2C master's transactions (IRAM_ATTR; their register access is
+# hal/i2c_ll.h's inline functions), and FreeRTOS, which IDF 6 moved to flash
+# to save IRAM: the semaphore take the loop blocks on, the stream queue's
+# send, vTaskDelay(). Every FreeRTOS function moves, the scheduler's and the
+# idle task's with them; $IDF/components/freertos/Kconfig ("Place FreeRTOS
+# functions in IRAM").
+#
+# Already in IRAM by the pinned ESP-IDF's defaults, and so not set:
+# esp_timer_get_time() (ESP_TIMER_IN_IRAM) and the interrupt dispatch
+# (ESP_INTR_IN_IRAM). Left in flash, because no conversion runs it: the own
+# master's recovery of a stuck bus (src/i2c_bus.cpp). The watchdog's
+# check-in, every 200 ms of samples, is the firmware's own and in IRAM
+# (src/watchdog.cpp). The ALERT pin's interrupt needs no ESP-IDF function
+# (FW-09): its handler is the sampler's, and its enable and status are
+# inlined register writes (hal/gpio_ll.h). Until FW-14 ESP-IDF's I2C master
+# also asked for CONFIG_I2C_ISR_IRAM_SAFE and a linker fragment for its
+# synchronous transfer path; neither is linked now (scripts/
+# check_drivers_absent.py). scripts/check_iram_hot_path.py lists all of it
+# from the linked image and fails on a hot function in flash.
+CONFIG_FREERTOS_IN_IRAM=y
+
+# PSRAM on, octal: the module is an N16R8 and the owner confirmed the part, so
+# the mode is no longer a guess. v1 left it off because 9.18 s of internal RAM
+# answered v1's questions; the uncertainty work asks a longer one -- a TRACE
+# window long enough to estimate an autocorrelation time -- and 128 KiB cannot
+# hold it. Octal is the R8 mode; declaring quad here would silently degrade to
+# no PSRAM at all, which is how a board of the Kleidos fleet lost its vault.
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_MODE_OCT=y
+CONFIG_SPIRAM_SPEED_80M=y
+
+# The TRACE ring is a static 4 MiB array in PSRAM (EXT_RAM_BSS_ATTR in
+# src/main.cpp), reserved at link time so that no capture allocates
+# (docs/misra.md). A board whose PSRAM is absent panics at boot either way:
+# CONFIG_SPIRAM_IGNORE_NOTFOUND was never set, and cannot be beside this.
+CONFIG_SPIRAM_ALLOW_BSS_SEG_EXTERNAL_MEMORY=y
+
+# PSRAM in the memory map only, not in the heap (FW-18). The ring above is
+# the one thing the firmware keeps there, placed at link time; with
+# ESP-IDF's default, SPIRAM_USE_MALLOC, its startup also registered PSRAM as
+# a heap (a 36-byte region record) and took a 32 KiB pool of internal RAM
+# out of the heap for DMA and stacks (SPIRAM_MALLOC_RESERVE_INTERNAL, a
+# 32,768-byte allocation and its 36-byte record), three allocations before
+# app_main() that nothing here asks for. The ring's section is still zeroed
+# at boot whatever the access method (esp_psram_bss_init(), called from
+# cpu_start.c for CONFIG_SPIRAM_ALLOW_BSS_SEG_EXTERNAL_MEMORY alone,
+# $IDF/components/esp_psram/system_layer/esp_psram.c), and the memory test
+# below still runs. DIAGnostic:HEAP?'s free_spiram reads 0 from here on.
+# $IDF/components/esp_psram/Kconfig.spiram.common, choice SPIRAM_USE.
+CONFIG_SPIRAM_USE_MEMMAP=y
+
+# ESP-IDF calls esp_heap_trace_alloc_hook / esp_heap_trace_free_hook from every
+# allocation and free; src/heap_monitor.cpp counts them, and DIAGnostic:HEAP?
+# reports how many the steady state made (none, outside a maintenance
+# operation).
+CONFIG_HEAP_USE_HOOKS=y
+
+# Free checks on an instrument that is not power-constrained (0.14.0). Light
+# heap poisoning puts a canary at each end of every allocation, so a write past
+# one is caught at its free; the steady state allocates nothing, so it costs
+# nothing there. The end-of-stack watchpoint panics on the first word written
+# past a task's stack, where the canary check would see it only at the next
+# switch. PSRAM is tested at every boot (stated: it is IDF's default), so a
+# ring in a bad part never measures.
+CONFIG_HEAP_POISONING_LIGHT=y
+CONFIG_FREERTOS_WATCHPOINT_END_OF_STACK=y
+CONFIG_SPIRAM_MEMTEST=y
+
+# Flash size, stated once instead of defaulted. The ESPTOOLPY_FLASHSIZE choice
+# defaults to 2 MB
+# ($IDF/components/esptool_py/Kconfig.projbuild:114, `default
+# ESPTOOLPY_FLASHSIZE_2MB`), while the board JSON this project pins declares
+# 8 MB (`upload.flash_size` in the installed
+# platforms/espressif32/boards/esp32-s3-devkitc-1.json). PlatformIO compares the
+# two and warns on a mismatch, and too small a value caps what esp_flash can
+# address. The module is an N16R8, so the honest figure is 16 MB and
+# platformio.ini overrides the generic board JSON to say so -- the DevKitC
+# profile that ships with the platform describes a smaller part than the one on
+# this bench. The symbol is Kconfig.projbuild:124-125.
+CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
+
+# The CPU, stated rather than defaulted. IDF's default for this target is
+# 160 MHz, which is what every build so far has quietly used. The instrument
+# formats and writes one line per channel per conversion, and both the sample
+# rate and the line rate are rising, so the headroom is wanted and the cost is
+# nothing: this board is mains-powered through a hub and measures OTHER boards'
+# current, never its own.
+CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_240=y
+
+# Optimize for speed (-O2), not for the debugger (-Og, IDF's default, which
+# every build before 0.14.0 used without saying so). BURST's loop runs a few
+# microseconds over its 100 us period at -Og, and the instrument is debugged
+# through its console, never through GDB (docs/architecture.md SS 3.4).
+CONFIG_COMPILER_OPTIMIZATION_PERF=y
+
+# The RTC slow clock on its internal RC, stated rather than defaulted. GPIO15
+# and GPIO16 are the 32 kHz crystal pins (XTAL_32K_P / XTAL_32K_N), and on this
+# rig GPIO15 drives the bypass (the Relay 2 Click) and GPIO16 relay K3's input
+# (src/relay.h, docs/carrier-board.md SS 8.1): an external crystal or
+# oscillator would take them and put a clock on the bypass relay's input.
+# relay.cpp refuses to build with either selected. The
+# symbol is $IDF/components/esp_hw_support/port/esp32s3/Kconfig.rtc:7.
+CONFIG_RTC_CLK_SRC_INT_RC=y
+
+# The partition table is the meter's own (FW-16): the calibration record
+# log's `calib` partition at 0x9000, the pin map's `pins` at 0xB000 (FW-03)
+# and the image, no NVS and no PHY data (partitions.csv says why).
+# platformio.ini's board_build.partitions names the same file for PlatformIO's
+# own table generation, and tests/firmware/test_partition_table.py holds the
+# two to one file.
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+
+# ESP-IDF's check of a flash write against the bootloader, the partition
+# table and the running image off (FW-16). That check needs the running
+# partition, which takes the partition table into a list on the heap; its
+# other check, esp_partition_is_flash_region_writable(), walks the same list
+# with an iterator it allocates, and the image links it wrapped onto a static
+# table that allows only the two record logs' two sectors each
+# (src/flash_port.h, firmware/CMakeLists.txt). The protection is narrower
+# than before, not wider: with this option the wrapped check is the only one,
+# and it refuses every write and erase outside those 16 KiB, the bootloader,
+# the table and the image included. $IDF/components/spi_flash/Kconfig:263-288,
+# spi_flash_os_func_app.c main_flash_region_protected().
+CONFIG_SPI_FLASH_DANGEROUS_WRITE_ALLOWED=y
+
+# ESP-IDF's brownout handling off; the firmware arms the detector itself
+# (FW-18). ESP-IDF's startup armed it with an interrupt and a software reset
+# (ESP_BROWNOUT_USE_INTR, which SPI_FLASH_BROWNOUT_RESET selects, a
+# promptless option that defaults to y, $IDF/components/spi_flash/Kconfig:
+# 13-21), and registering the handler through rtc_isr_register() allocated
+# three blocks before app_main(): its own 20-byte record and the interrupt
+# allocator's handle and vector (power_supply/brownout.c
+# esp_brownout_init()). The interrupt exists to send an XMC flash chip a
+# reset when a brownout lands in an erase or a write
+# (flash_brownout_hook.c: "Currently only XMC is suggested to reset when
+# brownout"); the meter's flash is not one (esptool's flash_id reads
+# manufacturer 0x68, BoyaMicro, device 0x4018, on the instrument of record,
+# 2026-11-23). src/brownout.cpp gives the detector ESP-IDF's own
+# configuration for the case without the interrupt, at the same 2.44 V
+# level: a hardware reset of the system, the flash suspended and the RF
+# powered down, right after app_main() releases the relays, with nothing
+# allocated.
+# Until then the bootloader's analog brownout reset holds
+# (bootloader_esp32s3.c: brownout_ll_ana_reset_enable(true)). The reset
+# reason is the hardware's, which esp_reset_reason() reports as
+# ESP_RST_BROWNOUT, so SYSTem:HEALth? names it as before. A meter built on
+# a module with XMC flash (manufacturer 0x20) wants ESP-IDF's interrupt
+# back, and its three allocations with it (docs/misra.md D1).
+# $IDF/components/esp_hw_support/power_supply/port/esp32s3/Kconfig.power.
+CONFIG_ESP_BROWNOUT_DET=n
+
+# No virtual file system (FW-18). Nothing in the image opens a file or a
+# stream; the console writes UART0's registers (src/uart0.cpp), and the
+# source gate bans printf, puts, fwrite and fopen
+# (tests/firmware/test_no_dynamic_memory.py). The vfs component left the
+# build with FW-16's component list, which took its two allocations before
+# app_main() with it (esp_vfs_register_fs_common(), 63 bytes in FW-07's
+# census); these two lines keep it so should a requirement bring it back, and
+# tests/firmware/test_meter_sdkconfig_reaches_the_build.py holds the
+# component out of the build. $IDF/components/vfs/Kconfig.
+CONFIG_VFS_SUPPORT_IO=n
+CONFIG_VFS_INITIALIZE_DEV_NULL=n

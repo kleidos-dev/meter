@@ -1,0 +1,907 @@
+<!doctype html>
+<!-- SPDX-FileCopyrightText: 2026 José M. Requena Plens -->
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="color-scheme" content="dark light">
+        <meta name="referrer" content="no-referrer">
+        <title>Kleidos meter panel</title>
+        <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='13' fill='%2308090c' stroke='%2300d2ff' stroke-width='3'/%3E%3Cpath d='M7 19h5l2-7 4 10 2-6h5' fill='none' stroke='%23eceef1' stroke-width='2' stroke-linejoin='round' stroke-linecap='round'/%3E%3C/svg%3E">
+        <link rel="stylesheet" href="/static/panel.css">
+        <script type="module" src="/static/js/main.js"></script>
+    </head>
+    <body>
+        <a class="skip-link" href="#main">Skip to the panel</a>
+        <header class="masthead-band">
+            <div class="masthead">
+                <p class="brand">Kleidos meter</p>
+                <dl class="statusbar" aria-label="Instrument and session">
+                    <div><dt>Instrument</dt><dd><span data-status="serial">-</span><span class="qualifier" data-qualifier="serial"></span></dd></div>
+                    <div><dt>Image</dt><dd><span data-status="image">-</span><span class="qualifier" data-qualifier="image"></span></dd></div>
+                    <div><dt>Capture</dt><dd><span data-status="capture">-</span><span class="qualifier" data-qualifier="capture"></span></dd></div>
+                    <div><dt>Samples</dt><dd><span data-status="loss">dropped 0 · lost 0</span><span class="qualifier" data-qualifier="loss"></span></dd></div>
+                    <div><dt>Controller</dt><dd><span data-status="controller">this panel</span><span class="qualifier" data-qualifier="controller"></span></dd></div>
+                    <div><dt>Calibration</dt><dd><span data-status="calibration">-</span><span class="qualifier" data-qualifier="calibration"></span></dd></div>
+                    <div><dt>Pins</dt><dd><span data-status="pins">-</span><span class="qualifier" data-qualifier="pins"></span></dd></div>
+                    <div><dt>Line</dt><dd><span data-status="link">-</span><span class="qualifier" data-qualifier="link"></span></dd></div>
+                </dl>
+            </div>
+        </header>
+        <main id="main">
+            <noscript>
+                <p>The panel draws its controls and its chart with JavaScript, and this browser runs none here. The HTTP API is below <code>/api/</code>.</p>
+            </noscript>
+            <nav class="views" aria-label="Views">
+                <ul>
+                    <li><a href="#live" aria-current="page">Live</a></li>
+                    <li><a href="#sequences">Sequences</a></li>
+                    <li><a href="#runs">Runs</a></li>
+                    <li><a href="#relays">Relays</a></li>
+                    <li><a href="#pins">Pins</a></li>
+                    <li><a href="#settings">Settings</a></li>
+                    <li><a href="#health">Calibration and health</a></li>
+                    <li><a href="#console">SCPI console</a></li>
+                </ul>
+            </nav>
+            <section id="live" class="card" data-view="live" aria-labelledby="live-title">
+                <h1 id="live-title">Live</h1>
+                <form id="capture-form" class="controls" aria-describedby="capture-note">
+                    <div class="field">
+                        <label for="capture-profile">Profile</label>
+                        <select id="capture-profile" name="profile" data-setting="profile"></select>
+                    </div>
+                    <fieldset class="field" data-setting="channels">
+                        <legend>Channels</legend>
+                        <div id="capture-channels" class="checks"></div>
+                    </fieldset>
+                    <div class="field">
+                        <label for="capture-seconds">Seconds</label>
+                        <input id="capture-seconds" name="seconds" type="number" min="0.1" max="86400" step="any" placeholder="until stop">
+                    </div>
+                    <div class="field">
+                        <label for="capture-label">Run label</label>
+                        <input id="capture-label" name="label" type="text" maxlength="80" autocomplete="off">
+                    </div>
+                    <div class="actions">
+                        <button id="capture-start" class="btn btn-primary" type="submit">Start</button>
+                        <button id="capture-stop" class="btn" type="button" disabled>Stop</button>
+                    </div>
+                    <div class="field">
+                        <label for="mark-label">Mark label</label>
+                        <input id="mark-label" name="mark" type="text" maxlength="15" autocomplete="off">
+                    </div>
+                    <div class="actions">
+                        <button id="capture-mark" class="btn" type="button" disabled>Mark</button>
+                    </div>
+                </form>
+                <p id="capture-refusal" class="refusal" role="alert"></p>
+                <p id="capture-note" class="hint"></p>
+                <div class="controls">
+                    <fieldset class="field">
+                        <legend>Window</legend>
+                        <div id="chart-windows" class="segmented"></div>
+                    </fieldset>
+                    <fieldset class="field" aria-describedby="chart-smoothing-hint">
+                        <legend>Smoothing</legend>
+                        <div id="chart-smoothing" class="segmented"></div>
+                    </fieldset>
+                    <div class="actions">
+                        <button id="chart-follow" class="btn" type="button">Follow live</button>
+                    </div>
+                    <div class="actions" role="group" aria-label="Export the view" aria-describedby="chart-export-hint">
+                        <button id="chart-export-png" class="btn" type="button">View as PNG</button>
+                        <button id="chart-export-csv" class="btn" type="button">View as CSV</button>
+                    </div>
+                </div>
+                <div class="chart-frame">
+                    <canvas id="chart" tabindex="0" role="img" aria-label="Live chart of the channels the capture streams, one lane per unit" aria-describedby="chart-readout chart-keys"></canvas>
+                </div>
+                <p id="chart-readout" class="readout" aria-live="off">No samples yet.</p>
+                <p id="chart-smoothing-hint" class="hint">The line is the mean of each pixel column, or with smoothing the moving average over the window chosen; the faint band is each column's minimum to maximum. Smoothing changes only the drawing, never the samples recorded, the statistics or a run's exports, and the live chart and a run's history each remember their own choice in this browser.</p>
+                <p id="chart-export-hint" class="hint">View as PNG and View as CSV save what the chart shows now, made in this page: the image with its caption, the time window, the source (live or the run) and the instrument, and the table of its pixel columns, each with the line, the band's minimum and maximum and the samples the line averages, its header naming the filter and the window. A run's own exports, of the samples it recorded, are in Runs.</p>
+                <p id="chart-keys" class="hint">With the chart focused: <kbd>←</kbd> <kbd>→</kbd> pan, <kbd>Shift</kbd> with them moves the crosshair, <kbd>+</kbd> <kbd>−</kbd> zoom, <kbd>F</kbd> follows the newest sample, <kbd>Esc</kbd> hides the crosshair. With a pointer: drag pans, <kbd>Ctrl</kbd> and the wheel or a pinch zooms, a double click follows again.</p>
+                <section id="statistics" class="stack" aria-labelledby="statistics-title" hidden>
+                    <h2 id="statistics-title">Statistics</h2>
+                    <p id="statistics-run" class="hint"></p>
+                    <dl id="statistics-list" class="stats"></dl>
+                </section>
+            </section>
+            <section id="sequences" class="card" data-view="sequences" aria-labelledby="sequences-title" hidden>
+                <h1 id="sequences-title">Sequences</h1>
+                <p class="hint">One button per measurement sequence. One runs at a time; its cleanup (the relays back on the shunt, the I2C clock back, a capture it started stopped) runs whatever happens, and the instrument's own hold puts the relays back 120 s after a panel that went away. A sequence that would leave the DUT without its battery asks first.</p>
+                <div class="sequence-grid">
+                    <article class="sequence" data-sequence="HEALTH" aria-labelledby="seq-health-title">
+                        <h3 id="seq-health-title">Health</h3>
+                        <p class="hint">identity, reset reason, stacks, heap counts, watchdog, self-test and bus scan</p>
+                        <div class="actions">
+                            <button class="btn" type="button" data-action="run">Run</button>
+                        </div>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </article>
+                    <article class="sequence" data-sequence="NULL_RELAY" aria-labelledby="seq-null-relay-title">
+                        <h3 id="seq-null-relay-title">Null on the relay path</h3>
+                        <p class="hint">a null with the DUT on the bypass (Relay 2 then Relay 1), the path released after</p>
+                        <div class="controls">
+                            <div class="field">
+                                <label for="seq-null-relay-seconds">Null window (s)</label>
+                                <input id="seq-null-relay-seconds" type="number" inputmode="numeric" step="1" data-param="seconds">
+                            </div>
+                        </div>
+                        <div class="actions">
+                            <button class="btn" type="button" data-action="run">Run</button>
+                        </div>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </article>
+                    <article class="sequence" data-sequence="NULL_LEAD" aria-labelledby="seq-null-lead-title">
+                        <h3 id="seq-null-lead-title">Null on an open lead</h3>
+                        <p class="hint">a null with Relay 1 open (FORCe: the DUT has no battery), the lead reclosed after</p>
+                        <div class="controls">
+                            <div class="field">
+                                <label for="seq-null-lead-seconds">Null window (s)</label>
+                                <input id="seq-null-lead-seconds" type="number" inputmode="numeric" step="1" data-param="seconds">
+                            </div>
+                        </div>
+                        <div class="actions">
+                            <button class="btn" type="button" data-action="run">Run</button>
+                        </div>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </article>
+                    <article class="sequence" data-sequence="STATE" aria-labelledby="seq-state-title">
+                        <h3 id="seq-state-title">STATE capture</h3>
+                        <p class="hint">a streamed capture of a state: bus, shunt and temperature at 1152 us</p>
+                        <div class="controls">
+                            <div class="field">
+                                <label for="seq-state-seconds">Length (s)</label>
+                                <input id="seq-state-seconds" type="number" inputmode="numeric" step="1" data-param="seconds">
+                            </div>
+                        </div>
+                        <div class="actions">
+                            <button class="btn" type="button" data-action="run">Run</button>
+                        </div>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </article>
+                    <article class="sequence" data-sequence="SLEEP" aria-labelledby="seq-sleep-title">
+                        <h3 id="seq-sleep-title">SLEEP capture</h3>
+                        <p class="hint">a streamed capture of deep sleep, averaged 16 at 67.52 ms</p>
+                        <div class="controls">
+                            <div class="field">
+                                <label for="seq-sleep-seconds">Length (s)</label>
+                                <input id="seq-sleep-seconds" type="number" inputmode="numeric" step="1" data-param="seconds">
+                            </div>
+                        </div>
+                        <div class="actions">
+                            <button class="btn" type="button" data-action="run">Run</button>
+                        </div>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </article>
+                    <article class="sequence" data-sequence="TRACE" aria-labelledby="seq-trace-title">
+                        <h3 id="seq-trace-title">TRACE ring</h3>
+                        <p class="hint">a ring of 1048576 shunt samples at 280 us, then its dump</p>
+                        <div class="actions">
+                            <button class="btn" type="button" data-action="run">Run</button>
+                        </div>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </article>
+                    <article class="sequence" data-sequence="BURST" aria-labelledby="seq-burst-title">
+                        <h3 id="seq-burst-title">BURST ring</h3>
+                        <p class="hint">a ring at 100 us on a 1 MHz bus, then its dump and the bus&#x27;s clock back</p>
+                        <div class="actions">
+                            <button class="btn" type="button" data-action="run">Run</button>
+                        </div>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </article>
+                    <article class="sequence" data-sequence="COLD_BOOT" aria-labelledby="seq-cold-boot-title">
+                        <h3 id="seq-cold-boot-title">Cold boot</h3>
+                        <p class="hint">the DUT&#x27;s boot from power-off: a capture across a lead cycle, its moves marked</p>
+                        <div class="controls">
+                            <div class="field">
+                                <label for="seq-cold-boot-off_ms">Off for (ms)</label>
+                                <input id="seq-cold-boot-off_ms" type="number" inputmode="numeric" step="1" data-param="off_ms">
+                            </div>
+                            <div class="field">
+                                <label for="seq-cold-boot-seconds">Captured after (s)</label>
+                                <input id="seq-cold-boot-seconds" type="number" inputmode="numeric" step="1" data-param="seconds">
+                            </div>
+                        </div>
+                        <div class="actions">
+                            <button class="btn" type="button" data-action="run">Run</button>
+                        </div>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </article>
+                    <article class="sequence" data-sequence="CAL_VERIFY" aria-labelledby="seq-cal-verify-title">
+                        <h3 id="seq-cal-verify-title">Verify the calibration</h3>
+                        <p class="hint">the instrument&#x27;s calibration against the registry&#x27;s copy</p>
+                        <div class="actions">
+                            <button class="btn" type="button" data-action="run">Run</button>
+                        </div>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </article>
+                    <article class="sequence" data-sequence="CAL_RESTORE" aria-labelledby="seq-cal-restore-title">
+                        <h3 id="seq-cal-restore-title">Restore the calibration</h3>
+                        <p class="hint">the registry&#x27;s copy written back where it differs, then verified</p>
+                        <div class="actions">
+                            <button class="btn" type="button" data-action="run">Run</button>
+                        </div>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </article>
+                </div>
+                <section id="sequence-progress" class="stack" aria-labelledby="sequence-progress-title">
+                    <h2 id="sequence-progress-title">Progress</h2>
+                    <p id="sequence-state" class="readout" aria-live="polite">No sequence has run since serve started.</p>
+                    <progress id="sequence-bar" max="1" value="0" aria-labelledby="sequence-progress-title"></progress>
+                    <div class="actions">
+                        <button id="sequence-abort" class="btn" type="button" disabled>Abort</button>
+                    </div>
+                    <p id="sequence-refusal" class="refusal" role="alert"></p>
+                    <div class="columns">
+                        <div class="stack">
+                            <h3>Steps</h3>
+                            <ol id="sequence-steps" class="log"></ol>
+                        </div>
+                        <div class="stack">
+                            <h3>Cleanup</h3>
+                            <ol id="sequence-cleanup" class="log"></ol>
+                        </div>
+                    </div>
+                    <h3>Results</h3>
+                    <dl id="sequence-results" class="stats"></dl>
+                </section>
+            </section>
+            <section id="runs" class="card" data-view="runs" aria-labelledby="runs-title" hidden>
+                <h1 id="runs-title">Runs</h1>
+                <p class="hint">Every capture serve recorded, newest first. Open shows a run in the Live chart from the server's count, mean, minimum and maximum per bucket, so a run of any length costs the page the same; the exports are the run's own files.</p>
+                <div class="actions">
+                    <button id="runs-refresh" class="btn" type="button">Refresh</button>
+                </div>
+                <p id="runs-refusal" class="refusal" role="alert"></p>
+                <div class="table-frame">
+                    <table class="runs">
+                        <caption class="hint" id="runs-caption">No run read yet.</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Run</th>
+                                <th scope="col">Label</th>
+                                <th scope="col">Profile</th>
+                                <th scope="col">Noise reduction</th>
+                                <th scope="col">State</th>
+                                <th scope="col">Samples</th>
+                                <th scope="col">Dropped</th>
+                                <th scope="col">Marks</th>
+                                <th scope="col">Ended by</th>
+                                <th scope="col">Open and export</th>
+                            </tr>
+                        </thead>
+                        <tbody id="runs-body"></tbody>
+                    </table>
+                </div>
+            </section>
+            <section id="relays" class="card" data-view="relays" aria-labelledby="relays-title" hidden>
+                <h1 id="relays-title">Relays</h1>
+                <figure class="circuit">
+                    <svg id="circuit" viewBox="0 0 680 250" role="img" aria-labelledby="circuit-title circuit-text">
+                        <title id="circuit-title">The measuring circuit: the cell, the shunt, Relay 1 on the DUT's battery lead and Relay 2 across the shunt</title>
+                        <g class="wire" data-segment="cell">
+                            <polyline points="60,98 60,50 150,50"/>
+                        </g>
+                        <g class="wire" data-segment="shunt">
+                            <polyline points="150,50 190,50"/>
+                            <rect class="part" x="190" y="38" width="100" height="24" rx="3"/>
+                            <polyline points="290,50 340,50"/>
+                        </g>
+                        <g class="wire" data-segment="k1">
+                            <polyline points="400,50 480,50"/>
+                        </g>
+                        <g class="wire" data-segment="k2">
+                            <polyline points="150,50 150,140 300,140"/>
+                            <polyline points="360,140 480,140 480,50"/>
+                        </g>
+                        <g class="wire" data-segment="dut">
+                            <polyline points="480,50 540,50"/>
+                            <polyline points="540,180 520,180 520,215 60,215 60,112"/>
+                        </g>
+                        <line class="plate" x1="40" y1="98" x2="80" y2="98"/>
+                        <line class="plate plate-short" x1="48" y1="112" x2="72" y2="112"/>
+                        <rect class="part" x="540" y="30" width="110" height="170" rx="8"/>
+                        <circle class="node" cx="150" cy="50" r="4"/>
+                        <circle class="node" cx="480" cy="50" r="4"/>
+                        <circle class="pivot" cx="340" cy="50" r="4"/>
+                        <circle class="pivot" cx="400" cy="50" r="4"/>
+                        <line id="k1-blade" class="blade" x1="340" y1="50" x2="400" y2="50"/>
+                        <circle class="pivot" cx="300" cy="140" r="4"/>
+                        <circle class="pivot" cx="360" cy="140" r="4"/>
+                        <line id="k2-blade" class="blade" x1="300" y1="140" x2="352" y2="116"/>
+                        <text x="18" y="80">cell</text>
+                        <text x="88" y="92">+</text>
+                        <text x="88" y="124">−</text>
+                        <text x="240" y="30" text-anchor="middle">shunt</text>
+                        <text x="150" y="30" text-anchor="middle">VIN+</text>
+                        <text x="315" y="30" text-anchor="middle">VIN−</text>
+                        <text id="k1-label" x="370" y="80" text-anchor="middle">Relay 1 lead</text>
+                        <text id="k2-label" x="330" y="170" text-anchor="middle">Relay 2 bypass</text>
+                        <text x="595" y="110" text-anchor="middle">DUT</text>
+                        <text x="595" y="130" text-anchor="middle" class="small">battery input</text>
+                        <text id="k1-pin" x="370" y="96" text-anchor="middle" class="small"></text>
+                        <text id="k2-pin" x="330" y="186" text-anchor="middle" class="small"></text>
+                        <text x="20" y="240" class="small">Relays 3 and 4: spare, not wired on the rig</text>
+                    </svg>
+                    <figcaption id="circuit-text" class="readout" aria-live="polite">The circuit is not read yet.</figcaption>
+                </figure>
+                <p class="hint">Which pin drives each relay, and at which level, is set in <a href="#pins">Pins</a>.</p>
+                <p id="hold-text" class="readout" aria-live="polite"></p>
+                <dl id="relay-state" class="stats"></dl>
+                <div class="actions">
+                    <button id="relays-refresh" class="btn" type="button">Read again</button>
+                </div>
+                <p id="relays-refusal" class="refusal" role="alert"></p>
+                <p class="hint">An order goes out with only the flags ticked: serve adds none. <code>FORCe</code> overrides the interlock that keeps the DUT on a supply or the shunt on a running capture's current, <code>LIVE</code> lets a contact move under a running capture and marks it there. Before an order with either, the panel says what moves and asks.</p>
+                <div class="relay-grid">
+                    <article class="relay" data-relay="lead" aria-labelledby="relay-lead-title">
+                        <h3 id="relay-lead-title">Relay 1, the DUT&#x27;s battery lead</h3>
+                        <p class="hint">OPEN leaves the DUT without its battery: FORCe is required</p>
+                        <div class="controls">
+                            <fieldset class="field">
+                                <legend>Flags</legend>
+                                <div class="checks">
+                                    <label><input type="checkbox" data-flag="force"> FORCe</label>
+                                    <label><input type="checkbox" data-flag="live"> LIVE</label>
+                                </div>
+                            </fieldset>
+                            <div class="actions">
+                                <button class="btn" type="button" data-choice="OPEN">OPEN</button>
+                                <button class="btn" type="button" data-choice="CLOSe">CLOSe</button>
+                            </div>
+                        </div>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </article>
+                    <article class="relay" data-relay="lead_cycle" aria-labelledby="relay-lead-cycle-title">
+                        <h3 id="relay-lead-cycle-title">Relay 1 opened and reclosed</h3>
+                        <p class="hint">Relay 1 held open for 1..60000 ms from path=shunt; FORCe is required</p>
+                        <div class="controls">
+                            <div class="field">
+                                <label for="relay-lead-cycle-ms">Open for (ms)</label>
+                                <input id="relay-lead-cycle-ms" type="number" inputmode="numeric" min="1" max="60000" step="1" value="2000" data-ms>
+                            </div>
+                            <fieldset class="field">
+                                <legend>Flags</legend>
+                                <div class="checks">
+                                    <label><input type="checkbox" data-flag="force"> FORCe</label>
+                                    <label><input type="checkbox" data-flag="live"> LIVE</label>
+                                </div>
+                            </fieldset>
+                            <div class="actions">
+                                <button class="btn" type="button" data-choice="">Cycle</button>
+                            </div>
+                        </div>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </article>
+                    <article class="relay" data-relay="bypass" aria-labelledby="relay-bypass-title">
+                        <h3 id="relay-bypass-title">Relay 2, the bypass across the shunt</h3>
+                        <p class="hint">ON takes the shunt off the DUT&#x27;s current: FORCe under a capture</p>
+                        <div class="controls">
+                            <fieldset class="field">
+                                <legend>Flags</legend>
+                                <div class="checks">
+                                    <label><input type="checkbox" data-flag="force"> FORCe</label>
+                                    <label><input type="checkbox" data-flag="live"> LIVE</label>
+                                </div>
+                            </fieldset>
+                            <div class="actions">
+                                <button class="btn" type="button" data-choice="ON">ON</button>
+                                <button class="btn" type="button" data-choice="OFF">OFF</button>
+                            </div>
+                        </div>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </article>
+                    <article class="relay" data-relay="nullpath" aria-labelledby="relay-nullpath-title">
+                        <h3 id="relay-nullpath-title">The null path (Relay 2 then Relay 1)</h3>
+                        <p class="hint">ON closes Relay 2 and opens Relay 1, make-before-break, checking each step</p>
+                        <div class="controls">
+                            <fieldset class="field">
+                                <legend>Flags</legend>
+                                <div class="checks">
+                                    <label><input type="checkbox" data-flag="live"> LIVE</label>
+                                    <label><input type="checkbox" data-flag="force"> FORCe</label>
+                                </div>
+                            </fieldset>
+                            <div class="actions">
+                                <button class="btn" type="button" data-choice="ON">ON</button>
+                                <button class="btn" type="button" data-choice="OFF">OFF</button>
+                            </div>
+                        </div>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </article>
+                    <article class="relay" data-relay="relay3" aria-labelledby="relay-relay3-title">
+                        <h3 id="relay-relay3-title">Relay 3, spare</h3>
+                        <p class="hint">not wired on the rig: the instrument refuses the order</p>
+                        <div class="controls">
+                            <fieldset class="field">
+                                <legend>Flags</legend>
+                                <div class="checks">
+                                    <label><input type="checkbox" data-flag="live"> LIVE</label>
+                                </div>
+                            </fieldset>
+                            <div class="actions">
+                                <button class="btn" type="button" data-choice="ON">ON</button>
+                                <button class="btn" type="button" data-choice="OFF">OFF</button>
+                            </div>
+                        </div>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </article>
+                    <article class="relay" data-relay="relay4" aria-labelledby="relay-relay4-title">
+                        <h3 id="relay-relay4-title">Relay 4, spare</h3>
+                        <p class="hint">not wired on the rig: the instrument refuses the order</p>
+                        <div class="controls">
+                            <fieldset class="field">
+                                <legend>Flags</legend>
+                                <div class="checks">
+                                    <label><input type="checkbox" data-flag="live"> LIVE</label>
+                                </div>
+                            </fieldset>
+                            <div class="actions">
+                                <button class="btn" type="button" data-choice="ON">ON</button>
+                                <button class="btn" type="button" data-choice="OFF">OFF</button>
+                            </div>
+                        </div>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </article>
+                </div>
+            </section>
+            <section id="pins" class="card" data-view="pins" aria-labelledby="pins-title" hidden>
+                <h1 id="pins-title">Pins</h1>
+                <p id="pins-hint" class="hint">What each pin of the board does. Choose a pin with the pointer, or move to it with the arrow keys and press <kbd>Enter</kbd>, to give it a use. Nothing is sent until Apply.</p>
+                <p id="pins-notice" class="banner" role="status" hidden></p>
+                <div class="pins-layout">
+                    <div class="stack">
+                        <div class="board-frame">
+                            <svg id="board" role="group" aria-labelledby="pins-title" aria-describedby="pins-hint"></svg>
+                        </div>
+                        <ul class="pin-legend" aria-label="Legend">
+                            <li><svg class="mark-key" viewBox="-9 -9 18 18" aria-hidden="true"><path class="mark" data-state="free" d="M 5 0 A 5 5 0 1 1 -5 0 A 5 5 0 1 1 5 0 Z"/></svg> free</li>
+                            <li><svg class="mark-key" viewBox="-9 -9 18 18" aria-hidden="true"><path class="mark" data-state="used" d="M -5 -5 H 5 V 5 H -5 Z"/></svg> in use</li>
+                            <li><svg class="mark-key" viewBox="-9 -9 18 18" aria-hidden="true"><path class="mark" data-state="reserved" d="M -5 -5 L 5 5 M 5 -5 L -5 5"/></svg> reserved by the board</li>
+                            <li><svg class="mark-key" viewBox="-9 -9 18 18" aria-hidden="true"><path class="mark" data-state="caution" d="M 0 -6 L 6 5 H -6 Z"/></svg> usable with caution</li>
+                            <li><svg class="mark-key" viewBox="-9 -9 18 18" aria-hidden="true"><path class="mark" data-state="conflict" d="M 0 -8 L 8 0 L 0 8 L -8 0 Z M 0 -4 V 1 M 0 3 V 4"/></svg> conflict</li>
+                            <li><span class="changed-key" aria-hidden="true"></span> dashed: differs from the live map</li>
+                        </ul>
+                        <p class="hint">GPIO26 to GPIO34 are on neither rail: they are the module's own flash and PSRAM lines.</p>
+                    </div>
+                    <div class="stack">
+                        <section class="stack" aria-labelledby="pins-diff-title">
+                            <h2 id="pins-diff-title">Changes</h2>
+                            <ul id="pins-diff" class="log"></ul>
+                            <ul id="pins-problems" class="log refusal" role="status" aria-label="Conflicts"></ul>
+                            <p id="pins-reason" class="hint"></p>
+                            <div class="actions">
+                                <button id="pins-apply" class="btn btn-primary" type="button" aria-describedby="pins-reason" disabled>Apply</button>
+                                <button id="pins-discard" class="btn" type="button" disabled>Discard changes</button>
+                                <button id="pins-defaults" class="btn" type="button" disabled>Defaults</button>
+                                <button id="pins-refresh" class="btn" type="button">Read again</button>
+                            </div>
+                            <p id="pins-refusal" class="refusal" role="alert"></p>
+                        </section>
+                        <section class="stack" aria-labelledby="pins-result-title">
+                            <h2 id="pins-result-title">Last change</h2>
+                            <p id="pins-result" class="readout" role="status"></p>
+                            <dl id="pins-result-list" class="stats"></dl>
+                        </section>
+                        <section id="pin-about" class="pin-about" aria-label="The pin under the pointer or the focus"></section>
+                    </div>
+                </div>
+                <aside class="pin-about" data-recommendation aria-labelledby="pins-note-title">
+                    <h2 id="pins-note-title">Which relay to fit as Relay 2</h2>
+                    <p class="hint">Relay 2 closes across the shunt and Relay 1's contact, where there are only about 10 mV and little current: a dry circuit. Fit a solid-state relay (a PhotoMOS), such as the MikroE Relay 2 Click with its LCA717, and not an electromechanical one such as the HW-316: its silver contacts do not close at that voltage, and <code>ROUTe:NULLpath ON</code> then answers <code>bypass check failed</code>.</p>
+                    <p class="hint">Open, a solid-state relay leaks beside the shunt. The LCA717 leaks 1 µA at most with 30 V across it, at 25 °C (IXYS, LCA717 data sheet DS-LCA717-R04, page 2, "Off-State Leakage Current"); above 25 °C the data sheet gives only a typical curve (DS-LCA717-R04, page 4). Read as an ohmic resistance, that is 30 V / 1 µA, at least 30 MΩ (derived from DS-LCA717-R04, page 2) across a branch of about 0.1 Ω, the shunt and Relay 1's contact, which sees 1 µV at 10 µA and 164 mV at the INA228's full scale: the open relay then takes 33 fA (3.3 × 10⁻⁸ µA) and 5.5 nA, 3.3 × 10⁻⁹ of either reading. The data sheet states no figure below 30 V: held to its 1 µA at any voltage, the worst case is 1 µA, a tenth of a 10 µA reading (DS-LCA717-R04, page 2). The open relay's leakage has not been measured on this rig, nor Relay 1's contact on its own.</p>
+                </aside>
+            </section>
+            <section id="settings" class="card" data-view="settings" aria-labelledby="settings-title" hidden>
+                <h1 id="settings-title">Settings</h1>
+                <p class="hint">Each setting as the instrument answers it, and the value to write. A setting whose flags refuse it now (<code>R</code> while a capture or a null window runs, <code>C</code> also until a window that ended by itself is closed, <code>D</code> without the INA228) is disabled, and says why. Serve writes back on exit what it changed.</p>
+                <div class="actions">
+                    <button id="settings-refresh" class="btn" type="button">Read again</button>
+                </div>
+                <p id="settings-refusal" class="refusal" role="alert"></p>
+                <div class="settings-list">
+                    <div class="setting" data-setting="i2c_hz">
+                        <span class="setting-label" id="set-i2c-hz-label">I2C clock</span>
+                        <output class="setting-current" data-current aria-labelledby="set-i2c-hz-label">-</output>
+                        <div class="setting-input" data-input></div>
+                        <button class="btn" type="button" data-action="set">Set</button>
+                        <p class="hint" data-summary>the INA228 bus, 50000..1000000 Hz; BURST needs 1000000</p>
+                        <p class="hint" data-reason></p>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </div>
+                    <div class="setting" data-setting="profile">
+                        <span class="setting-label" id="set-profile-label">Profile</span>
+                        <output class="setting-current" data-current aria-labelledby="set-profile-label">-</output>
+                        <div class="setting-input" data-input></div>
+                        <button class="btn" type="button" data-action="set">Set</button>
+                        <p class="hint" data-summary>the sampling profile; resets the channels to its default</p>
+                        <p class="hint" data-reason></p>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </div>
+                    <div class="setting" data-setting="channels">
+                        <span class="setting-label" id="set-channels-label">Channels</span>
+                        <output class="setting-current" data-current aria-labelledby="set-channels-label">-</output>
+                        <div class="setting-input" data-input></div>
+                        <button class="btn" type="button" data-action="set">Set</button>
+                        <p class="hint" data-summary>what a capture streams; none on a ring profile</p>
+                        <p class="hint" data-reason></p>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </div>
+                    <div class="setting" data-setting="range">
+                        <span class="setting-label" id="set-range-label">Current range</span>
+                        <output class="setting-current" data-current aria-labelledby="set-range-label">-</output>
+                        <div class="setting-input" data-input></div>
+                        <button class="btn" type="button" data-action="set">Set</button>
+                        <p class="hint" data-summary>ADCRANGE: 0 is ±163.84 mV (1.6384 A), 1 is ±40.96 mV (0.4096 A)</p>
+                        <p class="hint" data-reason></p>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </div>
+                    <div class="setting" data-setting="capture">
+                        <span class="setting-label" id="set-capture-label">Capture keeps</span>
+                        <output class="setting-current" data-current aria-labelledby="set-capture-label">-</output>
+                        <div class="setting-input" data-input></div>
+                        <button class="btn" type="button" data-action="set">Set</button>
+                        <p class="hint" data-summary>DATA streams or fills the ring; STATistics keeps the statistics only</p>
+                        <p class="hint" data-reason></p>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </div>
+                    <div class="setting" data-setting="limit">
+                        <span class="setting-label" id="set-limit-label">Capture limit</span>
+                        <output class="setting-current" data-current aria-labelledby="set-limit-label">-</output>
+                        <div class="setting-input" data-input></div>
+                        <button class="btn" type="button" data-action="set">Set</button>
+                        <p class="hint" data-summary>ON ends a capture by itself after the sample count</p>
+                        <p class="hint" data-reason></p>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </div>
+                    <div class="setting" data-setting="threshold">
+                        <span class="setting-label" id="set-threshold-label">Current threshold</span>
+                        <output class="setting-current" data-current aria-labelledby="set-threshold-label">-</output>
+                        <div class="setting-input" data-input></div>
+                        <button class="btn" type="button" data-action="set">Set</button>
+                        <p class="hint" data-summary>a level the next captures count against, or OFF</p>
+                        <p class="hint" data-reason></p>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </div>
+                    <div class="setting" data-setting="hysteresis">
+                        <span class="setting-label" id="set-hysteresis-label">Threshold hysteresis</span>
+                        <output class="setting-current" data-current aria-labelledby="set-hysteresis-label">-</output>
+                        <div class="setting-input" data-input></div>
+                        <button class="btn" type="button" data-action="set">Set</button>
+                        <p class="hint" data-summary>how far below the level the count falls back</p>
+                        <p class="hint" data-reason></p>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </div>
+                    <div class="setting" data-setting="threshold_marks">
+                        <span class="setting-label" id="set-threshold-marks-label">Threshold marks</span>
+                        <output class="setting-current" data-current aria-labelledby="set-threshold-marks-label">-</output>
+                        <div class="setting-input" data-input></div>
+                        <button class="btn" type="button" data-action="set">Set</button>
+                        <p class="hint" data-summary>ON marks each crossing of the threshold in a streamed capture</p>
+                        <p class="hint" data-reason></p>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </div>
+                    <div class="setting" data-setting="sample_count">
+                        <span class="setting-label" id="set-sample-count-label">Sample count</span>
+                        <output class="setting-current" data-current aria-labelledby="set-sample-count-label">-</output>
+                        <div class="setting-input" data-input></div>
+                        <button class="btn" type="button" data-action="set">Set</button>
+                        <p class="hint" data-summary>samples one acquisition takes, and the limit&#x27;s count</p>
+                        <p class="hint" data-reason></p>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </div>
+                    <div class="setting" data-setting="trigger_source">
+                        <span class="setting-label" id="set-trigger-source-label">Trigger source</span>
+                        <output class="setting-current" data-current aria-labelledby="set-trigger-source-label">-</output>
+                        <div class="setting-input" data-input></div>
+                        <button class="btn" type="button" data-action="set">Set</button>
+                        <p class="hint" data-summary>what starts a ring capture&#x27;s record</p>
+                        <p class="hint" data-reason></p>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </div>
+                    <div class="setting" data-setting="trigger_level">
+                        <span class="setting-label" id="set-trigger-level-label">Trigger level</span>
+                        <output class="setting-current" data-current aria-labelledby="set-trigger-level-label">-</output>
+                        <div class="setting-input" data-input></div>
+                        <button class="btn" type="button" data-action="set">Set</button>
+                        <p class="hint" data-summary>the current a level trigger fires at</p>
+                        <p class="hint" data-reason></p>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </div>
+                    <div class="setting" data-setting="trigger_slope">
+                        <span class="setting-label" id="set-trigger-slope-label">Trigger slope</span>
+                        <output class="setting-current" data-current aria-labelledby="set-trigger-slope-label">-</output>
+                        <div class="setting-input" data-input></div>
+                        <button class="btn" type="button" data-action="set">Set</button>
+                        <p class="hint" data-summary>upwards or downwards through the level</p>
+                        <p class="hint" data-reason></p>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </div>
+                    <div class="setting" data-setting="pretrigger">
+                        <span class="setting-label" id="set-pretrigger-label">Pretrigger</span>
+                        <output class="setting-current" data-current aria-labelledby="set-pretrigger-label">-</output>
+                        <div class="setting-input" data-input></div>
+                        <button class="btn" type="button" data-action="set">Set</button>
+                        <p class="hint" data-summary>samples kept from before the crossing</p>
+                        <p class="hint" data-reason></p>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </div>
+                    <div class="setting" data-setting="format">
+                        <span class="setting-label" id="set-format-label">Stream format</span>
+                        <output class="setting-current" data-current aria-labelledby="set-format-label">-</output>
+                        <div class="setting-input" data-input></div>
+                        <button class="btn" type="button" data-action="set" hidden>Set</button>
+                        <p class="hint" data-summary>the stream record format, shown; serve never changes it</p>
+                        <p class="hint" data-reason></p>
+                        <p class="refusal" role="alert" data-refusal></p>
+                    </div>
+                </div>
+                <section id="noise" class="stack" aria-labelledby="noise-title">
+                    <h2 id="noise-title">Noise reduction in the INA228 (changes the measurement)</h2>
+                    <p class="hint">Off on every profile, at every boot and after a reset, unless you turn it on here. On, the INA228 averages the count of conversions into each sample and a conversion takes the time chosen, so samples come less often and a short event is spread over one: the recorded samples change, unlike with the charts' smoothing. The chart, the status bar, the run's list entry, its files and the exports of a view then say so, and serve puts every profile back on the way out.</p>
+                    <p id="noise-refusal" class="refusal" role="alert"></p>
+                    <p class="hint">The instrument keeps one for each profile and answers the live profile's: Set selects the profile first, which resets its channels.</p>
+                    <div class="noise-cards">
+                        <article class="noise-card" data-noise="TRACe" aria-labelledby="noise-trace-title">
+                            <h3 id="noise-trace-title">TRACe</h3>
+                            <p class="setting-current" data-current>Not read.</p>
+                            <div class="controls">
+                                <div class="field">
+                                    <label for="noise-trace-state">Noise reduction</label>
+                                    <select id="noise-trace-state" data-noise-setting="average"></select>
+                                </div>
+                                <div class="field">
+                                    <label for="noise-trace-count">Averaging count</label>
+                                    <select id="noise-trace-count" data-noise-setting="average_count"></select>
+                                </div>
+                                <div class="field">
+                                    <label for="noise-trace-time">Shunt conversion time</label>
+                                    <select id="noise-trace-time" data-noise-setting="average_aperture"></select>
+                                </div>
+                                <div class="actions">
+                                    <button class="btn" type="button" data-action="set" aria-describedby="noise-trace-period">Set</button>
+                                </div>
+                            </div>
+                            <p class="hint" id="noise-trace-period" data-period aria-live="polite"></p>
+                            <p class="hint" data-reason></p>
+                            <p class="refusal" role="alert" data-refusal></p>
+                        </article>
+                        <article class="noise-card" data-noise="STATe" aria-labelledby="noise-state-title">
+                            <h3 id="noise-state-title">STATe</h3>
+                            <p class="setting-current" data-current>Not read.</p>
+                            <div class="controls">
+                                <div class="field">
+                                    <label for="noise-state-state">Noise reduction</label>
+                                    <select id="noise-state-state" data-noise-setting="average"></select>
+                                </div>
+                                <div class="field">
+                                    <label for="noise-state-count">Averaging count</label>
+                                    <select id="noise-state-count" data-noise-setting="average_count"></select>
+                                </div>
+                                <div class="field">
+                                    <label for="noise-state-time">Shunt conversion time</label>
+                                    <select id="noise-state-time" data-noise-setting="average_aperture"></select>
+                                </div>
+                                <div class="actions">
+                                    <button class="btn" type="button" data-action="set" aria-describedby="noise-state-period">Set</button>
+                                </div>
+                            </div>
+                            <p class="hint" id="noise-state-period" data-period aria-live="polite"></p>
+                            <p class="hint" data-reason></p>
+                            <p class="refusal" role="alert" data-refusal></p>
+                        </article>
+                        <article class="noise-card" data-noise="SLEep" aria-labelledby="noise-sleep-title">
+                            <h3 id="noise-sleep-title">SLEep</h3>
+                            <p class="setting-current" data-current>Not read.</p>
+                            <div class="controls">
+                                <div class="field">
+                                    <label for="noise-sleep-state">Noise reduction</label>
+                                    <select id="noise-sleep-state" data-noise-setting="average"></select>
+                                </div>
+                                <div class="field">
+                                    <label for="noise-sleep-count">Averaging count</label>
+                                    <select id="noise-sleep-count" data-noise-setting="average_count"></select>
+                                </div>
+                                <div class="field">
+                                    <label for="noise-sleep-time">Shunt conversion time</label>
+                                    <select id="noise-sleep-time" data-noise-setting="average_aperture"></select>
+                                </div>
+                                <div class="actions">
+                                    <button class="btn" type="button" data-action="set" aria-describedby="noise-sleep-period">Set</button>
+                                </div>
+                            </div>
+                            <p class="hint" id="noise-sleep-period" data-period aria-live="polite"></p>
+                            <p class="hint" data-reason></p>
+                            <p class="refusal" role="alert" data-refusal></p>
+                        </article>
+                        <article class="noise-card" data-noise="BURSt" aria-labelledby="noise-burst-title">
+                            <h3 id="noise-burst-title">BURSt</h3>
+                            <p class="setting-current" data-current>Not read.</p>
+                            <p class="hint">Its 50 µs conversion is its definition: the instrument refuses any other, and says so.</p>
+                            <div class="controls">
+                                <div class="field">
+                                    <label for="noise-burst-state">Noise reduction</label>
+                                    <select id="noise-burst-state" data-noise-setting="average"></select>
+                                </div>
+                                <div class="field">
+                                    <label for="noise-burst-count">Averaging count</label>
+                                    <select id="noise-burst-count" data-noise-setting="average_count"></select>
+                                </div>
+                                <div class="field">
+                                    <label for="noise-burst-time">Shunt conversion time</label>
+                                    <select id="noise-burst-time" data-noise-setting="average_aperture"></select>
+                                </div>
+                                <div class="actions">
+                                    <button class="btn" type="button" data-action="set" aria-describedby="noise-burst-period">Set</button>
+                                </div>
+                            </div>
+                            <p class="hint" id="noise-burst-period" data-period aria-live="polite"></p>
+                            <p class="hint" data-reason></p>
+                            <p class="refusal" role="alert" data-refusal></p>
+                        </article>
+                    </div>
+                </section>
+                <section id="settings-pins" class="stack" aria-labelledby="settings-pins-title">
+                    <h2 id="settings-pins-title">Pins</h2>
+                    <p class="hint">What the live pin map gives each role. It is kept on the instrument and serve never writes it back on exit; it is changed in <a href="#pins">Pins</a>.</p>
+                    <dl id="settings-pins-list" class="stats"></dl>
+                    <p id="settings-pins-refusal" class="refusal" role="alert"></p>
+                </section>
+                <section id="shunt" class="stack" aria-labelledby="shunt-title">
+                    <h2 id="shunt-title">Shunt</h2>
+                    <p id="shunt-banner" class="banner" role="status" hidden></p>
+                    <p id="shunt-verdict" class="readout"></p>
+                    <div class="table-frame">
+                        <table class="runs">
+                            <caption class="hint">Each range's shunt as the instrument converts with it, beside the registry's figure. U is the expanded uncertainty at k = 2.</caption>
+                            <thead>
+                                <tr>
+                                    <th scope="col">Range</th>
+                                    <th scope="col">Instrument</th>
+                                    <th scope="col">Source</th>
+                                    <th scope="col">U (k = 2)</th>
+                                    <th scope="col">Registry</th>
+                                    <th scope="col">Deviation</th>
+                                </tr>
+                            </thead>
+                            <tbody id="shunt-body"></tbody>
+                        </table>
+                    </div>
+                    <form id="override-form" class="controls" aria-labelledby="override-title">
+                        <h3 id="override-title" class="full">Override a range's shunt</h3>
+                        <div class="field">
+                            <label for="override-range">Range</label>
+                            <select id="override-range" name="range">
+                                <option value="0">0 (±163.84 mV)</option>
+                                <option value="1">1 (±40.96 mV)</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="override-value">Value, micro-ohms</label>
+                            <input id="override-value" name="uohm" type="number" min="0" step="any" required>
+                        </div>
+                        <div class="field">
+                            <label for="override-kind">Uncertainty stated as</label>
+                            <select id="override-kind" name="kind">
+                                <option value="expanded_ppm">U at k = 2, ppm</option>
+                                <option value="expanded_uohm">U at k = 2, micro-ohms</option>
+                                <option value="tolerance_ppm">a tolerance, ppm (u = t/√3)</option>
+                                <option value="tolerance_uohm">a tolerance, micro-ohms (u = t/√3)</option>
+                            </select>
+                        </div>
+                        <div class="field">
+                            <label for="override-amount">Uncertainty</label>
+                            <input id="override-amount" name="amount" type="number" min="0" step="any" required>
+                        </div>
+                        <div class="field grow">
+                            <label for="override-note">Where the figures come from</label>
+                            <input id="override-note" name="note" type="text" maxlength="200" autocomplete="off">
+                        </div>
+                        <div class="actions">
+                            <button id="override-preview" class="btn" type="submit">Preview</button>
+                            <button id="override-write" class="btn" type="button" disabled>Write</button>
+                            <button id="override-revert" class="btn" type="button">Revert to the registry</button>
+                        </div>
+                    </form>
+                    <p id="override-refusal" class="refusal" role="alert"></p>
+                    <dl id="override-preview-list" class="stats" hidden></dl>
+                </section>
+            </section>
+            <section id="health" class="card" data-view="health" aria-labelledby="health-title" hidden>
+                <h1 id="health-title">Calibration and health</h1>
+                <div class="actions">
+                    <button id="health-refresh" class="btn" type="button">Read again</button>
+                    <button id="health-selftest" class="btn" type="button">Self-test (<code>*TST?</code>)</button>
+                    <button id="health-scan" class="btn" type="button">Scan the bus</button>
+                </div>
+                <p id="health-refusal" class="refusal" role="alert"></p>
+                <p id="health-elf" class="readout" aria-live="polite"></p>
+                <div class="health-grid">
+                    <section class="stack" aria-labelledby="health-identity-title">
+                        <h2 id="health-identity-title">Identity</h2>
+                        <dl id="health-identity" class="stats"></dl>
+                    </section>
+                    <section class="stack" aria-labelledby="health-reset-title">
+                        <h2 id="health-reset-title">Reset and uptime</h2>
+                        <dl id="health-reset" class="stats"></dl>
+                    </section>
+                    <section class="stack" aria-labelledby="health-stacks-title">
+                        <h2 id="health-stacks-title">Stacks</h2>
+                        <dl id="health-stacks" class="stats"></dl>
+                    </section>
+                    <section class="stack" aria-labelledby="health-heap-title">
+                        <h2 id="health-heap-title">Heap</h2>
+                        <dl id="health-heap" class="stats"></dl>
+                    </section>
+                    <section class="stack" aria-labelledby="health-watchdog-title">
+                        <h2 id="health-watchdog-title">Watchdog</h2>
+                        <dl id="health-watchdog" class="stats"></dl>
+                    </section>
+                    <section class="stack" aria-labelledby="health-calibration-title">
+                        <h2 id="health-calibration-title">Calibration</h2>
+                        <dl id="health-calibration" class="stats"></dl>
+                    </section>
+                    <section class="stack" aria-labelledby="health-selftest-title">
+                        <h2 id="health-selftest-title">Self-test</h2>
+                        <p id="health-selftest-result" class="readout">Not run since the page opened.</p>
+                        <ul id="health-selftest-bits" class="log"></ul>
+                    </section>
+                    <section class="stack" aria-labelledby="health-scan-title">
+                        <h2 id="health-scan-title">Bus scan</h2>
+                        <p id="health-scan-result" class="readout">Not run since the page opened.</p>
+                    </section>
+                </div>
+            </section>
+            <section id="console" class="card" data-view="console" aria-labelledby="console-title" hidden>
+                <h1 id="console-title">SCPI console</h1>
+                <p class="hint">Program messages, one per line, sent in turn through serve's queue, each with the instrument's errors after it. A ring dump is refused here: the recorder fetches it to a file.</p>
+                <form id="console-form" class="stack">
+                    <label class="field" for="console-input"><span>Messages</span></label>
+                    <textarea id="console-input" rows="4" spellcheck="false" autocomplete="off" required></textarea>
+                    <div class="actions">
+                        <button id="console-send" class="btn btn-primary" type="submit">Send</button>
+                        <button id="console-clear" class="btn" type="button">Clear the transcript</button>
+                    </div>
+                </form>
+                <p id="console-refusal" class="refusal" role="alert"></p>
+                <ol id="console-log" class="transcript" aria-live="polite"></ol>
+            </section>
+            <section class="card" aria-labelledby="notices-title">
+                <h2 id="notices-title">Notices</h2>
+                <p class="hint">Errors the instrument queued that no request asked for, reboots, the line going down or up, a passthrough client attaching, and events the page missed: the last 20, newest first.</p>
+                <ol id="notices" class="notices" aria-live="polite"></ol>
+            </section>
+        </main>
+        <dialog id="confirm-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-lines">
+            <h2 id="confirm-title">Confirm</h2>
+            <ul id="confirm-lines" class="log"></ul>
+            <form method="dialog" class="actions">
+                <button class="btn" type="submit" value="cancel" autofocus>Cancel</button>
+                <button id="confirm-go" class="btn btn-primary" type="submit" value="confirm">Go ahead</button>
+            </form>
+        </dialog>
+        <dialog id="prompt-dialog" aria-labelledby="prompt-title" aria-describedby="prompt-text">
+            <h2 id="prompt-title">The sequence asks</h2>
+            <p id="prompt-text"></p>
+            <form id="prompt-choices" method="dialog" class="actions"></form>
+        </dialog>
+        <dialog id="pin-dialog" aria-labelledby="pin-title" aria-describedby="pin-what">
+            <h2 id="pin-title">A pin</h2>
+            <p id="pin-what" class="hint"></p>
+            <form id="pin-form" method="dialog" class="stack" novalidate>
+                <fieldset id="pin-uses" class="field pin-uses">
+                    <legend>Use</legend>
+                </fieldset>
+                <div id="pin-config" class="controls"></div>
+                <p id="pin-problem" class="refusal" role="status"></p>
+                <div class="actions">
+                    <button id="pin-keep" class="btn btn-primary" type="submit" value="keep">Keep</button>
+                    <button class="btn" type="submit" value="cancel" formnovalidate>Cancel</button>
+                </div>
+            </form>
+        </dialog>
+    </body>
+</html>

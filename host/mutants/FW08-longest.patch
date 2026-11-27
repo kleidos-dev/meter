@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW08-longest: An override over 200 ms a sample is taken.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_sim_pins.py::test_an_override_the_instrument_cannot_run_is_refused_and_changes_nothing
+
+diff --git a/host/kleidos_meter/sim.py b/host/kleidos_meter/sim.py
+--- a/host/kleidos_meter/sim.py
++++ b/host/kleidos_meter/sim.py
+@@ -1809,5 +1809,5 @@
+         if period < shortest:
+             return f"{sample}, under the {shortest} us its reads need at {self.scl_hz} Hz"
+-        if period > _LONGEST_AVERAGED_US:
++        if period > 10 * _LONGEST_AVERAGED_US:
+             return f"{sample}, over the {_LONGEST_AVERAGED_US} us its pacing allows"
+         return None

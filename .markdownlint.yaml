@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# markdownlint rules, read by the review bots' markdownlint-cli2 (CodeRabbit)
+# and by any local run. markdownlint-cli2 lets this file override
+# .markdownlint-cli2.jsonc, so it extends the quality kit's base too: the
+# rules that catch a broken table (MD055, MD056, MD058) and nothing else, so
+# the line-length rule stays off (Markdown is never hard-wrapped, which the
+# kit's md_nowrap.py checks). Added here: a repeated heading is fine under a
+# different parent, never under the same one.
+extends: .github/quality/markdownlint.jsonc
+MD024:
+  siblings_only: true

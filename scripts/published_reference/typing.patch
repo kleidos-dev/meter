@@ -1,0 +1,22 @@
+--- a/api_reference_pages.py
++++ b/api_reference_pages.py
+@@ -433,7 +433,7 @@
+     rows = [_CELL_RE.findall(row) for row in _ROW_RE.findall(table)]
+     if not rows or any(tuple(kind for kind, _ in row) not in _ROWS for row in rows):
+         return None
+-    name = rows[0][0][1].strip()
++    name = str(rows[0][0][1]).strip()
+     if len(rows[0]) == 1:
+         return name
+     parameters = []
+--- a/api_reference_twins.py
++++ b/api_reference_twins.py
+@@ -529,7 +529,7 @@
+                     )
+                 ]
+             return labeled
+-        blocks: list[str] = []
++        blocks = []
+         for child in node.elements():
+             if child.tag == "dt":
+                 words = self.words(child)

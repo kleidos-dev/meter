@@ -1,0 +1,156 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Only the files that cannot carry a comment of their own are annotated here,
+# each by name: every other file names its holder and license in its own
+# header, and scripts/check_spdx.py refuses a file that does neither. There is
+# deliberately no catch-all `**`, so a new file with no notice fails the check
+# instead of inheriting one in silence.
+version = 1
+
+[[annotations]]
+path = [
+  "hardware/bom.csv",
+  "hardware/rig.kicad_sch",
+  "hardware/rig-calibration.kicad_sch",
+  "hardware/rig.kicad_pro",
+  "hardware/rig.kicad_sym",
+  "hardware/sym-lib-table",
+  "hardware/rig.pdf",
+  "hardware/rig.svg",
+  "hardware/rig-calibration.svg",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 José M. Requena Plens"
+SPDX-License-Identifier = "CERN-OHL-S-2.0"
+
+# The files of this repository that cannot carry a comment: JSON, a version
+# number, the GPL text's notice, the EditorConfig checker's settings, the
+# Python the quality kit's workflows read (.python-version).
+[[annotations]]
+path = [
+  "LICENSE",
+  ".ecrc",
+  ".python-version",
+  ".greptile/config.json",
+  ".greptile/files.json",
+  ".github/quality/SOURCE.json",
+  "firmware/version.txt",
+  "calibration/configurations/**",
+  "calibration/instruments/**",
+  "calibration/schemas/**",
+  "calibration/index.json",
+  "host/kleidos_meter/board_pins.json",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 José M. Requena Plens"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+# The panel's images and their manifest (scripts/take_panel_shots.py), and its
+# bench images (scripts/file_bench_shots.py): a PNG carries its notice in its
+# text chunks (scripts/media_meta.py), not in a comment REUSE reads, and JSON
+# has none.
+[[annotations]]
+path = [
+    "docs/images/panel/*.png",
+    "docs/images/panel/bench/*.png",
+    "docs/images/panel/manifest.json",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 José M. Requena Plens"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+# The mutants of the firmware (scripts/run_mutants.sh) and of the host package,
+# the golden transcript and the pin map's vectors: each carries its own two
+# lines, in formats the quality kit's header check has no comment syntax for,
+# so they are named here as well.
+[[annotations]]
+path = [
+  "scripts/mutants/*.patch",
+  "host/mutants/*.patch",
+  "firmware/test/native/golden/console.transcript",
+  "firmware/test/native/golden/pinmap.vectors",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 José M. Requena Plens"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+# Files held to their bytes, so no header can be added to them: the
+# calibration records (evidence, each held to its SHA-256 by the registry),
+# the fixtures kicad-cli and pypdf write, and the host harness's sdkconfig.h,
+# whose name the quality kit's header check reads as an ESP-IDF sdkconfig
+# file (hash comments) although it is a C header with its own // lines.
+[[annotations]]
+path = [
+  "calibration/records/**",
+  "tests/hardware/fixtures/**",
+  "firmware/test/native/harness/idf/sdkconfig.h",
+]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 José M. Requena Plens"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+# The Kleidos KiCad kit, byte copies of the brand repository's kicad/ at the
+# commit hardware/kicad/KIT.json records (written by brand's
+# tools/sync_kicad.py; never edited here). The two drawing sheets embed the
+# Kleidos mark, brand's artwork, under the GNU GPL version 3 or later with
+# brand's additional terms (TRADEMARKS.md there); rig.pdf and rig.svg show it
+# placed unchanged under brand's press permission and keep CERN-OHL-S-2.0.
+[[annotations]]
+path = ["hardware/kicad/*.kicad_wks"]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 José M. Requena Plens"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+# The rest of the kit (the color themes, the resolved style, the helper that
+# runs kicad-cli with it, the manifest): MIT in brand as here.
+[[annotations]]
+path = ["hardware/kicad/*.json", "hardware/kicad/*.py"]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 José M. Requena Plens"
+SPDX-License-Identifier = "MIT"
+
+# The ESP-IDF installer, a byte copy of the Kleidos firmware repository's
+# scripts/install_idf.sh at the commit scripts/install_idf.json records (never
+# edited here, so it cannot take a header of its own), and that manifest;
+# GPL-3.0-or-later there as here.
+[[annotations]]
+path = ["scripts/install_idf.sh", "scripts/install_idf.json"]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 José M. Requena Plens"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+# The overlay of the Doxyfile for the published site: a Doxygen configuration
+# under a name the header check does not know; its header is in the file too.
+[[annotations]]
+path = ["Doxyfile.public"]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 José M. Requena Plens"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+# The published site's manifest of its copies of the Kleidos firmware
+# repository's page modules and the patch they differ by
+# (scripts/published_reference/: neither a JSON file nor a patch can hold a
+# header); the copies carry their own.
+[[annotations]]
+path = ["scripts/published_reference/SOURCE.json", "scripts/published_reference/typing.patch"]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 José M. Requena Plens"
+SPDX-License-Identifier = "GPL-3.0-or-later"
+
+# The quality kit's base configurations and its comment caller, byte copies
+# of kleidos-dev/.github (.github/quality/SOURCE.json; the caller is its
+# quality/templates/run/commit-check-comment.yml): MIT there as here.
+[[annotations]]
+path = [
+  ".clang-tidy",
+  ".github/quality/markdownlint.jsonc",
+  ".github/quality/ruff.toml",
+  ".github/zizmor.yml",
+  ".gitleaks-mac.toml",
+  ".shellcheckrc",
+  ".github/workflows/commit-check-comment.yml",
+]
+precedence = "override"
+SPDX-FileCopyrightText = "2026 José M. Requena Plens"
+SPDX-License-Identifier = "MIT"

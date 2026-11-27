@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant RV-bucketname: A run's view does not name its buckets.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && METER_BROWSER_REQUIRED=1 ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_panel_browser.py -k 'names_its_buckets'
+
+diff --git a/host/kleidos_meter/panel/static/js/chart-math.js b/host/kleidos_meter/panel/static/js/chart-math.js
+--- a/host/kleidos_meter/panel/static/js/chart-math.js
++++ b/host/kleidos_meter/panel/static/js/chart-math.js
+@@ -990,6 +990,6 @@
+  * @returns {string} For example `moving average 1 s · INA228 AVG 16, 18.4 ms per sample`.
+  */
+ export function chartCaption(window, noise, bucketUs = 0) {
+-    const buckets = bucketUs > 0 ? `run buckets ${formatDuration(bucketUs)}` : "";
++    const buckets = bucketUs < 0 ? `run buckets ${formatDuration(bucketUs)}` : "";
+     return [window.caption, buckets, noiseCaption(noise)].filter((text) => text !== "").join(" · ");
+ }

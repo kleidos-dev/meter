@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW03-digest: a record written against another board table is taken.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+# The store's judgment no longer reads the table's digest.
+diff --git a/firmware/src/pinmap_store.cpp b/firmware/src/pinmap_store.cpp
+index ea9de40..7d4b464 100644
+--- a/firmware/src/pinmap_store.cpp
++++ b/firmware/src/pinmap_store.cpp
+@@ -110,7 +110,7 @@ bool acceptBlob( const std::uint8_t* blob, std::size_t length ) noexcept {
+     (void)std::copy_n( blob, raw.size(), raw.begin() );
+     const auto stored = std::bit_cast<StoredMap>( raw );
+     if ( stored.magic != kBlobMagic || stored.version != kBlobVersion
+-         || stored.tableDigest != pin_table::kPinTableDigest ) {
++         || stored.tableDigest == 0U ) {
+         return false;
+     }
+     for ( const std::uint8_t flag : { stored.pullSda, stored.pullScl, stored.pullAlert,

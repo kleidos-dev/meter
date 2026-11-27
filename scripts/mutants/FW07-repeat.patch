@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW07-repeat: A unit cut by a flush is written again from its start.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -1161,7 +1161,6 @@ void Console::appendResponse( std::string_view text ) noexcept {
+     while ( text.size() > room ) {
+         (void)std::copy_n( text.begin(), room, units.subspan( responseLength_ ).begin() );
+         responseLength_ += room;
+-        text.remove_prefix( room );
+         flushResponse();
+         room = units.size();
+     }

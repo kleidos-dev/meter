@@ -1,0 +1,48 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Every weakening of a Kleidos quality kit rule in this repository, with its
+# reason (kleidos-dev/.github docs/quality.md, "Overrides"). Adding a rule is
+# free; turning one off, down, or away from a path needs an entry here, and
+# check_quality.py fails on a weakening with no entry, on an entry with no
+# reason, on an entry that matches nothing any more, and on an expired one.
+#
+# [[waiver]]
+# tool = "ruff"                       # ruff, eslint, tsconfig, clang-tidy, markdownlint, ci, dependabot, pre-commit, reuse, pins, typos, actionlint
+# what = "ignore:E501"                # the exact weakening, as check_quality.py names it
+# where = "pyproject.toml"            # optional: the file it is in, when the same weakening is in two
+# reason = "Why the rule is wrong for this code, with the sites read"
+# decided = "owner 2026-11-22"        # or "agent, reviewed in PR #<n>"
+# expires = 2027-05-22                # optional
+
+[[waiver]]
+tool = "ci"
+what = "continue-on-error:.github/workflows/security.yml:osv-scanner:Run OSV-Scanner"
+reason = "The advisory scan of security.yml, which runs before the switch to the kit and keeps running: OSV-Scanner over every manifest, triaged by hand, with its weekly schedule. The blocking OSV-Scanner is the kit's (check.yml's 🛡️ Dependencies job), so this one reports without failing."
+decided = "agent, reviewed in PR #1"
+
+[[waiver]]
+tool = "ci"
+what = "continue-on-error:.github/workflows/security.yml:trivy:Run the Trivy filesystem scan"
+reason = "Trivy's vulnerability, secret and license scan of the tree is advisory: the ESP-IDF and PlatformIO dependency model is not one it reads in full, so its SARIF is kept as an artifact and triaged by hand. The blocking gates are the kit's OSV-Scanner and gitleaks."
+decided = "agent, reviewed in PR #1"
+
+[[waiver]]
+tool = "ci"
+what = "continue-on-error:.github/workflows/security.yml:trivy:Generate the CycloneDX SBOM"
+reason = "The SBOM is a record kept as an artifact; a failure to write it must not hide the scan's own artifact or fail the security workflow, which gates nothing."
+decided = "agent, reviewed in PR #1"
+
+[[waiver]]
+tool = "ruff"
+what = "exclude:hardware/kicad"
+where = "pyproject.toml"
+reason = "hardware/kicad/ is the brand repository's KiCad kit, byte copies held to hardware/kicad/KIT.json by tests/hardware/test_rig_schematic.py: its findings are fixed in kleidos-dev/brand, which runs the same kit, and synced, never edited here."
+decided = "agent, reviewed in PR #1"
+
+[[waiver]]
+tool = "ruff"
+what = "exclude:scripts/published_reference"
+where = "pyproject.toml"
+reason = "scripts/published_reference/ holds three modules of the Kleidos firmware repository's build of its published API reference, copies held to scripts/published_reference/SOURCE.json by tests/firmware/test_published_reference_copies.py, byte for byte but for the two typing lines of typing.patch: that repository runs ruff on them under its own settings (line length 100 with its own rule set), so a finding of this kit's is fixed there and copied, never edited here."
+decided = "agent, reviewed in the pull request of the documentation site"

@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW29-zero: the sampler takes a null of zero seconds.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/sampler.cpp b/firmware/src/sampler.cpp
+--- a/firmware/src/sampler.cpp
++++ b/firmware/src/sampler.cpp
+@@ -1002,7 +1002,7 @@
+ }
+
+ bool Sampler::startZero( std::uint32_t seconds, const char*& error ) noexcept {
+-    if ( seconds == 0U || seconds > kZeroMaxSeconds ) {
++    if ( seconds > kZeroMaxSeconds ) {
+         error = "use CALibration:ZERO <seconds> (1..600)";
+         return false;
+     }

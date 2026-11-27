@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW03-olderwins: an older stored map runs when the newest record is one the store refuses.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+# load() takes the newest record it accepts, whatever was refused after it.
+diff --git a/firmware/src/pinmap_store.cpp b/firmware/src/pinmap_store.cpp
+index ea9de40..d60dae1 100644
+--- a/firmware/src/pinmap_store.cpp
++++ b/firmware/src/pinmap_store.cpp
+@@ -160,7 +160,7 @@ Loaded load() noexcept {
+     // under another table, layout or rule: nobody chose the older map after
+     // it, so the defaults run, as with no record.
+     const flash_log::Head log = flash_log::head( flash_log::Log::Pins );
+-    if ( log.refused != 0U && log.refusedSequence >= log.sequence ) {
++    if ( log.refused != 0U && log.refusedSequence >= log.sequence && !log.hasRecord ) {
+         out.found = Found::Refused;
+         return out;
+     }

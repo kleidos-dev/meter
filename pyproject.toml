@@ -1,0 +1,75 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# The repository's tool configuration, read from the top of the tree: ruff
+# and mypy as the Kleidos quality kit holds them (kleidos-dev/.github,
+# docs/quality.md). The host package keeps its own pyproject.toml (host/),
+# whose [tool.ruff] extends this one. This file declares no project: nothing
+# installs the repository's root.
+#
+# [tool.ruff] extends the kit's rule set (.github/quality/ruff.toml, a byte
+# copy the kit's check holds) and adds this repository's facts; [tool.mypy]
+# opens with the kit's strict block, and the keys after it are facts about
+# this repository.
+
+[tool.ruff]
+extend = ".github/quality/ruff.toml"
+# The host package supports Python 3.11 and later (host/pyproject.toml).
+target-version = "py311"
+# hardware/kicad/ is the brand repository's KiCad kit, byte copies held to
+# hardware/kicad/KIT.json: its findings are fixed in brand and synced, never
+# here (.github/quality/waivers.toml).
+# scripts/published_reference/ holds the Kleidos firmware repository's page
+# modules of its published reference, copies held to its SOURCE.json: its
+# findings are fixed there and copied, never here.
+extend-exclude = ["hardware/kicad", "scripts/published_reference"]
+
+[tool.mypy]
+strict = true
+# An ignore names the error it silences, so it cannot hide a second one.
+enable_error_code = ["ignore-without-code"]
+# The oldest Python the host package supports (host/pyproject.toml).
+python_version = "3.11"
+# The folders a script or a test imports from beside itself (each puts its
+# own folder or the package's on sys.path), so mypy resolves them there too,
+# and module names follow the folders below them.
+mypy_path = [
+    "host",
+    "host/tests",
+    "tests/bench",
+    "tests/firmware",
+    "scripts",
+    "scripts/published_reference",
+    "hardware",
+    "hardware/kicad",
+    "firmware/scripts",
+]
+explicit_package_bases = true
+
+
+# Three mypy runs, one per group (the quality kit's mypy groups,
+# kleidos-dev/.github docs/quality.md): the host package and its tests, the
+# bench tests, and the rest of the tree (the guards, the scripts, the
+# schematic's generator). Each test folder has a conftest.py, and its tests
+# import their helpers from beside them (pytest puts the folder on sys.path),
+# so the folders whose conftest.py would share a name are separate runs.
+# Together they are every Python file of the tree.
+[[tool.kleidos-quality.mypy-groups]]
+name = "host"
+files = ["host/kleidos_meter", "host/tests"]
+
+[[tool.kleidos-quality.mypy-groups]]
+name = "bench"
+files = ["tests/bench"]
+
+[[tool.kleidos-quality.mypy-groups]]
+name = "repo"
+files = [
+    "tests/conftest.py",
+    "tests/ci",
+    "tests/firmware",
+    "tests/hardware",
+    "scripts",
+    "firmware/scripts",
+    "hardware",
+]

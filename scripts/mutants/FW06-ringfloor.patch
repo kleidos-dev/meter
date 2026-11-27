@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW06-ringfloor: TRACE takes a period its loop is not known to keep.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/sampler.cpp b/firmware/src/sampler.cpp
+--- a/firmware/src/sampler.cpp
++++ b/firmware/src/sampler.cpp
+@@ -322,8 +322,7 @@
+ /// @return The period, microseconds.
+ constexpr std::uint32_t shortestPeriodUs( const ProfileSpec& spec, std::uint32_t sclHz ) noexcept {
+     const std::uint32_t overTwiceTheReads = ( 2U * sampleReadMicroseconds( spec, sclHz ) ) + 1U;
+-    return spec.capturesToRing ? std::max( overTwiceTheReads, kShortestRingPeriodUs )
+-                               : overTwiceTheReads;
++    return overTwiceTheReads;
+ }
+
+ // Every profile's own period passes the limits at the clock it is used at, so

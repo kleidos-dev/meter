@@ -1,0 +1,39 @@
+{
+  "meta": {
+    "name": "Kleidos Light",
+    "version": 5
+  },
+  "schematic": {
+    "override_item_colors": false,
+    "background": "rgb(255, 255, 255)",
+    "bus": "rgb(0, 112, 140)",
+    "bus_junction": "rgb(0, 112, 140)",
+    "component_body": "rgb(242, 244, 245)",
+    "component_outline": "rgb(12, 15, 19)",
+    "dnp_marker": "rgb(201, 42, 42)",
+    "fields": "rgb(74, 82, 92)",
+    "grid": "rgb(216, 217, 217)",
+    "hidden": "rgb(216, 217, 217)",
+    "junction": "rgb(0, 112, 140)",
+    "label_global": "rgb(15, 52, 96)",
+    "label_hier": "rgb(15, 52, 96)",
+    "label_local": "rgb(15, 52, 96)",
+    "netclass_flag": "rgb(74, 82, 92)",
+    "no_connect": "rgb(74, 82, 92)",
+    "note": "rgb(12, 15, 19)",
+    "page_limits": "rgb(216, 217, 217)",
+    "pin": "rgb(0, 112, 140)",
+    "pin_name": "rgb(74, 82, 92)",
+    "pin_number": "rgb(74, 82, 92)",
+    "private_note": "rgb(74, 82, 92)",
+    "reference": "rgb(12, 15, 19)",
+    "sheet": "rgb(74, 82, 92)",
+    "sheet_fields": "rgb(74, 82, 92)",
+    "sheet_filename": "rgb(74, 82, 92)",
+    "sheet_label": "rgb(15, 52, 96)",
+    "sheet_name": "rgb(12, 15, 19)",
+    "value": "rgb(74, 82, 92)",
+    "wire": "rgb(0, 112, 140)",
+    "worksheet": "rgb(74, 82, 92)"
+  }
+}

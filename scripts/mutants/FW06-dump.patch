@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW06-dump: the window's period is the live profile's, not the one it ran with.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/sampler.h b/firmware/src/sampler.h
+--- a/firmware/src/sampler.h
++++ b/firmware/src/sampler.h
+@@ -968,7 +968,7 @@
+     /// period from it would silently re-time the whole trace.
+     ///
+     /// @return The period, in microseconds.
+-    std::uint32_t capturedPeriodUs() const noexcept { return windowSpec_.periodUs; }
++    std::uint32_t capturedPeriodUs() const noexcept { return periodUs(); }
+
+     /// @brief Converts a sample's shunt counts to nanoamps with that snapshot.
+     ///

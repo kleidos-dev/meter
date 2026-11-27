@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant HO10-pathabove: A path is shown relative to a directory above the home directory.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_panel_paths.py
+
+diff --git a/host/kleidos_meter/panel/paths.py b/host/kleidos_meter/panel/paths.py
+--- a/host/kleidos_meter/panel/paths.py
++++ b/host/kleidos_meter/panel/paths.py
+@@ -53,8 +53,6 @@
+     home = (Path.home() if home is None else home).resolve()
+     shown_from = (Path.cwd(), PROJECT) if bases is None else bases
+     for base in (each.resolve() for each in shown_from):
+-        if base in home.parents:
+-            continue  # relative to it, the path would name the home directory
+         if resolved == base or base in resolved.parents:
+             return resolved.relative_to(base).as_posix()
+     parts = resolved.parts[1:]  # without the anchor: no leading separator

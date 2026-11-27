@@ -1,0 +1,774 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# The repository's gate on every push to main and every pull request, in
+# stages, cheapest first (the organization's CI convention). Every check that
+# is not this repository's own is a job of the Kleidos quality kit
+# (kleidos-dev/.github, docs/quality.md), called by its name, @v3, which only
+# the organization's admin can move; nothing of the kit is held here.
+#
+# 1. "What changed" (this repository's path filter) and Quick (kit,
+#    quick.yml): the kit's policy checks, every pre-commit hook on every file
+#    (ruff and its formatter, typos, gitleaks over the tree with both
+#    configurations, markdownlint, actionlint, zizmor, shellcheck,
+#    clang-format, EditorConfig, the hygiene hooks, the SPDX and document-path
+#    hooks of this repository; the hooks that need a toolchain or the host
+#    package are skipped there, see below), zizmor online, reuse lint with
+#    both header lines in every file that can carry them, gitleaks over the
+#    whole history plus the kit's MAC plant test, and on a pull request the
+#    commit messages.
+# 2. After Quick: Check (kit, check.yml), mypy strict in its three groups
+#    and OSV-Scanner over every manifest; and this repository's own rules
+#    (lint): the document paths, the calibration registry, the renders'
+#    metadata and the gitleaks rules' planted values. Every later job needs
+#    the lint, so a failure there skips the rest of the run.
+# 3. The firmware's host tests (sanitizers, then MC/DC and decision
+#    coverage), the host package (the client and the panel) against its
+#    simulated instrument and against the firmware's native bridge, the guards
+#    over the firmware sources, and the test report built from all of them
+#    (scripts/run_tests.sh, docs/testing.md), with the host package's mutants,
+#    kept as an artifact and written to the job summary; always. A test skipped there for a reason that names
+#    no place where it runs instead fails the report's gate.
+#    Beside it, only when a path they read changed: the panel's page in a
+#    headless browser, the firmware's Doxygen reference at zero warnings, the firmware's host tests again at 32 bits
+#    with GCC (native32), the device image (meter) against the pinned
+#    platform and ESP-IDF, so a change that only the real headers refuse
+#    fails here and not first on the bench, and the rig's schematic in KiCad;
+#    after the device image, clang-tidy (over the device's compile commands
+#    and the host harness, with the kit's .clang-tidy and firmware/'s own on
+#    top) and cppcheck over the firmware.
+#    A DRAFT pull request stops after stage 2: its run is the quick job, the
+#    kit's check, "What changed" and the repository's rules (minutes), and
+#    "What changed" reports every heavy family false and the tests job skips,
+#    so iterating on a draft costs no runner hours. The run of the ready
+#    head (the pull request marked ready for review, and every later push to
+#    it) runs everything the paths ask for, and it is the verdict. A draft's
+#    run ends red on purpose: the job "🙋 Draft" fails on a draft, so
+#    "✅ Check" fails with it and no draft head ever carries a green gate.
+#    GitHub requires no check on main (no protection, no ruleset), and main
+#    takes a signed fast-forward push that ignores the draft flag; the gate
+#    must therefore say on the head itself that a draft's run judged nothing.
+#    The kit holds the gate's name, step and env word for word, so the gate
+#    cannot carry another name on a draft as the firmware's verdict does.
+# 4. "✅ Check", last: it needs every other job of this file and fails unless
+#    each succeeded; the path-filtered jobs, the tests job (skipped on a draft
+#    alone) and "🙋 Draft" (which runs on a draft alone) are the ones allowed
+#    to be skipped (MAY_SKIP). The kit's check holds this job to its model
+#    word for word.
+#
+# The quick job skips the hooks of this repository that need what its runner
+# has not: native-tests and host-tests (the tests job runs both, through
+# scripts/run_tests.sh), static-analysis (the static-analysis job), doxygen
+# (the docs job) and calibration-registry (the lint job; it imports the host
+# package, which needs pyserial). No hook here reads the organization's
+# deny-list, so quick.yml takes no deny-hooks and no secret.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  # ready_for_review: a draft pull request runs only the cheap jobs (below);
+  # marking it ready runs the heavy ones, once.
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# A new push supersedes the run of the old one; a run by hand does not cancel
+# a push's. Nothing here releases or deploys.
+concurrency:
+  group: ci-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
+
+jobs:
+  quick:
+    name: "⚡ Quick"
+    uses: kleidos-dev/.github/.github/workflows/quick.yml@v3
+    with:
+      skip: "native-tests,host-tests,static-analysis,doxygen,calibration-registry"
+    permissions:
+      contents: read
+
+  check:
+    name: "🧪 Check"
+    needs: quick
+    uses: kleidos-dev/.github/.github/workflows/check.yml@v3
+    with:
+      install: "python -m pip install -e 'host[dev,browser]' types-pyserial==3.5.0.20261122 pyelftools==0.33"
+    permissions:
+      contents: read
+
+  # One boolean per heavy family, from the event's base against its head
+  # (both fetched at depth 1, so no history). Each pattern lists what does
+  # NOT reach the family, so a new input runs it by default. A run by hand,
+  # a new branch, a forced push or a diff git cannot compute counts as
+  # touching everything. The fetch passes the token on the command line
+  # only: the checkout keeps no credentials.
+  changes:
+    name: "📋 What changed"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      draft: ${{ steps.paths.outputs.draft }}
+      firmware: ${{ steps.paths.outputs.firmware }}
+      docs: ${{ steps.paths.outputs.docs }}
+      panel: ${{ steps.paths.outputs.panel }}
+      schematic: ${{ steps.paths.outputs.schematic }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Decide which families run
+        id: paths
+        env:
+          EVENT: ${{ github.event_name }}
+          FORCED: ${{ github.event.forced }}
+          DRAFT: ${{ github.event.pull_request.draft == true }}
+          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          TOKEN: ${{ github.token }}
+        run: |
+          set -uo pipefail
+          # Paths the firmware (device images, 32-bit host tests) never reads.
+          not_firmware='^(docs/|host/|hardware/|calibration/|tests/|LICENSES/|\.github/(quality/.*|dependabot\.yml|zizmor\.yml)$|\.github/workflows/(commit-check-comment|codeql|security)\.yml$|scripts/(check_[a-z_]+|media_meta|panel_images|take_panel_shots|test_report)\.py$|scripts/run_tests\.sh$|(LICENSE|REUSE\.toml|\.editorconfig|\.ecrc|\.typos\.toml|\.gitleaks\.toml|\.gitleaksignore|pyproject\.toml|\.python-version|\.gitleaks-mac\.toml|\.shellcheckrc|\.markdownlint\.yaml|\.markdownlint-cli2\.jsonc|\.gitattributes|\.gitignore|\.pre-commit-config\.yaml)$)|\.md$'
+          # The guards over the device build and the reference, which only the
+          # firmware family's jobs (the firmware job, the docs job) run, and
+          # the reference's own inputs under docs/ (tests/ci/test_changes_filter.py).
+          build_guards='^((tests/firmware/(conftest|test_effective_compile_flags|test_meter_sdkconfig_reaches_the_build|test_heap_reachability_gate|test_misra_rules|test_static_analysis_gate|test_doxygen_gate)|scripts/check_(doc_links|heap_objects|heap_reachability|iram_hot_path|radio_absent|drivers_absent))\.py|docs/[^/]+\.dox)$'
+          # What the documentation site reads besides the firmware's sources:
+          # its Markdown pages and images, the Doxyfiles, the published
+          # build's header, footer and layout, its scripts and their tests,
+          # and the gitleaks rules its guard reads (tests/ci/test_changes_filter.py).
+          docs_inputs='^(docs/|Doxyfile(\.public)?$|(README|AGENTS|CHANGELOG|NOTICE)\.md$|calibration/(README\.md|records/[^/]+\.md)$|hardware/((README|bom)\.md|rig(-calibration)?\.svg)$|host/README\.md$|scripts/((doxygen_md_filter|build_reference|check_reference|preview_reference|check_doc_links)\.py|published_reference/.*)$|\.gitleaks(-mac)?\.toml$|tests/firmware/test_(doxygen_gate|doc_link_form|reference_build|published_reference_copies)\.py$)'
+          # Paths the panel's page in the browser never reads: it runs on
+          # serve's own simulator and the registry's schemas.
+          not_panel='^(docs/|firmware/|hardware/|tests/|scripts/|LICENSES/|calibration/records/|\.github/(quality/.*|dependabot\.yml|zizmor\.yml)$|\.github/workflows/(commit-check-comment|codeql|security)\.yml$|(LICENSE|REUSE\.toml|Doxyfile|\.clang-format|\.clang-tidy|\.cppcheck-suppress|\.editorconfig|\.ecrc|\.typos\.toml|\.gitleaks\.toml|\.gitleaksignore|pyproject\.toml|\.python-version|\.gitleaks-mac\.toml|\.shellcheckrc|\.markdownlint\.yaml|\.markdownlint-cli2\.jsonc|\.gitattributes|\.gitignore|\.pre-commit-config\.yaml)$)|\.md$'
+          # The script the panel job runs the page's mutants with
+          # (tests/ci/test_host_mutants.py).
+          panel_runners='^scripts/run_mutants\.sh$'
+          # What the browser half of the images' guard reads beyond host/:
+          # the images' list and how a view is signed, and the manifest
+          # (tests/ci/test_changes_filter.py).
+          panel_inputs='^(scripts/panel_images\.py|docs/images/panel/manifest\.json)$'
+          # Paths the schematic and its renders never read.
+          not_schematic='^(docs/|host/|firmware/|calibration/|tests/|LICENSES/|\.github/(quality/.*|dependabot\.yml|zizmor\.yml)$|\.github/workflows/(commit-check-comment|codeql|security)\.yml$|scripts/(check_calibration_registry|check_doc_paths|check_spdx|test_report)\.py$|scripts/(run_tests\.sh|install_idf\.(sh|json))$|(LICENSE|REUSE\.toml|\.editorconfig|\.ecrc|\.typos\.toml|\.gitleaks\.toml|\.gitleaksignore|pyproject\.toml|\.python-version|\.gitleaks-mac\.toml|\.shellcheckrc|\.markdownlint\.yaml|\.markdownlint-cli2\.jsonc|\.gitattributes|\.gitignore|\.pre-commit-config\.yaml)$)|\.md$'
+          firmware=true
+          docs=true
+          panel=true
+          schematic=true
+          if [[ "$EVENT" == push || "$EVENT" == pull_request ]] && [[ "$FORCED" != true ]] \
+             && [[ -n "$BASE" && ! "$BASE" =~ ^0+$ ]] \
+             && git fetch --quiet --depth=1 "https://x-access-token:${TOKEN}@github.com/${GITHUB_REPOSITORY}.git" "$BASE" \
+             && changed=$(git diff --name-only "$BASE" HEAD) && [[ -n "$changed" ]]; then
+            printf '%s\n' "$changed"
+            printf '%s\n' "$changed" | grep -Evq "$not_firmware" || firmware=false
+            # The guards the family runs over its builds live in tests/ and scripts/.
+            printf '%s\n' "$changed" | grep -Eq "$build_guards" && firmware=true
+            docs=$firmware
+            printf '%s\n' "$changed" | grep -Eq "$docs_inputs" && docs=true
+            printf '%s\n' "$changed" | grep -Evq "$not_panel" || panel=false
+            printf '%s\n' "$changed" | grep -Eq "$panel_runners" && panel=true
+            printf '%s\n' "$changed" | grep -Eq "$panel_inputs" && panel=true
+            printf '%s\n' "$changed" | grep -Evq "$not_schematic" || schematic=false
+          fi
+          # A draft pull request runs no heavy family: only the ready head does.
+          if [[ "$DRAFT" == true ]]; then
+            firmware=false
+            docs=false
+            panel=false
+            schematic=false
+          fi
+          echo "draft=$DRAFT" | tee -a "$GITHUB_OUTPUT"
+          echo "firmware=$firmware" | tee -a "$GITHUB_OUTPUT"
+          echo "docs=$docs" | tee -a "$GITHUB_OUTPUT"
+          echo "panel=$panel" | tee -a "$GITHUB_OUTPUT"
+          echo "schematic=$schematic" | tee -a "$GITHUB_OUTPUT"
+          {
+            echo "### What changed"
+            echo
+            [[ "$DRAFT" == true ]] && echo "A draft pull request: no heavy job runs until it is marked ready for review." && echo
+            echo "| Family | Runs |"
+            echo "|---|---|"
+            echo "| firmware (native32, device images) | $firmware |"
+            echo "| docs (the documentation site) | $docs |"
+            echo "| panel (Playwright) | $panel |"
+            echo "| schematic (KiCad) | $schematic |"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+  # This repository's own rules, after the kit's: the paths the documents
+  # write, the calibration registry (which imports the host package), the
+  # renders' metadata, and the gitleaks rules held to their planted values
+  # with the gitleaks binary the kit's hook pins, downloaded and checked
+  # against its SHA-256. Every step runs even when one before it failed, so
+  # one run reports every failure. The linters themselves (ruff, typos,
+  # gitleaks, EditorConfig, clang-format, REUSE and the header lines) are the
+  # kit's quick job's hooks.
+  lint:
+    name: "🧹 Repository rules (document paths, registry, metadata, gitleaks plants)"
+    needs: quick
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: Install the host client and the checkers
+        run: pip install -e 'host[dev]' pypdf==7.1.1 pyelftools==0.33
+      - name: Install gitleaks
+        env:
+          GITLEAKS_VERSION: 8.30.1
+          # SHA-256 from gitleaks_8.30.1_checksums.txt.
+          GITLEAKS_SHA256: 551f6fc83ea457d62a0d98237cbad105af8d557003051f41f3e7ca7b3f2470eb
+        run: |
+          set -euo pipefail
+          cd "$RUNNER_TEMP"
+          curl -sSfL -o gitleaks.tar.gz \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          echo "${GITLEAKS_SHA256}  gitleaks.tar.gz" | sha256sum -c -
+          tar -xzf gitleaks.tar.gz gitleaks
+          sudo install -m 0755 gitleaks /usr/local/bin/gitleaks
+          gitleaks version
+      - name: The secret rules find each planted value (gitleaks)
+        if: ${{ !cancelled() }}
+        run: python3 -m pytest -q -W error -p no:cacheprovider tests/ci/test_gitleaks_rules.py
+      - name: Every path a document writes is here, or names its owner
+        if: ${{ !cancelled() }}
+        run: |
+          python3 scripts/check_doc_paths.py
+          python3 scripts/check_doc_paths.py --selftest
+      - name: The calibration registry and its index
+        if: ${{ !cancelled() }}
+        run: python3 scripts/check_calibration_registry.py
+      - name: The renders carry their metadata
+        if: ${{ !cancelled() }}
+        run: python3 scripts/check_metadata.py
+
+  tests:
+    name: "🧪 Tests and coverage report"
+    needs: [changes, lint]
+    if: needs.changes.outputs.draft != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      # The whole history: the ratchets that only fall are held to every
+      # version of their file (docs/misra.md's counts, heap_expectations.toml,
+      # the ESP-IDF allocation lists).
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: LLVM (clang, llvm-cov, llvm-profdata) for the MC/DC coverage
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq clang llvm
+          clang++ --version
+          llvm-cov --version
+      # pyelftools reads the planted images of the reachability gate's tests
+      # (tests/firmware/test_heap_reachability_gate.py), which skip without it.
+      - name: Install the host client
+        run: pip install -e 'host[dev]' reuse pypdf==7.1.1 pyelftools==0.33
+      - name: Every test, and the report (scripts/run_tests.sh)
+        run: scripts/run_tests.sh
+      - name: Keep the test report
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: test-report
+          path: build/test-report/
+          if-no-files-found: warn
+
+  # The panel's page (host/kleidos_meter/panel/static) in a headless Chromium
+  # against serve's own simulator: host/tests/test_panel_browser.py, which the
+  # job above skips because it installs no browser. Its last test holds what
+  # the suite ran of the page's modules to host/js_floors.toml, and the
+  # page's mutants run after it. Playwright is pinned in the
+  # [browser] extra of host/pyproject.toml, at the Kleidos QA pin, and it pins
+  # the browser's build, so the cache is keyed on its release.
+  # METER_BROWSER_REQUIRED=1 turns the suite's skip without either into a
+  # failure.
+  panel:
+    name: "🧭 Panel (Playwright)"
+    needs: [changes, lint]
+    if: needs.changes.outputs.panel == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: Install the host package, its tests and Playwright
+        id: install
+        run: |
+          set -euo pipefail
+          pip install -e 'host[dev,browser]'
+          echo "playwright=$(python3 -c 'import importlib.metadata as m; print(m.version("playwright"))')" | tee -a "$GITHUB_OUTPUT"
+      - name: Cache the pinned browser
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-playwright-${{ steps.install.outputs.playwright }}-chromium
+      - name: Install Chromium (the cache's, or the pinned build) and its libraries
+        run: python3 -m playwright install --with-deps chromium
+      - name: The page in the browser, against serve's simulator
+        working-directory: host
+        env:
+          METER_BROWSER_REQUIRED: "1"
+          PLAYWRIGHT: ${{ steps.install.outputs.playwright }}
+        run: |
+          set -euo pipefail
+          mkdir -p ../build/test-report
+          # -n 0: one file, which loadfile gives one worker anyway, and its last
+          # test writes record_testsuite_property, which xdist does not carry
+          # back to the junit report the summary below reads.
+          python3 -m pytest -n 0 -q -rs -W error -p no:cacheprovider \
+            --junitxml=../build/test-report/panel.xml tests/test_panel_browser.py | tee "$RUNNER_TEMP/panel.txt"
+          { echo "### Panel (Playwright ${PLAYWRIGHT}, Chromium)"; echo; tail -1 "$RUNNER_TEMP/panel.txt"; } >> "$GITHUB_STEP_SUMMARY"
+          # What the suite's last test held to host/js_floors.toml; no figure
+          # means that it judged nothing, and fails the step.
+          {
+            echo
+            echo "### The page's modules, as Chromium counts them"
+            echo
+            grep -oE '<property name="[a-z-]+\.js" value="[^"]*"' ../build/test-report/panel.xml \
+              | sed -E 's/.*name="([^"]*)" value="([^"]*)"/- \1: \2/'
+          } | tee -a "$GITHUB_STEP_SUMMARY"
+      # The mutants of the page's modules, each killed by the browser tests its
+      # kill command names (host/mutants/); the tests job runs the others.
+      - name: The page's mutants, every one killed
+        run: scripts/run_mutants.sh --page
+      - name: Keep the panel's report
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: panel-report
+          path: build/test-report/panel.xml
+          if-no-files-found: warn
+
+  # The firmware's reference and its gates: Doxygen 1.17.0 (the official Linux
+  # binary, pinned by digest, as the firmware repository's docs job pins it)
+  # exits non-zero on any warning, and the Doxyfile shows undocumented symbols,
+  # private, file-static and anonymous-namespace ones included, so an
+  # undocumented symbol or parameter fails here. Then the link gate reads that
+  # build for what Doxygen does not warn on (a link to a page it never wrote,
+  # a name an enclosing namespace also declares), and its self-test plants
+  # each defect it fails on. The guard test plants an undocumented public
+  # function, private member and anonymous-namespace function to prove the
+  # first gate still sees each.
+  docs:
+    name: "📚 Documentation site and firmware reference (Doxygen 1.17.0)"
+    needs: [changes, lint]
+    if: needs.changes.outputs.firmware == 'true' || needs.changes.outputs.docs == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install Doxygen
+        env:
+          DOXYGEN_VERSION: 1.17.0
+          DOXYGEN_SHA256: 75419ef4f446fc1c24ef12514b574e66e898ee6f527c6ae2ad84f91a905823c2
+        # The project's own release asset on GitHub first, doxygen.nl second:
+        # doxygen.nl's CDN has answered GitHub's runners with another body
+        # (2026-11-27). Either copy must be the pinned file.
+        run: |
+          tag="Release_${DOXYGEN_VERSION//./_}"
+          file="doxygen-${DOXYGEN_VERSION}.linux.bin.tar.gz"
+          for url in "https://github.com/doxygen/doxygen/releases/download/${tag}/${file}" \
+                     "https://www.doxygen.nl/files/${file}"; do
+            if curl -sSfL --retry 3 -o "$RUNNER_TEMP/doxygen.tar.gz" "$url" &&
+               echo "${DOXYGEN_SHA256}  $RUNNER_TEMP/doxygen.tar.gz" | sha256sum -c -; then
+              break
+            fi
+            rm -f "$RUNNER_TEMP/doxygen.tar.gz"
+          done
+          test -f "$RUNNER_TEMP/doxygen.tar.gz"
+          tar -xzf "$RUNNER_TEMP/doxygen.tar.gz" -C "$RUNNER_TEMP"
+          sudo install -m 0755 "$RUNNER_TEMP/doxygen-${DOXYGEN_VERSION}/bin/doxygen" /usr/local/bin/doxygen
+          doxygen --version
+      - name: The reference, zero warnings (doxygen Doxyfile)
+        run: mkdir -p build && doxygen Doxyfile
+      - name: Every link of the reference resolves, no name shadows an outer one
+        run: python3 scripts/check_doc_links.py --html build/doxygen/html
+      - name: The link gate raises each planted defect
+        run: python3 scripts/check_doc_links.py --selftest
+      - name: The gate sees each planted undocumented symbol
+        run: |
+          pip install pytest pytest-xdist==3.8.0
+          python3 -m pytest -q tests/firmware/test_doxygen_gate.py
+      - name: The site as it is published, built and guarded (scripts/build_reference.py)
+        run: python3 scripts/build_reference.py --out build/reference
+      - name: The guard of the published site raises each planted defect
+        run: python3 scripts/check_reference.py --selftest
+      - name: The published site's links, page names and copies (tests)
+        run: python3 -m pytest -q tests/firmware/test_doc_link_form.py tests/firmware/test_reference_build.py tests/firmware/test_published_reference_copies.py
+      - name: Keep the published site
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: meter-reference
+          path: build/reference
+          retention-days: 14
+
+  # clang-tidy and cppcheck over firmware/src (scripts/run_static_analysis.sh),
+  # once the device build has passed. clang-tidy runs twice: over each
+  # source's compile command from the device's compile database, for the
+  # Xtensa target against the real ESP-IDF, libstdc++ and picolibc headers,
+  # and over the sources as the host tests compile them. So this job installs
+  # what the firmware job does (the pinned platform and ESP-IDF, the cached
+  # package) and writes the compile database itself. Both analyzers are at the
+  # releases scripts/analysis_toolchain.sh pins: clang-tidy from its PyPI
+  # wheel, cppcheck built from its source archive, checked against the pinned
+  # SHA-256 and cached by release (the runner's distribution package is an
+  # older release, whose checkers differ). The gate refuses another major of
+  # clang-tidy, another cppcheck, a short or stale compile database and any
+  # parse diagnostic (exit 2), and its self-test proves those guards. Every
+  # finding fails the job; .clang-tidy and .cppcheck-suppress say what is left
+  # out and why. The include-cleaner report is advisory and goes to the job
+  # summary.
+  static-analysis:
+    name: "🔎 Static analysis (clang-tidy device and harness, cppcheck)"
+    needs: [changes, lint, firmware]
+    if: needs.changes.outputs.firmware == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      KLEIDOS_PIO_JOB_ALONE: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: Read the analyzers' pins
+        run: |
+          set -euo pipefail
+          . scripts/analysis_toolchain.sh
+          {
+            echo "CLANG_TIDY_VERSION=$METER_CLANG_TIDY_VERSION"
+            echo "CPPCHECK_VERSION=$METER_CPPCHECK_VERSION"
+            echo "CPPCHECK_SHA256=$METER_CPPCHECK_SHA256"
+          } >> "$GITHUB_ENV"
+      - name: Cache the installed ESP-IDF package
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.platformio/packages/framework-espidf@*
+          key: ${{ runner.os }}-espidf-${{ hashFiles('firmware/platformio.ini', 'scripts/install_idf.sh') }}
+      - name: Cache the pinned cppcheck
+        id: cppcheck-cache
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.local/cppcheck
+          key: ${{ runner.os }}-cppcheck-${{ env.CPPCHECK_VERSION }}-${{ env.CPPCHECK_SHA256 }}
+      - name: Build the pinned cppcheck from its source archive
+        if: steps.cppcheck-cache.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          archive="$RUNNER_TEMP/cppcheck.tar.gz"
+          curl -sSfL -o "$archive" "https://github.com/danmar/cppcheck/archive/refs/tags/${CPPCHECK_VERSION}.tar.gz"
+          echo "${CPPCHECK_SHA256}  $archive" | sha256sum -c -
+          tar -xzf "$archive" -C "$RUNNER_TEMP"
+          cmake -S "$RUNNER_TEMP/cppcheck-${CPPCHECK_VERSION}" -B "$RUNNER_TEMP/cppcheck-build" \
+            -DCMAKE_BUILD_TYPE=Release -DUSE_MATCHCOMPILER=ON -DBUILD_GUI=OFF -DHAVE_RULES=OFF \
+            -DCMAKE_INSTALL_PREFIX="$HOME/.local/cppcheck"
+          cmake --build "$RUNNER_TEMP/cppcheck-build" -j"$(nproc)"
+          cmake --install "$RUNNER_TEMP/cppcheck-build"
+      - name: Install PlatformIO, the pinned clang-tidy, the platform and the pinned ESP-IDF
+        run: |
+          set -euo pipefail
+          pip install platformio==6.2.0 "clang-tidy==${CLANG_TIDY_VERSION}"
+          pio pkg install -g -p "platformio/espressif32@7.0.1"
+          bash scripts/install_idf.sh
+          rm -rf ~/.platformio/.cache/tmp
+          echo "$HOME/.local/cppcheck/bin" >> "$GITHUB_PATH"
+      - name: The device's compile database
+        run: pio run --project-dir firmware -e meter -t compiledb
+      - name: The analyzers' versions
+        run: |
+          clang-tidy --version
+          cppcheck --version
+      - name: clang-tidy, device and harness legs
+        run: scripts/run_static_analysis.sh tidy
+      - name: The clang-tidy guards prove themselves
+        run: scripts/run_static_analysis.sh selftest
+      # The guards that read the compile database and need a clang, which the
+      # test job skips: METER_BUILD_REQUIRED=1 turns their skip into a failure.
+      - name: The guards over the compile database (the MISRA rules on the device leg, the clang-tidy gate)
+        run: |
+          set -euo pipefail
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq clang
+          pip install pytest pytest-xdist==3.8.0
+          METER_BUILD_REQUIRED=1 python3 -m pytest -q -rs -W error -p no:cacheprovider \
+            tests/firmware/test_misra_rules.py tests/firmware/test_static_analysis_gate.py
+      - name: cppcheck
+        run: scripts/run_static_analysis.sh cppcheck
+      - name: Include-cleaner report (advisory)
+        run: |
+          set -euo pipefail
+          out=$(scripts/run_static_analysis.sh includes)
+          echo "$out"
+          { echo "### Include-cleaner (advisory)"; echo; echo "$out" | grep -E '^clang-tidy device' | sed 's/^/- /'; } >> "$GITHUB_STEP_SUMMARY"
+
+  # The firmware's host tests at 32 bits, with GCC: std::size_t, long and
+  # pointers at the target's width, so a conversion or a format only a 64-bit
+  # host forgives fails here. GCC because the device's compiler is GCC: it
+  # sees what clang does not (-Wformat-truncation, the order it evaluates
+  # operands in). LeakSanitizer is on, as on every Linux run.
+  native32:
+    name: "🧪 Native tests at 32 bits (GCC)"
+    needs: [changes, lint]
+    if: needs.changes.outputs.firmware == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: GCC with its 32-bit libraries
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq g++-multilib
+          g++ --version
+      - name: The test binaries at 32 bits (make test32)
+        run: make -C firmware/test/native -j"$(nproc)" test32 CXX=g++
+
+  # The device image, built as the bench builds it: the pinned platform
+  # (espressif32 7.0.1) and the ESP-IDF release firmware/platformio.ini pins,
+  # which the PlatformIO registry does not publish, installed by
+  # scripts/install_idf.sh (a byte copy of the firmware repository's, held by
+  # tests/firmware/test_install_idf_copy.py). The installer would hand itself
+  # to that repository's pio-job; KLEIDOS_PIO_JOB_ALONE says it runs alone.
+  # Only the installed ESP-IDF package is cached, on the two files that decide
+  # what it holds: the whole ~/.platformio (the RISC-V toolchain alone is
+  # 3 GB) left the runner no disk to write the cache archive on. The release
+  # archive is deleted once unpacked, for the same reason. The image's sizes go
+  # to the job summary.
+  firmware:
+    name: "🔨 Device image (meter)"
+    needs: [changes, lint]
+    if: needs.changes.outputs.firmware == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      KLEIDOS_PIO_JOB_ALONE: "1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.13"
+      - name: Cache the installed ESP-IDF package
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.platformio/packages/framework-espidf@*
+          key: ${{ runner.os }}-espidf-${{ hashFiles('firmware/platformio.ini', 'scripts/install_idf.sh') }}
+      - name: Install PlatformIO
+        run: pip install platformio==6.2.0
+      - name: Install the platform and the pinned ESP-IDF
+        run: |
+          pio pkg install -g -p "platformio/espressif32@7.0.1"
+          bash scripts/install_idf.sh
+          rm -rf ~/.platformio/.cache/tmp
+      - name: Build meter
+        run: pio run --project-dir firmware -e meter
+      # The guards over what the build wrote: every relaxed warning ends as an
+      # error in each source's compile command (the compile database, never a
+      # verbose build), the image links with --fatal-warnings, and the
+      # generated sdkconfig carries what sdkconfig.defaults declares, and no
+      # allocator is reachable in the image (the reachability gate's own tests,
+      # which read the image with pyelftools).
+      # METER_BUILD_REQUIRED=1 turns their skip on a missing output into a
+      # failure (tests/firmware/conftest.py), so none is skipped here.
+      - name: The guards over the build (compile flags, link, sdkconfig, reachability)
+        run: |
+          set -euo pipefail
+          pio run --project-dir firmware -e meter -t compiledb
+          pip install pytest pytest-xdist==3.8.0 pyelftools==0.33
+          METER_BUILD_REQUIRED=1 python3 -m pytest -q -rs -W error -p no:cacheprovider \
+            tests/firmware/test_effective_compile_flags.py \
+            tests/firmware/test_meter_sdkconfig_reaches_the_build.py \
+            tests/firmware/test_heap_reachability_gate.py
+      - name: Image sizes
+        run: |
+          size=~/.platformio/packages/toolchain-xtensa-esp-elf/bin/xtensa-esp32s3-elf-size
+          {
+            echo "### Device images"
+            echo
+            echo "| Image | firmware.bin (bytes) | text | data | bss |"
+            echo "|---|---:|---:|---:|---:|"
+            build="firmware/.pio/build/meter"
+            read -r text data bss _ < <("$size" "$build/firmware.elf" | tail -1)
+            echo "| \`meter\` | $(stat -c %s "$build/firmware.bin") | $text | $data | $bss |"
+          } >> "$GITHUB_STEP_SUMMARY"
+      # The object gate: no object of the firmware's own component references
+      # an allocator, and the image holds no operator new or delete, no
+      # allocating C++ runtime and no NVS (scripts/check_heap_objects.py,
+      # docs/misra.md). The count goes to the job summary.
+      - name: No allocator in the firmware's objects
+        run: |
+          set -euo pipefail
+          nm=~/.platformio/packages/toolchain-xtensa-esp-elf/bin/xtensa-esp32s3-elf-nm
+          { echo "### Object gate"; echo; } >> "$GITHUB_STEP_SUMMARY"
+          out=$(python3 scripts/check_heap_objects.py --nm "$nm" --elf firmware/.pio/build/meter/firmware.elf firmware/.pio/build/meter/src/*.o)
+          echo "$out"
+          echo "- \`meter\`: $(echo "$out" | tail -1)" >> "$GITHUB_STEP_SUMMARY"
+      # The reachability gate: no allocator is reachable from any of the
+      # firmware's own functions in the linked image's call graph, read from
+      # the relocations the link keeps (scripts/check_heap_reachability.py,
+      # docs/misra.md; pyelftools reads the image). Its counts go to the job
+      # summary.
+      - name: No allocator reachable from the firmware's own code
+        run: |
+          set -euo pipefail
+          pip install pyelftools==0.33
+          python3 scripts/check_heap_reachability.py --selftest
+          out=$(python3 scripts/check_heap_reachability.py --elf firmware/.pio/build/meter/firmware.elf firmware/.pio/build/meter/src/*.o)
+          echo "$out"
+          { echo; echo "### Reachability gate"; echo; echo "$out" | grep -E '^([0-9]+ own|[0-9]+ function|cut:|[0-9]+ object)' | sed 's/^/- /'; } >> "$GITHUB_STEP_SUMMARY"
+      # The IRAM gate: nothing a conversion executes on Core 1 is in flash
+      # (scripts/check_iram_hot_path.py, docs/architecture.md SS 5.2).
+      # Its counts go to the job summary.
+      - name: The hot path is in IRAM
+        run: |
+          set -euo pipefail
+          bin=~/.platformio/packages/toolchain-xtensa-esp-elf/bin
+          out=$(python3 scripts/check_iram_hot_path.py --objdump "$bin/xtensa-esp32s3-elf-objdump" --nm "$bin/xtensa-esp32s3-elf-nm" firmware/.pio/build/meter)
+          echo "$out"
+          { echo; echo "### IRAM gate"; echo; echo "$out" | grep -E '^(hot path|cold|[0-9]+ object)' | sed 's/^/- /'; } >> "$GITHUB_STEP_SUMMARY"
+      # The radio gate: the image defines no Wi-Fi, Bluetooth, PHY,
+      # coexistence or USB-Serial-JTAG symbol (scripts/check_radio_absent.py,
+      # the owner's serial-only ruling of 2026-11-21). Its counts go to the
+      # job summary.
+      - name: No radio and no USB-Serial-JTAG in the image
+        run: |
+          set -euo pipefail
+          nm=~/.platformio/packages/toolchain-xtensa-esp-elf/bin/xtensa-esp32s3-elf-nm
+          python3 scripts/check_radio_absent.py --selftest
+          out=$(python3 scripts/check_radio_absent.py --nm "$nm" firmware/.pio/build/meter/firmware.elf)
+          echo "$out"
+          { echo; echo "### Radio gate"; echo; echo "$out" | grep -E '^([0-9]+ defined|wifi|bluetooth|phy|coexistence|usb_serial_jtag|firmware)' | sed 's/^/- /'; } >> "$GITHUB_STEP_SUMMARY"
+      # The retired-driver gate: the image links no member of an ESP-IDF
+      # driver the firmware replaced with its own code on the low-level layer
+      # (scripts/check_drivers_absent.py; FW-10 on: the RMT driver).
+      - name: No retired ESP-IDF driver in the image
+        run: |
+          set -euo pipefail
+          python3 scripts/check_drivers_absent.py --selftest
+          out=$(python3 scripts/check_drivers_absent.py firmware/.pio/build/meter/kleidos-meter.map)
+          echo "$out"
+          { echo; echo "### Retired drivers"; echo; printf '%s\n' "$out" | sed 's/^/- /'; } >> "$GITHUB_STEP_SUMMARY"
+      # The bench builds incrementally, CI from scratch: a changed version.txt
+      # must reach an existing build tree too (firmware/scripts/
+      # meter_version_reconfigure.py). Last, so the sizes above are the real
+      # images'.
+      - name: A changed version.txt reaches an incremental build
+        run: |
+          set -euo pipefail
+          test "$(python3 scripts/app_version.py firmware/.pio/build/meter/firmware.bin)" = "$(cat firmware/version.txt)"
+          echo 99.99.99 > firmware/version.txt
+          pio run --project-dir firmware -e meter
+          got=$(python3 scripts/app_version.py firmware/.pio/build/meter/firmware.bin)
+          git checkout -- firmware/version.txt
+          test "$got" = 99.99.99 || { echo "::error file=firmware/version.txt::an incremental build kept version $got"; exit 1; }
+
+  # The rig's schematic in the KiCad its renders are exported with (10.0.8):
+  # the generator gives back the committed files, ERC is clean, the netlist is
+  # the rig's, and a fresh export is byte for byte the committed PDF and SVG.
+  # The image brings its own Python; pypdf is installed at the version the
+  # lint job uses.
+  schematic:
+    name: "🧫 Rig schematic (KiCad 10.0.8 ERC, netlist, export)"
+    needs: [changes, lint]
+    if: needs.changes.outputs.schematic == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    container:
+      image: kicad/kicad@sha256:3f4a01786dfbe803a65f345c3342b765db9add913f5e9448f8356793714ddc34 # 10.0.8
+      options: --user root
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install pypdf
+        run: |
+          set -euo pipefail
+          apt-get update
+          apt-get install -y --no-install-recommends python3-pip
+          python3 -m pip install --break-system-packages --root-user-action=ignore pypdf==7.1.1
+      - name: The generator gives back the committed files
+        run: |
+          set -euo pipefail
+          copy="$RUNNER_TEMP/gen/hardware"
+          mkdir -p "$copy"
+          cp -r hardware/kicad hardware/gen_rig.py "$copy/"
+          python3 "$copy/gen_rig.py"
+          for name in rig.kicad_sch rig-calibration.kicad_sch rig.kicad_pro rig.kicad_sym sym-lib-table; do
+            cmp "$copy/$name" "hardware/$name" || { echo "::error file=hardware/$name::not what gen_rig.py gives"; exit 1; }
+          done
+      - name: ERC, the netlist, and a fresh export byte for byte the committed renders
+        run: |
+          set -euo pipefail
+          python3 hardware/export_rig.py --out "$RUNNER_TEMP/export"
+          for name in rig.pdf rig.svg rig-calibration.svg; do
+            cmp "$RUNNER_TEMP/export/$name" "hardware/$name" || { echo "::error file=hardware/$name::not what a fresh export gives; run hardware/export_rig.py in KiCad 10.0.8's container"; exit 1; }
+          done
+
+  # A draft's run judges nothing: the heavy jobs skip on it. This job fails on
+  # a draft, and "✅ Check" with it, so a draft head never shows a green gate
+  # that a signed fast-forward push to main could be mistaken for a verdict
+  # by. Marking the pull request ready for review skips this job and runs the
+  # rest (see stage 3 above).
+  draft:
+    name: "🙋 Draft: mark it ready for review for a verdict"
+    needs: [changes, lint]
+    if: needs.changes.outputs.draft == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: A draft's run is no verdict
+        run: |
+          echo "::error title=Draft pull request::The cheap jobs ran; the tests and the heavy jobs wait. Mark the pull request ready for review when the local gates pass, and that run of its head judges it."
+          exit 1
+
+  done:
+    name: "✅ Check"
+    needs: [quick, check, changes, lint, tests, panel, docs, static-analysis, native32, firmware, schematic, draft]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Every job of this file succeeded
+        # -p: no BASH_ENV, no function and no option from the environment; and
+        # both variables are always set here, so nothing outside the step steers it.
+        shell: /bin/bash --noprofile --norc -p -e -o pipefail {0}
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+          MAY_SKIP: tests panel docs static-analysis native32 firmware schematic draft
+        run: |
+          set -euo pipefail
+          export PATH=/usr/bin:/bin HOME=/nonexistent
+          echo "${NEEDS}" | jq -r 'to_entries[] | "\(.key): \(.value.result)"' | tee -a "${GITHUB_STEP_SUMMARY}"
+          echo "${NEEDS}" | jq -e --arg may " ${MAY_SKIP} " '
+            length > 0 and all(to_entries[];
+              .value.result == "success"
+              or (.value.result == "skipped" and (.key as $job | $may | contains(" \($job) "))))' > /dev/null || {
+            echo "::error title=Not every job succeeded::a job that failed, was cancelled or was skipped without leave is listed above"
+            exit 1
+          }

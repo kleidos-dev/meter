@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW03-pinbase: the pin map log is mounted on the calibration's sectors.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+# The store's mount names the calib partition's base.
+diff --git a/firmware/src/pinmap_store.cpp b/firmware/src/pinmap_store.cpp
+index ea9de40..549fc61 100644
+--- a/firmware/src/pinmap_store.cpp
++++ b/firmware/src/pinmap_store.cpp
+@@ -129,7 +129,7 @@ bool acceptBlob( const std::uint8_t* blob, std::size_t length ) noexcept {
+ ///        judgment, reading it as a reboot would.
+ /// @return The mount's answer.
+ flash_log::Status mountLog() noexcept {
+-    return flash_log::mount( flash_log::Log::Pins, flash_port::kPinLogBaseAddress, &acceptBlob );
++    return flash_log::mount( flash_log::Log::Pins, flash_port::kLogBaseAddress, &acceptBlob );
+ }
+
+ }  // namespace

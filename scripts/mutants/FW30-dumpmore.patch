@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW30-dumpmore: TRACe:DATA? with no form ignores a third number.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console_commands.cpp b/firmware/src/console_commands.cpp
+--- a/firmware/src/console_commands.cpp
++++ b/firmware/src/console_commands.cpp
+@@ -1651,7 +1651,7 @@
+     }
+     // The table allows the form, a place and a count; with no form written
+     // the two numbers are all there is.
+-    if ( call.params.count() > index + 2U ) {
++    if ( call.params.count() > index + 3U ) {
+         failText( scpi::err::kParameterNotAllowed, kUsage );
+         return;
+     }

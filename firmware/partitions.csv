@@ -1,0 +1,38 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# The meter's partition table (FW-16, FW-03): the two record logs and the
+# image, and nothing else.
+#
+#   0x000000 - 0x007FFF  the second-stage bootloader (ESP-IDF's)
+#   0x008000 - 0x008FFF  this table (CONFIG_PARTITION_TABLE_OFFSET)
+#   0x009000 - 0x00AFFF  calib: the calibration record log's two 4 KiB
+#                        sectors (src/flash_log.h), at the fixed offset
+#                        src/flash_port.h names as kLogBaseAddress, so that
+#                        the firmware never looks a partition up
+#   0x00B000 - 0x00CFFF  pins: the pin map record log's two sectors
+#                        (src/pinmap_store.h), at kPinLogBaseAddress
+#   0x00D000 - 0x00FFFF  unused
+#   0x010000 - 0x10FFFF  factory: the image (about 300 KB today)
+#
+# No nvs: the calibration left NVS in FW-16 (every NVS save allocated,
+# docs/misra.md), and nothing else of the image uses it. No phy_init: the
+# meter has no radio (AGENTS.md, "Serial-only"). The 16 MB part's other
+# 15 MB are unused.
+#
+# An app flash writes the bootloader, this table and the image, and leaves
+# 0x9000 to 0xCFFF as they were: on the first flash of this table over an
+# older image, the calib sectors hold that image's NVS pages, which the log
+# reads as no record (q=uncal) and erases at its first save; `kleidos-meter
+# calibration restore` writes the registry's working copy back
+# (calibration/README.md). The pins sectors hold whatever an older image left
+# at 0xB000 (erased, or the NVS pages of an image before FW-16, in which no
+# record's magic and CRC hold), which the log reads as no record, so the
+# default map, and erases at its first save. tests/firmware/test_partition_table.py
+# holds both rows to the firmware's constants and the table to
+# sdkconfig.defaults and platformio.ini.
+#
+# Name,   Type, SubType,   Offset,  Size,     Flags
+calib,    data, undefined, 0x9000,  0x2000,
+pins,     data, undefined, 0xB000,  0x2000,
+factory,  app,  factory,   0x10000, 0x100000,

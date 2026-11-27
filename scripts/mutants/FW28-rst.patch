@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW28-rst: *RST keeps statistics from a stop the sampler did not acknowledge.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -1326,7 +1326,7 @@
+         (void)sampler_->finishZero( discarded );
+     } else if ( sampler_->captureOpen() ) {
+         CaptureStats stats = {};
+-        if ( sampler_->stop( stats ) ) {
++        if ( sampler_->stop( stats ) || true ) {
+             lastStats_         = stats;
+             lastHoldTeardowns_ = holdTeardowns_;
+             paceUnmet_         = stats.paceUnmet;

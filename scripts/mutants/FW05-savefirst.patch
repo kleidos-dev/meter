@@ -1,0 +1,27 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW05-savefirst: the map is saved before it is proved.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -2180,6 +2180,7 @@
+     }
+     const bool restJudged = relaysMove && relay::seesDutCurrent( restBefore - reference );
+
++    bool saved = pinmap_store::save( target ) == pinmap_store::Saved::Ok;
+     PinsTrial trial = tryPins( lastGood, target, range );
+     if ( restJudged && trial.reason == kAbsent ) {
+         // The parts' slowest move, before the shunt is read again.
+@@ -2194,10 +2195,8 @@
+     // The defaults are kept whatever the proof finds, since they are the way
+     // back with no INA228; nothing is, when the bus did not move.
+     bool keep  = trial.reason == kAbsent || ( defaults && trial.moved.made );
+-    bool saved = false;
+     if ( keep ) {
+         // Written and read back only now, with the map proved.
+-        saved = pinmap_store::save( target ) == pinmap_store::Saved::Ok;
+         if ( !saved ) {
+             trial.reason = kReasonSave;
+             keep         = defaults;

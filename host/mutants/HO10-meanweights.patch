@@ -1,0 +1,37 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant HO10-meanweights: The moving mean weighs every column alike, whatever it holds.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && METER_BROWSER_REQUIRED=1 ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_panel_browser.py -k 'uneven_timestamps or line_keeps_the_mean'
+
+diff --git a/host/kleidos_meter/panel/static/js/chart-math.js b/host/kleidos_meter/panel/static/js/chart-math.js
+--- a/host/kleidos_meter/panel/static/js/chart-math.js
++++ b/host/kleidos_meter/panel/static/js/chart-math.js
+@@ -692,21 +692,21 @@
+     let sum = 0;
+     let weight = 0;
+     for (let i = Math.max(0, offset - half); i <= Math.min(total - 1, offset + half); i += 1) {
+-        sum += columns.sum[i];
+-        weight += held[i];
++        sum += held[i] > 0 ? columns.sum[i] / held[i] : 0;
++        weight += held[i] > 0 ? 1 : 0;
+     }
+     for (let c = 0; c < n; c += 1) {
+         const i = c + offset;
+         if (c > 0) {
+             const leaving = i - half - 1;
+             if (leaving >= 0) {
+-                sum -= columns.sum[leaving];
+-                weight -= held[leaving];
++                sum -= held[leaving] > 0 ? columns.sum[leaving] / held[leaving] : 0;
++                weight -= held[leaving] > 0 ? 1 : 0;
+             }
+             const entering = i + half;
+             if (entering < total) {
+-                sum += columns.sum[entering];
+-                weight += held[entering];
++                sum += held[entering] > 0 ? columns.sum[entering] / held[entering] : 0;
++                weight += held[entering] > 0 ? 1 : 0;
+             }
+         }
+         if (held[i] > 0) {

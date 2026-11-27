@@ -1,0 +1,167 @@
+{
+  "strictness": 2,
+  "commentTypes": [
+    "logic",
+    "syntax",
+    "style"
+  ],
+  "autoReview": [
+    "open",
+    "push"
+  ],
+  "excludeAuthors": [
+    "dependabot[bot]",
+    "github-actions[bot]"
+  ],
+  "shouldUpdateDescription": false,
+  "updateSummaryOnly": false,
+  "statusCheck": true,
+  "statusCommentsEnabled": false,
+  "summarySection": {
+    "included": false
+  },
+  "issuesTableSection": {
+    "included": false
+  },
+  "confidenceScoreSection": {
+    "included": false
+  },
+  "sequenceDiagramSection": {
+    "included": false
+  },
+  "fixWithAI": true,
+  "hideFooter": true,
+  "instructions": "Review the diff and post inline comments with concrete suggestions. The rules of this repository are in AGENTS.md (listed in files.json, with docs/scpi.md, docs/misra.md and calibration/README.md for their paths) and in the rules below: cite the rule a finding breaks. Never comment on the pull request's title or description. Files byte-copied from another repository (hardware/kicad/, scripts/install_idf.*, .github/commit-check/ and its workflows) and generated files (the KiCad schematic and its renders, calibration/index.json) are changed at their source, never by hand.",
+  "ignorePatterns": "hardware/*.kicad_sch\nhardware/*.kicad_pro\nhardware/*.kicad_sym\nhardware/sym-lib-table\nhardware/*.svg\nhardware/*.pdf\nhardware/kicad/\nscripts/install_idf.sh\nscripts/install_idf.json\n.github/commit-check/\n.github/workflows/commit-check.yml\n.github/workflows/commit-check-comment.yml\ncalibration/index.json\ncalibration/records/*.log",
+  "rules": [
+    {
+      "id": "spdx",
+      "rule": "Every file carries an SPDX-FileCopyrightText line reading '2026 José M. Requena Plens' directly above its SPDX-License-Identifier line: GPL-3.0-or-later everywhere, CERN-OHL-S-2.0 under hardware/. A file that cannot hold a comment has its own explicit entry in REUSE.toml, which has no catch-all. Never a Creative Commons license.",
+      "severity": "medium"
+    },
+    {
+      "id": "bench-privacy",
+      "rule": "No private bench data in a tracked file: serial port names, USB serials, MAC addresses, host names (the KM- instrument serial is public). No measurement of a Kleidos board is filed here; those go to the Kleidos firmware repository's power store.",
+      "severity": "high"
+    },
+    {
+      "id": "no-heap",
+      "scope": [
+        "firmware/src/**"
+      ],
+      "rule": "No dynamic memory: no new, delete, malloc/calloc/realloc/free, heap_caps_* allocator, smart pointer or standard container. FreeRTOS objects and task stacks use the static creators (xQueueCreateStatic, xSemaphoreCreateBinaryStatic, xTaskCreateStaticPinnedToCore) over static storage.",
+      "severity": "high"
+    },
+    {
+      "id": "esp-idf-only",
+      "scope": [
+        "firmware/**"
+      ],
+      "rule": "ESP-IDF only: no Arduino API or header and no third-party device library. Integer arithmetic for every value on the wire: no float in the measurement path, no locale. Compiler warnings are errors.",
+      "severity": "high"
+    },
+    {
+      "id": "i2c-bus-core",
+      "scope": [
+        "firmware/src/**"
+      ],
+      "rule": "Every call into the firmware's own I2C master (i2c_bus.h) goes through Ina228Driver's transaction entries, made in place on the bus's core (Core 1, the sampler's) and routed through esp_ipc_call_blocking() from the other core, one transaction per call. Any other I2C call is a defect.",
+      "severity": "high"
+    },
+    {
+      "id": "iram-hot-path",
+      "scope": [
+        "firmware/src/**",
+        "firmware/sdkconfig.defaults"
+      ],
+      "rule": "A function or constant the sampler loop, the ALERT handler or the I2C transfer path reaches is IRAM_ATTR / DRAM_ATTR (ours) or moved by sdkconfig.defaults (ESP-IDF's); one deliberately left in flash goes in scripts/check_iram_hot_path.py's COLD list with the reason no conversion runs it.",
+      "severity": "high"
+    },
+    {
+      "id": "serial-only",
+      "scope": [
+        "firmware/**"
+      ],
+      "rule": "The meter is serial-only: the image links no Wi-Fi, Bluetooth, PHY or coexistence symbol and keeps USB-Serial-JTAG off. Every broken-out GPIO the firmware does not use is parked at boot from relay.h kParkedPins.",
+      "severity": "high"
+    },
+    {
+      "id": "misra-and-analysis",
+      "scope": [
+        "firmware/src/**"
+      ],
+      "rule": "A clang-tidy or cppcheck finding is fixed, or suppressed at its line with the reason beside it and an entry in docs/misra.md, the register of what the firmware holds of MISRA C++:2023 and where it departs.",
+      "severity": "medium"
+    },
+    {
+      "id": "doxygen",
+      "scope": [
+        "firmware/src/**"
+      ],
+      "rule": "Every symbol carries a Doxygen comment; every function a @brief, one @param[in|out] per parameter and @return or @retval. The contract is on the .h declaration and not repeated on the .cpp definition; each file joins its docs/groups.dox topic with @addtogroup inside its namespace and @ingroup in its @file block.",
+      "severity": "medium"
+    },
+    {
+      "id": "protocol-contract",
+      "scope": [
+        "firmware/src/scpi*",
+        "firmware/src/console*",
+        "host/**",
+        "docs/scpi.md"
+      ],
+      "rule": "docs/scpi.md is normative. A change to a command, response, report key, error number or stream record changes docs/scpi.md, the host client, its simulator and their tests in the same commit. Report keys keep their integer unit suffix (_na, _pv, _uohm, _mc, _us) and are never renamed or given another unit. The TEXT record never changes. Every refused unit queues exactly one error and changes nothing.",
+      "severity": "high"
+    },
+    {
+      "id": "version-rule",
+      "scope": [
+        "firmware/**",
+        "host/**",
+        "CHANGELOG.md"
+      ],
+      "rule": "A new command, key, error, record or observable behavior is a minor version, a fix invisible on the wire a patch, a removal a major; a changed meaning is not allowed. The change bumps firmware/version.txt and its copies (host package, simulator, host-test harness) and adds its CHANGELOG.md entry in the same commit.",
+      "severity": "medium"
+    },
+    {
+      "id": "host-tests",
+      "scope": [
+        "firmware/src/**",
+        "firmware/test/native/**"
+      ],
+      "rule": "A firmware change comes with the host tests that show its decisions; the sources compile unchanged against the fake ESP-IDF of firmware/test/native/harness/. An uncovered MC/DC condition needs a written reason in firmware/test/native/mcdc_exclusions.toml.",
+      "severity": "medium"
+    },
+    {
+      "id": "calibration-append-only",
+      "scope": [
+        "calibration/**"
+      ],
+      "rule": "Filed records and instrument events are append-only and held to their hashes: a correction is a new event and a new record, never an edit. A change to a configuration or an instrument regenerates index.json with scripts/check_calibration_registry.py --write.",
+      "severity": "high"
+    },
+    {
+      "id": "schematic-generated",
+      "scope": [
+        "hardware/**"
+      ],
+      "rule": "The schematic and its renders are generated by gen_rig.py and export_rig.py and never edited by hand; hardware/kicad/ is changed only in the brand repository. The netlist stays EXPECTED in export_rig.py unless the bench wiring changes, and then both change with a new revision in gen_rig.py.",
+      "severity": "medium"
+    },
+    {
+      "id": "ci-convention",
+      "scope": [
+        ".github/workflows/check.yml"
+      ],
+      "rule": "Job names '<emoji> <description>', stages cheapest first through needs:, path filters only in the '📋 What changed' job, a superseded run cancelled, actions pinned to a full commit SHA with the version in a comment, checkouts without persisted credentials.",
+      "severity": "medium"
+    },
+    {
+      "id": "markdown-unwrapped",
+      "scope": [
+        "**/*.md"
+      ],
+      "rule": "English, and Markdown prose is never hard-wrapped: one line per paragraph and one per list item. Never suggest wrapping a long line.",
+      "severity": "low"
+    }
+  ]
+}

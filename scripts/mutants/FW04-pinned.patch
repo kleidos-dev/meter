@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW04-pinned: a pinned address is scanned for like any other.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/ina228.cpp b/firmware/src/ina228.cpp
+--- a/firmware/src/ina228.cpp
++++ b/firmware/src/ina228.cpp
+@@ -178,7 +178,7 @@
+ }
+
+ bool Ina228Driver::selectAddress( std::uint8_t pinned ) noexcept {
+-    if ( std::uint32_t{ pinned } != std::uint32_t{ kScanForAddress } ) {
++    if ( std::uint32_t{ pinned } == std::uint32_t{ 0xFFU } ) {
+         address_ = pinned;
+         return answers( pinned );
+     }

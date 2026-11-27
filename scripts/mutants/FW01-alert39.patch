@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW01-alert39: ALERT is admitted on GPIO39, outside the status register's bank.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/pinmap.h b/firmware/src/pinmap.h
+index d525d63..b3eecd4 100644
+--- a/firmware/src/pinmap.h
++++ b/firmware/src/pinmap.h
+@@ -225,7 +225,7 @@ struct Verdict {
+         if ( row->pinClass == pin_table::PinClass::Reserved ) {
+             return { Problem::Reserved, at };
+         }
+-        if ( gpio >= pin_table::kRoleBelow[index] ) {
++        if ( ( gpio >= pin_table::kRoleBelow[index] ) && ( gpio != 39 ) ) {
+             return { Problem::TooHigh, at };
+         }
+         for ( std::size_t earlier = 0U; earlier < index; ++earlier ) {

@@ -1,0 +1,39 @@
+{
+  "$comment": "The base configurations of the Kleidos quality kit the tools read from this repository's disk; nothing else of the kit is held here. Never edit them: the kit's tools/ecosystem.py refresh writes newer ones (docs/quality.md there).",
+  "schema": "kleidos.vendored-copy/1",
+  "upstream": {
+    "repo": "kleidos-dev/.github",
+    "path": ".",
+    "commit": "05201502250a70d43ce46b713709e1fbb903ab54",
+    "held_by": "the kleidos-kit hook and the lint job of the kit's quick.yml"
+  },
+  "mode": "follow",
+  "taken": "2026-11-24",
+  "root": ".",
+  "kit": {
+    "version": "3.1.1",
+    "profiles": [
+      "base",
+      "python",
+      "actions",
+      "shell",
+      "cpp"
+    ]
+  },
+  "sources": {
+    ".github/quality/markdownlint.jsonc": "quality/markdownlint/base.jsonc",
+    ".gitleaks-mac.toml": "quality/gitleaks/mac.toml",
+    ".github/quality/ruff.toml": "quality/ruff/ruff.toml",
+    ".github/zizmor.yml": "quality/zizmor/zizmor.yml",
+    ".shellcheckrc": "quality/shellcheck/shellcheckrc",
+    ".clang-tidy": "quality/clang-tidy/base.yaml"
+  },
+  "files": {
+    ".clang-tidy": "3bd66a3c0121ed2d53af37f64cdc115e8dde21cce7d96c9da222cb7979dc20be",
+    ".github/quality/markdownlint.jsonc": "f09947dc371fe195ac69837e7c231878b6fbdfb99cc3bcd52aa951311e04a6c8",
+    ".github/quality/ruff.toml": "20d436dedf3d71b4674197a8e823741b2f06eb7166cebcae16d544ed93707613",
+    ".github/zizmor.yml": "f29db3ecd618636580e0f5cb643d36b955d27042580c4c7ee6f9057b80969fac",
+    ".gitleaks-mac.toml": "321806bc2e68db0d82347aef349e3eaa7bce1bd80993e582eddc51bda4cc32e9",
+    ".shellcheckrc": "b73693c1e1bf701cc1588cdc866ac6d2856150e52ea04b1c33093b4b8dbd8ec6"
+  }
+}

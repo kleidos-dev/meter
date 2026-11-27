@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW06-rst: *RST leaves the overrides on.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -1548,7 +1548,6 @@
+
+     const char* error = nullptr;
+     (void)sampler_->setProfile( Profile::Trace, error );
+-    sampler_->resetAveraging();
+     if ( device_->ready() ) {
+         (void)selectRange( ShuntRange::Wide163mV );
+         // A rewrite of the bus's timing registers, made only when the speed

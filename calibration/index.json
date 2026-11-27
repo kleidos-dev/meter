@@ -1,0 +1,76 @@
+{
+  "instruments": {
+    "KM-0000000000": {
+      "calibrations": [
+        {
+          "configuration": "mjkdz-r100-relay2click",
+          "coverage_k": 2,
+          "device": {
+            "cal_date": "2026-11-20",
+            "cal_tag": "R100_20261120_HR",
+            "shunt_uohm_r0": 100116,
+            "shunt_uohm_r1": 100116,
+            "vbus_side": "source"
+          },
+          "event": "2026-11-20-02",
+          "expanded_ppm": 848,
+          "ranges": {
+            "0": {
+              "applied_nohm": 100116000,
+              "u_ppm": 424
+            },
+            "1": {
+              "applied_nohm": 100116000,
+              "u_ppm": 424
+            }
+          },
+          "record": "records/2026-11-20.md",
+          "taken_at": "2026-11-20T03:45:17+01:00",
+          "valid_from": "2026-11-20",
+          "valid_until": "2027-11-20"
+        }
+      ],
+      "configuration": "mjkdz-r100-relay2click",
+      "configurations": {
+        "mjkdz-r100-relay2click": {
+          "adc": {
+            "die": "0x228",
+            "mfg": "0x5449"
+          },
+          "bypass_part": "relay2click",
+          "id": "mjkdz-r100-relay2click",
+          "image": "meter_relay2",
+          "image_aliases": [
+            {
+              "image": "meter",
+              "min_version": "0.8.0"
+            }
+          ],
+          "min_version": "0.4.0",
+          "nominal_nohm": 100000000,
+          "recalibration_days": 365,
+          "sense_core": "mjkdz-ina228+r100-unmarked"
+        }
+      },
+      "drift": [],
+      "label": "bench 1"
+    }
+  },
+  "schema": "kleidos.meter.calibration-index/1",
+  "sense_groups": {
+    "mjkdz-ina228+r100-unmarked range 0": {
+      "compared": false,
+      "instruments": [
+        "KM-0000000000"
+      ],
+      "mean_offset_ppm": 1160
+    },
+    "mjkdz-ina228+r100-unmarked range 1": {
+      "compared": false,
+      "instruments": [
+        "KM-0000000000"
+      ],
+      "mean_offset_ppm": 1160
+    }
+  }
+}

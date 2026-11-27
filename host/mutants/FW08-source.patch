@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW08-source: The default map applied as any other reads as a stored one.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_sim_pins.py::test_the_default_map_is_the_default_map_however_it_is_applied
+
+diff --git a/host/kleidos_meter/sim.py b/host/kleidos_meter/sim.py
+--- a/host/kleidos_meter/sim.py
++++ b/host/kleidos_meter/sim.py
+@@ -1622,7 +1622,7 @@
+         reason = "rest" if rest is not None else proof.reason
+         self.pins_verified = self.pins_verified and not moved
+         self.pins_live = self.pins_pending = target
+-        self.pins_src = "default" if target == pins.DEFAULT_MAP else "stored"
++        self.pins_src = "default" if defaults else "stored"
+         self.pins_record = (pins.DIGEST, target)
+         self.scl_hz = target.scl_hz
+         self.pins_result = f"result=ok reason={reason} {ids} tst={proof.tst} saved=1"

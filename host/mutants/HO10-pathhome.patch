@@ -1,0 +1,14 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant HO10-pathhome: A path under the home directory keeps it, so a short one spells it out.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_panel_paths.py
+
+diff --git a/host/kleidos_meter/panel/paths.py b/host/kleidos_meter/panel/paths.py
+--- a/host/kleidos_meter/panel/paths.py
++++ b/host/kleidos_meter/panel/paths.py
+@@ -61,4 +61,2 @@
+     inside = home.parts[1:]
+-    if parts[: len(inside)] == inside:
+-        parts = parts[len(inside) :]
+     return "/".join(parts[-TAIL:]) or "."

@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW28-cnvrf: a range switch reports cnvrf=1 whatever DIAG_ALRT says.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console_commands.cpp b/firmware/src/console_commands.cpp
+--- a/firmware/src/console_commands.cpp
++++ b/firmware/src/console_commands.cpp
+@@ -295,7 +295,7 @@
+         lastRangeDiscardUs_ = adcConfigPeriodMicroseconds( device_->adcConfig() );
+         vTaskDelay( rtos::ticksFromMs( lastRangeDiscardUs_ / 1000U + kDiscardGraceMs ) );
+         if ( device_->readDiagAlrt( diag ) == ESP_OK ) {
+-            lastRangeConverted_ = ( bits::hasBit( diag, kDiagCnvrf ) ) ? 1U : 0U;
++            lastRangeConverted_ = 1U;
+         }
+     }
+     return true;

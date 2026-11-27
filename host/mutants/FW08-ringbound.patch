@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW08-ringbound: An acquisition on a ring is not bounded to 600 s.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_sim_pins.py::test_a_rings_acquisition_is_bounded_to_600_s_of_the_samples_the_ring_holds
+
+diff --git a/host/kleidos_meter/sim.py b/host/kleidos_meter/sim.py
+--- a/host/kleidos_meter/sim.py
++++ b/host/kleidos_meter/sim.py
+@@ -2154,7 +2154,7 @@
+     def _acquisition_refused(self) -> bool:
+         """Whether an acquisition is refused: over 600 s, or a period its loop cannot keep."""
+         period, count = self._conversion(self.profile).period_us, self._acquisition_count()
+-        if count * period > MAX_ACQUISITION_US:
++        if count == self.sample_count and count * period > MAX_ACQUISITION_US:
+             self._fail(
+                 -222,
+                 f"acquisition of {count} x {period} us exceeds 600 s"

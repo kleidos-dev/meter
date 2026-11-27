@@ -1,0 +1,13 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW07-stucklead: A lead already open that still conducts is not seen.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -2613,3 +2613,3 @@ void Console::executeRelayOrder( const relay::Plan& plan, bool force, bool live,
+         // K1 again to judge it by.
+-        stuckLead = judged && relay::isEnergized( before, relay::kLead );
++        stuckLead = false;
+     }

@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW05-ended: an apply is taken under a window ended and not closed.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -882,7 +882,7 @@
+         { "SYSTem:PINS:CLOCk", takes( 1U ), &Console::cmdPinsClock },
+         { "SYSTem:PINS:CLEar", N, &Console::cmdPinsClear },
+         { "SYSTem:PINS:APPLy", R | C, &Console::cmdPinsApply },
+-        { "SYSTem:PINS:DEFault", R | C, &Console::cmdPinsDefault },
++        { "SYSTem:PINS:DEFault", R, &Console::cmdPinsDefault },
+         { "SYSTem:PINS:RESult?", N, &Console::cmdPinsResult },
+         // STATus
+         { "STATus:OPERation[:EVENt]?", N, &Console::cmdOperEvent },

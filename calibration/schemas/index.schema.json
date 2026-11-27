@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "kleidos.meter.calibration-index/1",
+  "title": "The calibration index: the one file other tools read",
+  "description": "Generated from the configurations and the instruments by scripts/check_calibration_registry.py --write, and held to them by the same script. The Kleidos QA harness reads it at a pinned commit (git show <commit>:calibration/index.json).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "instruments", "sense_groups"],
+  "properties": {
+    "schema": { "const": "kleidos.meter.calibration-index/1" },
+    "instruments": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label", "configuration", "configurations", "calibrations", "drift"],
+        "properties": {
+          "label": { "type": "string" },
+          "configuration": { "type": ["string", "null"], "description": "The configuration the instrument is in now." },
+          "configurations": { "type": "object" },
+          "calibrations": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["event", "configuration", "taken_at", "valid_from", "valid_until", "device", "ranges", "coverage_k", "expanded_ppm", "record"],
+              "properties": {
+                "event": { "type": "string" },
+                "configuration": { "type": "string" },
+                "taken_at": { "type": "string" },
+                "valid_from": { "type": "string", "description": "The first day it holds." },
+                "valid_until": { "type": "string", "description": "The first day it no longer holds." },
+                "device": { "type": "object" },
+                "ranges": { "type": "object" },
+                "coverage_k": { "type": "number" },
+                "expanded_ppm": { "type": "integer" },
+                "record": { "type": "string" }
+              }
+            }
+          },
+          "drift": { "type": "array" }
+        }
+      }
+    },
+    "sense_groups": { "type": "object" }
+  }
+}

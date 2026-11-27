@@ -1,0 +1,25 @@
+<title id="kl-meter-rig-cal-t">Kleidos bench meter shunt calibration schematic</title>
+<desc id="kl-meter-rig-cal-d">Sheet 2 of the Kleidos bench meter's rig: the same parts rewired for the shunt's two-point calibration, with a 100 Ω reference in the board's place, sensed four-wire.</desc>
+<!-- REUSE-IgnoreStart -->
+<metadata id="kl-meter-rig-cal-m">
+  <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+           xmlns:dc="http://purl.org/dc/elements/1.1/"
+           xmlns:cc="http://creativecommons.org/ns#"
+           xmlns:Iptc4xmpExt="http://iptc.org/std/Iptc4xmpExt/2008-02-29/">
+    <cc:Work rdf:about="">
+      <dc:format>image/svg+xml</dc:format>
+      <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+      <dc:title>Kleidos bench meter shunt calibration schematic</dc:title>
+      <dc:description>Sheet 2 of the Kleidos bench meter's rig: the same parts rewired for the shunt's two-point calibration, with a 100 Ω reference in the board's place, sensed four-wire.</dc:description>
+      <dc:creator><cc:Agent><dc:title>José M. Requena Plens</dc:title></cc:Agent></dc:creator>
+      <dc:publisher><cc:Agent><dc:title>Kleidos</dc:title></cc:Agent></dc:publisher>
+      <dc:rights><cc:Agent><dc:title>© 2026 José M. Requena Plens. CERN-OHL-S-2.0.</dc:title></cc:Agent></dc:rights>
+      <dc:identifier>https://github.com/kleidos-dev/meter/blob/main/hardware/rig-calibration.svg</dc:identifier>
+      <dc:language>en</dc:language>
+      <dc:subject><rdf:Bag><rdf:li>Kleidos</rdf:li><rdf:li>hardware password manager</rdf:li><rdf:li>open source</rdf:li><rdf:li>bench meter</rdf:li><rdf:li>INA228</rdf:li><rdf:li>schematic</rdf:li><rdf:li>KiCad</rdf:li></rdf:Bag></dc:subject>
+      <Iptc4xmpExt:DigitalSourceType rdf:resource="http://cv.iptc.org/newscodes/digitalsourcetype/digitalCreation"/>
+      <cc:license rdf:resource="https://spdx.org/licenses/CERN-OHL-S-2.0.html"/>
+    </cc:Work>
+  </rdf:RDF>
+</metadata>
+<!-- REUSE-IgnoreEnd -->

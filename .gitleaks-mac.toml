@@ -1,0 +1,80 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: MIT
+#
+# The Kleidos quality kit's gitleaks rules for MAC-shaped values
+# (kleidos-dev/.github quality/gitleaks/mac.toml), copied byte for byte to
+# .gitleaks-mac.toml at a repository's root. The rules and the allowlist are
+# kleidos-dev/qa's, which proved them; only the title is generic.
+#
+# A bench board's or a host's real address is private data (it identifies the
+# owner's hardware and his network) and lives only in ignored inventory
+# files. A fake address in a test is written in one of the shapes the
+# allowlist below accepts, and in no other: every one of them is locally
+# administered, multicast, broadcast or all zeros, so no vendor-assigned
+# (real) address can hide behind it.
+#
+# This file extends nothing, on purpose. A config that extends gitleaks'
+# default set inherits its global allowlist, which no option turns off and
+# which skips images (SVG among them), documents, fonts, lockfiles and
+# node_modules for every rule; the repository's own .gitleaks.toml holds the
+# default rules, and the hooks and the secrets workflow scan with both files,
+# each on its own.
+# Every expression is RE2 (gitleaks is written in Go): no backreferences, no
+# lookarounds. So the character before an address is consumed by the match
+# and the address itself is the secret (group 1); a hex digit there means the
+# run is part of a longer hex word, and anything else (a letter past f, an
+# underscore, a quote, a separator, "0x") does not hide it. Nothing after the
+# address is consumed, so two addresses one space apart are both seen; a
+# colon or dash run longer than six octets (a key fingerprint, a hex dump)
+# reads as an address and is written without separators instead. The dotted
+# form also refuses a letter or a dot before it, which is how SVG path data
+# runs its numbers together ("S1126.1228.0953", "-.5565.9419.5645").
+#
+# Every scan runs with --ignore-gitleaks-allow, so an inline allow comment
+# hides nothing. The kit's check_quality.py --plant-mac proves on planted
+# values, in a temporary tree, that every rule fires on a real shape (one in
+# an SVG file among them) and spares the fakes; the secrets workflow runs it.
+
+title = "Kleidos MAC-address gitleaks config"
+
+[[rules]]
+id = "mac-address"
+description = "A MAC-shaped value with colons or dashes (a bench board or host identity)"
+regex = '''(?im)(?:^|[^0-9a-f])((?:[0-9a-f]{2}[:-]){5}[0-9a-f]{2})'''
+secretGroup = 1
+keywords = [":", "-"]
+
+[[rules]]
+id = "mac-address-dotted"
+description = "A MAC-shaped value in the dotted form 3x4 hex (a bench board or host identity)"
+regex = '''(?im)(?:^|[^0-9a-z.])([0-9a-f]{4}\.[0-9a-f]{4}\.[0-9a-f]{4})'''
+secretGroup = 1
+keywords = ["."]
+
+# Twelve bare hex digits are any hash prefix, so this form counts only after
+# a word that names an address (mac, addr, bssid and the words that hold them).
+[[rules]]
+id = "mac-address-bare"
+description = "Twelve bare hex digits after a word naming an address (a bench board or host identity)"
+regex = '''(?i)(?:mac|addr|bssid)[a-z0-9_]*["']?[ \t]*[:=]?[ \t]*["']?(?:0x)?([0-9a-f]{12})(?:[^0-9a-f]|$)'''
+secretGroup = 1
+keywords = ["mac", "addr", "bssid"]
+
+# Each expression is matched against the address alone, with any separators.
+[[allowlists]]
+description = "Fakes: all zeros, broadcast, the aa and 11 fillers, 02:00:00:xx:xx:xx, the aa:bb:cc, 11:22:33, 12:34:56 and de:ad:be prefixes"
+targetRules = ["mac-address", "mac-address-dotted", "mac-address-bare"]
+regexTarget = "secret"
+regexes = [
+  # One octet six times: all zeros (a placeholder), broadcast, and two
+  # fillers (aa is locally administered, 11 is multicast).
+  '''(?i)^(?:00[:.-]?){5}00$''',
+  '''(?i)^(?:ff[:.-]?){5}ff$''',
+  '''(?i)^(?:aa[:.-]?){5}aa$''',
+  '''(?i)^(?:11[:.-]?){5}11$''',
+  # The locally administered test range 02:00:00:xx:xx:xx.
+  '''(?i)^02[:.-]?00[:.-]?00(?:[:.-]?[0-9a-f]{2}){3}$''',
+  # A spelled or counting prefix with any three octets after it. aa, de and
+  # 12 are locally administered, 11 is multicast: none is a vendor's OUI.
+  '''(?i)^(?:aa[:.-]?bb[:.-]?cc|11[:.-]?22[:.-]?33|12[:.-]?34[:.-]?56|de[:.-]?ad[:.-]?be)(?:[:.-]?[0-9a-f]{2}){3}$''',
+]

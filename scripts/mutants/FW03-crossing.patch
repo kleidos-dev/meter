@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW03-crossing: a write or an erase that runs from the calibration log into the pin map's is allowed.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+# The two regions checked as one span of 16 KiB.
+diff --git a/firmware/src/flash_port.cpp b/firmware/src/flash_port.cpp
+index 3a430e4..54f1988 100644
+--- a/firmware/src/flash_port.cpp
++++ b/firmware/src/flash_port.cpp
+@@ -44,7 +44,8 @@ constexpr bool inRegion( std::size_t address, std::size_t length, std::size_t fi
+
+ bool writable( std::size_t address, std::size_t length ) noexcept {
+     return inRegion( address, length, kLogBaseAddress )
+-           || inRegion( address, length, kPinLogBaseAddress );
++           || inRegion( address, length, kPinLogBaseAddress )
++           || ( address >= kLogBaseAddress && address + length <= kPinLogBaseAddress + kLogBytes );
+ }
+
+ }  // namespace flash_port

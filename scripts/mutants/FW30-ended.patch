@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW30-ended: flag C lets a command through once a ring has filled and is not closed.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -865,7 +865,7 @@
+         }
+         return;
+     }
+-    if ( bits::hasBit( found->flags, kRefusedWhileOpen ) && sampler_->captureOpen() ) {
++    if ( bits::hasBit( found->flags, kRefusedWhileOpen ) && sampler_->zeroOpen() ) {
+         // Finished but not closed: its closing reads (ABORt) are still to come.
+         if ( sampler_->zeroOpen() ) {
+             failText( scpi::err::kWindowRunning, "null window ended, not closed (ABORt first)" );

@@ -1,0 +1,36 @@
+{
+  "files": [
+    {
+      "path": "AGENTS.md",
+      "description": "The repository's rules for every contributor and agent: firmware, protocol, calibration, schematic, licensing and conventions. Review findings cite these rules."
+    },
+    {
+      "path": "docs/scpi.md",
+      "description": "The normative SCPI protocol: commands, responses, report keys, errors and stream records.",
+      "scope": [
+        "firmware/src/scpi*",
+        "firmware/src/console*",
+        "host/**",
+        "docs/scpi.md"
+      ]
+    },
+    {
+      "path": "docs/misra.md",
+      "description": "The register of what the firmware holds of MISRA C++:2023, its departures and the suppressions with their reasons.",
+      "scope": [
+        "firmware/**",
+        ".clang-tidy",
+        ".cppcheck-suppress"
+      ]
+    },
+    {
+      "path": "calibration/README.md",
+      "description": "The calibration registry: configurations, instruments, append-only events and records, and the generated index.",
+      "scope": [
+        "calibration/**",
+        "host/kleidos_meter/registry.py",
+        "scripts/check_calibration_registry.py"
+      ]
+    }
+  ]
+}

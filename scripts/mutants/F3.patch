@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant F3: READ:TEMPerature? answers the voltage.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console_commands.cpp b/firmware/src/console_commands.cpp
+--- a/firmware/src/console_commands.cpp
++++ b/firmware/src/console_commands.cpp
+@@ -1005,7 +1005,7 @@
+     measure( Function::Energy, call, false );
+ }
+ void Console::cmdReadTemperature( Call& call ) noexcept {
+-    measure( Function::Temperature, call, false );
++    measure( Function::Voltage, call, false );
+ }
+ void Console::cmdFetch( Call& ) noexcept {
+     (void)reportFunction( function_ );

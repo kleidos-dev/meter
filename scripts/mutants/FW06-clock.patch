@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW06-clock: INITiate takes an override a lower bus clock no longer carries.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/sampler.cpp b/firmware/src/sampler.cpp
+--- a/firmware/src/sampler.cpp
++++ b/firmware/src/sampler.cpp
+@@ -849,7 +849,7 @@
+     // (paceAllows()): its period was accepted at the clock the bus ran at
+     // when it was set, which may have changed since.
+     if ( averaged ) {
+-        if ( !paceAllows( spec, error ) ) {
++        if ( spec.periodUs == 0U ) {
+             return false;
+         }
+     }

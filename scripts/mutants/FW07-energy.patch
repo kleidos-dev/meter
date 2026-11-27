@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW07-energy: CONFigure:CHARge reports as the bus functions do.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console_commands.cpp b/firmware/src/console_commands.cpp
+--- a/firmware/src/console_commands.cpp
++++ b/firmware/src/console_commands.cpp
+@@ -969,7 +969,7 @@ bool Console::reportFunction( Function function ) noexcept {
+         // Picoamps, written in amps.
+         value    = lastStats_.meanPicoamps;
+         decimals = 12U;
+-    } else if ( function == Function::Charge ) {
++    } else if ( function == Function::Energy ) {
+         if ( !lastStats_.chargeValid ) {
+             failText( scpi::err::kDataStale, "the acquisition read no CHARGE boundary" );
+             return false;

@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant F8: DIAGnostic:ALERt? reads mathof=0 always.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console_commands.cpp b/firmware/src/console_commands.cpp
+--- a/firmware/src/console_commands.cpp
++++ b/firmware/src/console_commands.cpp
+@@ -2042,7 +2042,7 @@
+     text::Writer w = openUnit();
+     hexField( w, "raw", diag, 4U );
+     w.field( "memstat", bits::hasBit( diag, kDiagMemStat ) ? 1U : 0U );
+-    w.field( "mathof", bits::hasBit( diag, kDiagMathOf ) ? 1U : 0U );
++    w.field( "mathof", 0U );
+     w.field( "energyof", bits::hasBit( diag, kDiagEnergyOf ) ? 1U : 0U );
+     w.field( "chargeof", bits::hasBit( diag, kDiagChargeOf ) ? 1U : 0U );
+     w.field( "cnvrf", bits::hasBit( diag, kDiagCnvrf ) ? 1U : 0U );

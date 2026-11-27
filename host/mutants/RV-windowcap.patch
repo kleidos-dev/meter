@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant RV-windowcap: A smoothing window is not capped at twice the view.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && METER_BROWSER_REQUIRED=1 ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_panel_browser.py -k 'keeps_the_buffers'
+
+diff --git a/host/kleidos_meter/panel/static/js/chart-math.js b/host/kleidos_meter/panel/static/js/chart-math.js
+--- a/host/kleidos_meter/panel/static/js/chart-math.js
++++ b/host/kleidos_meter/panel/static/js/chart-math.js
+@@ -902,7 +902,7 @@
+     }
+     // A window is never more than twice the view: a longer one would only
+     // flatten the line, and its margins would cost columns by the million.
+-    const half = choiceUs > 0 ? Math.min(windowHalf(choiceUs / columnUs), Math.max(0, columns)) : 0;
++    const half = choiceUs > 0 ? windowHalf(choiceUs / columnUs) : 0;
+     const span = 2 * half + 1;
+     const us = span * columnUs;
+     const asked = choiceUs > 0 ? ` (${formatDuration(choiceUs)} asked)` : "";

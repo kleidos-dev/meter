@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant RV-sixteenth: the null path's K2 step needs no share left on the shunt (the upper bound alone), so a lead that opened at the first step passes as a bypass that closed.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -2708,7 +2708,7 @@
+         // A checked plan is NULLpath ON, whose steps only ever energize: K2
+         // closes the bypass, K1 opens the lead (relay.h).
+         const bool bypassFailed = step.channel == relay::kBypass && judged
+-                                  && !relay::bypassTookCurrent( shareBefore, shareAfter );
++                                  && !relay::shareLeftShunt( shareBefore, shareAfter );
+         // A share that fell to nothing is a lead that opened, not a bypass
+         // that closed: Relay 2 is on Relay 1's wire.
+         const bool shareLost  = bypassFailed && relay::shareLeftShunt( shareBefore, shareAfter );

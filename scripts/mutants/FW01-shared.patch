@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW01-shared: two roles on one pin are admitted.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/pinmap.h b/firmware/src/pinmap.h
+index d525d63..9d8ef7c 100644
+--- a/firmware/src/pinmap.h
++++ b/firmware/src/pinmap.h
+@@ -229,9 +229,7 @@ struct Verdict {
+             return { Problem::TooHigh, at };
+         }
+         for ( std::size_t earlier = 0U; earlier < index; ++earlier ) {
+-            if ( map.pins[earlier] == gpio ) {
+-                return { Problem::Shared, at };
+-            }
++            (void)earlier;
+         }
+     }
+     if ( !addressAllowed( map.address ) ) {

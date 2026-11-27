@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW05-verified: relays an apply moved stay verified.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -2193,7 +2193,6 @@
+     pinsOutcome_.tst        = trial.tst;
+
+     if ( keep ) {
+-        relaysVerified_ = relaysVerified_ && pinmap::sameRelays( target, lastGood );
+         *pins_          = pin_boot::liveOf( target );
+         pinsPending_    = target;
+         bringUp_        = trial.moved.bus;

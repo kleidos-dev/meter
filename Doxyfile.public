@@ -1,0 +1,105 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Doxyfile.public: the meter's documentation as it is published, at
+# https://api.kleidos.dev/meter/ once this repository is public.
+#
+# An overlay of the Doxyfile: the same pages, the same filter, the same
+# preprocessor and the same warnings, with the output of the Kleidos firmware
+# repository's published reference (kleidos:Doxyfile.public): the host's
+# header, footer and layout (docs/published-reference/), the public API of the
+# firmware without its source, no script, no frame, no search and no tree.
+# The Doxyfile stays the gate and is not changed by this file.
+#
+# Never run by hand into a tree that is then published: the build is
+# scripts/build_reference.py, which runs this, takes what a static host has no
+# use for out of the tree, rewrites what the host's policy would block, writes
+# each page's Markdown twin and the llms.txt, and then runs the guard
+# (scripts/check_reference.py). The guard reads the tree and not this file, so
+# a setting dropped here fails there.
+#
+# Usage:
+#   python3 scripts/build_reference.py --out <new directory>
+@INCLUDE               = Doxyfile
+
+#---------------------------------------------------------------------------
+# Project. The build names the output directory and the version
+# (firmware/version.txt) the footer states.
+#---------------------------------------------------------------------------
+PROJECT_NAME           = "Kleidos bench meter"
+PROJECT_BRIEF          = "In development"
+OUTPUT_DIRECTORY       = build/doxygen/public
+HTML_OUTPUT            = meter
+
+#---------------------------------------------------------------------------
+# Pages: the text of a topic, a class, a file or a namespace before its lists,
+# and the titles the header's links use. One spelling of every address: a
+# name with capitals keeps them, and the build refuses two names that only
+# capitals tell apart.
+#---------------------------------------------------------------------------
+LAYOUT_FILE            = docs/published-reference/layout.xml
+CASE_SENSE_NAMES       = YES
+
+#---------------------------------------------------------------------------
+# No source, as the firmware's reference publishes none: each of these is YES
+# in the Doxyfile, by its own line or by Doxygen's default, and each would
+# copy code into the tree. The private, file-static and anonymous symbols the
+# gate documents are the firmware's insides, not its interface.
+#---------------------------------------------------------------------------
+SOURCE_BROWSER         = NO
+INLINE_SOURCES         = NO
+VERBATIM_HEADERS       = NO
+REFERENCED_BY_RELATION = NO
+REFERENCES_RELATION    = NO
+REFERENCES_LINK_SOURCE = NO
+MAX_INITIALIZER_LINES  = 0
+EXTRACT_ALL            = NO
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = NO
+EXTRACT_LOCAL_CLASSES  = NO
+EXTRACT_ANON_NSPACES   = NO
+SHOW_FILES             = NO
+SHOW_USED_FILES        = NO
+SHOW_INCLUDE_FILES     = NO
+SHOW_HEADERFILE        = NO
+
+#---------------------------------------------------------------------------
+# No graph: the Doxyfile runs no dot, and a class's bases are words.
+#---------------------------------------------------------------------------
+CLASS_GRAPH            = TEXT
+CALL_GRAPH             = NO
+CALLER_GRAPH           = NO
+INCLUDE_GRAPH          = NO
+INCLUDED_BY_GRAPH      = NO
+COLLABORATION_GRAPH    = NO
+DIRECTORY_GRAPH        = NO
+GROUP_GRAPHS           = NO
+GRAPHICAL_HIERARCHY    = NO
+UML_LOOK               = NO
+INTERACTIVE_SVG        = NO
+GENERATE_LEGEND        = NO
+
+#---------------------------------------------------------------------------
+# No script: the host serves none (its Content-Security-Policy admits only
+# the zone's analytics beacon). No search, no tree, no folding, no menus; the
+# header's bar is the navigation.
+#---------------------------------------------------------------------------
+SEARCHENGINE           = NO
+GENERATE_TREEVIEW      = NO
+DISABLE_INDEX          = YES
+HTML_DYNAMIC_SECTIONS  = NO
+HTML_DYNAMIC_MENUS     = NO
+HTML_CODE_FOLDING      = NO
+HTML_COPY_CLIPBOARD    = NO
+USE_MATHJAX            = NO
+
+#---------------------------------------------------------------------------
+# The host's design: its header (the bar and the "In development" note) and
+# footer, and none of Doxygen's sheets; the pages link the host's tokens.css
+# and api.css, beside the meter/ directory.
+#---------------------------------------------------------------------------
+HTML_HEADER            = docs/published-reference/header.html
+HTML_FOOTER            = docs/published-reference/footer.html
+HTML_EXTRA_STYLESHEET  =
+HTML_EXTRA_FILES       =
+HTML_COLORSTYLE        = LIGHT

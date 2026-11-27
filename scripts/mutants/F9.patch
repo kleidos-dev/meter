@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant F9: SENSe:CURRent:SHUNt refuses 0.2 ohm, the window's upper end.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console_commands.cpp b/firmware/src/console_commands.cpp
+--- a/firmware/src/console_commands.cpp
++++ b/firmware/src/console_commands.cpp
+@@ -384,7 +384,7 @@
+         return;
+     }
+     if ( microOhm < static_cast<std::int64_t>( kMinShuntMicroOhm )
+-         || microOhm > static_cast<std::int64_t>( kMaxShuntMicroOhm ) ) {
++         || microOhm >= static_cast<std::int64_t>( kMaxShuntMicroOhm ) ) {
+         failText( scpi::err::kDataOutOfRange, "use SENSe:CURRent:SHUNt <ohms> (0.05..0.2)" );
+         return;
+     }

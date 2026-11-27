@@ -1,0 +1,20 @@
+{
+  "$comment": "editorconfig-checker configuration, as the Kleidos firmware repository's: it honors .editorconfig with the IndentSize check off (it flags aligned comments, docstrings and continuation lines that are not a multiple of indent_size; the C++ indentation is clang-format's and the Python's ruff's). SpacesAfterTabs lets a Makefile recipe or continuation line align with spaces after its tab. Excluded: build and tool output, the byte-for-byte fixtures of tests/hardware/fixtures/ (an XMP packet as kicad-cli and pypdf write it, compared byte for byte), and binary or generated renders by extension. REUSE.toml carries this file's license, JSON having no comment.",
+  "Verbose": false,
+  "SpacesAfterTabs": true,
+  "Disable": {
+    "IndentSize": true
+  },
+  "Exclude": [
+    "\\.git/",
+    "\\.pio/",
+    "\\.venv/",
+    "\\.pytest_cache/",
+    "\\.ruff_cache/",
+    "__pycache__/",
+    "^build/",
+    "compile_commands\\.json$",
+    "^tests/hardware/fixtures/",
+    "\\.(pdf|svg|png|jpg|jpeg|gif|ico|bin|elf|map|gz)$"
+  ]
+}

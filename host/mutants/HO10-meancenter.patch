@@ -1,0 +1,32 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant HO10-meancenter: The moving mean looks back only: its window ends at the column it is drawn on.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && METER_BROWSER_REQUIRED=1 ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_panel_browser.py -k 'step_moves_the_line or symmetric_pulse'
+
+diff --git a/host/kleidos_meter/panel/static/js/chart-math.js b/host/kleidos_meter/panel/static/js/chart-math.js
+--- a/host/kleidos_meter/panel/static/js/chart-math.js
++++ b/host/kleidos_meter/panel/static/js/chart-math.js
+@@ -691,19 +691,19 @@
+     }
+     let sum = 0;
+     let weight = 0;
+-    for (let i = Math.max(0, offset - half); i <= Math.min(total - 1, offset + half); i += 1) {
++    for (let i = Math.max(0, offset - 2 * half); i <= Math.min(total - 1, offset); i += 1) {
+         sum += columns.sum[i];
+         weight += held[i];
+     }
+     for (let c = 0; c < n; c += 1) {
+         const i = c + offset;
+         if (c > 0) {
+-            const leaving = i - half - 1;
++            const leaving = i - 2 * half - 1;
+             if (leaving >= 0) {
+                 sum -= columns.sum[leaving];
+                 weight -= held[leaving];
+             }
+-            const entering = i + half;
++            const entering = i;
+             if (entering < total) {
+                 sum += columns.sum[entering];
+                 weight += held[entering];

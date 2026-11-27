@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW04-source: a fallback still reads as the stored map.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/pin_boot.cpp b/firmware/src/pin_boot.cpp
+--- a/firmware/src/pin_boot.cpp
++++ b/firmware/src/pin_boot.cpp
+@@ -91,7 +91,7 @@
+     device.closeBus();
+     relay::Bank::park( pinmap::parkedSet( fallback ) & ~pinmap::parkedSet( pins.map ) );
+     pins.map    = fallback;
+-    pins.source = Source::Fallback;
++    pins.source = Source::Stored;
+     pins.bus    = Bus::FellBack;
+     return bringUpOn( device, pins.map );
+ }

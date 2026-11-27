@@ -1,0 +1,16 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW04-latch: a relay pad is made an output before its latch holds the released level.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/relay.cpp b/firmware/src/relay.cpp
+--- a/firmware/src/relay.cpp
++++ b/firmware/src/relay.cpp
+@@ -141,7 +141,6 @@
+         // level is the release level written here (high for an active-low
+         // input such as the HW-316's, low for an active-high one such as the
+         // Relay 2 Click's LED), never the register's reset value.
+-        (void)gpio_set_level( wired.pin, releaseLevel( wired.drive ) );
+
+         // Input as well as output, so that the pad's real level can be read
+         // back (padMismatches()). Push-pull, no pulls: a driven pin is never

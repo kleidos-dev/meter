@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW29-isrwake: the ALERT interrupt asks for a switch when no task waits.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/sampler.cpp b/firmware/src/sampler.cpp
+--- a/firmware/src/sampler.cpp
++++ b/firmware/src/sampler.cpp
+@@ -436,7 +436,7 @@
+     (void)self->alertEdges_.fetch_add( 1 );
+     BaseType_t higherPriorityWoken = pdFALSE;
+     (void)xSemaphoreGiveFromISR( self->conversionSem_, &higherPriorityWoken );
+-    if ( higherPriorityWoken == pdTRUE ) {
++    if ( higherPriorityWoken != pdTRUE ) {
+         portYIELD_FROM_ISR();
+     }
+ }

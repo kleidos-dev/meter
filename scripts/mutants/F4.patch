@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant F4: CALibration:DATA?'s vbus_side spelled the other way round.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console_commands.cpp b/firmware/src/console_commands.cpp
+--- a/firmware/src/console_commands.cpp
++++ b/firmware/src/console_commands.cpp
+@@ -179,8 +179,8 @@
+ /// @param[in] side Where the `VBUS` sense is wired.
+ /// @return `source` or `unknown`.
+ std::string_view vbusSideName( VbusSide side ) noexcept {
+-    return ( side == VbusSide::Source ) ? std::string_view( "source" )
+-                                        : std::string_view( "unknown" );
++    return ( side == VbusSide::Source ) ? std::string_view( "unknown" )
++                                        : std::string_view( "source" );
+ }
+
+ /// A channel name of the FUNCtion list, by Channel.

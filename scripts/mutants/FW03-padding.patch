@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW03-padding: a record whose padding is not zero is taken.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+# Only the first byte of the padding is compared.
+diff --git a/firmware/src/pinmap_store.cpp b/firmware/src/pinmap_store.cpp
+index ea9de40..2fe45f5 100644
+--- a/firmware/src/pinmap_store.cpp
++++ b/firmware/src/pinmap_store.cpp
+@@ -119,7 +119,7 @@ bool acceptBlob( const std::uint8_t* blob, std::size_t length ) noexcept {
+             return false;
+         }
+     }
+-    if ( stored.tail != std::array<std::uint8_t, 2>{} ) {
++    if ( stored.tail.front() != 0U ) {
+         return false;
+     }
+     return pinmap::validate( fromBlob( stored ) ).problem == pinmap::Problem::None;

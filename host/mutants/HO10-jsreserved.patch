@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant HO10-jsreserved: The page's rules admit GPIO45, a strapping pin.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && METER_BROWSER_REQUIRED=1 ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_panel_browser.py -k 'pages_rules_give_every_vector'
+
+diff --git a/host/kleidos_meter/panel/static/js/pins-math.js b/host/kleidos_meter/panel/static/js/pins-math.js
+--- a/host/kleidos_meter/panel/static/js/pins-math.js
++++ b/host/kleidos_meter/panel/static/js/pins-math.js
+@@ -152,7 +152,7 @@
+     if (row === undefined) {
+         return "no_pin";
+     }
+-    if (row.class === "reserved") {
++    if (row.class === "reserved" && gpio !== 45) {
+         return "reserved";
+     }
+     return gpio >= role.below ? "too_high" : null;

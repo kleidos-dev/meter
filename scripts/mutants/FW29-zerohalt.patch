@@ -1,0 +1,19 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW29-zerohalt: a null whose stop was not acknowledged still reads a result.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/sampler.cpp b/firmware/src/sampler.cpp
+--- a/firmware/src/sampler.cpp
++++ b/firmware/src/sampler.cpp
+@@ -1025,9 +1025,7 @@
+     const ProfileSpec& spec = windowSpec_;
+
+     result = ZeroResult{};
+-    if ( !halt() ) {
+-        return false;
+-    }
++    (void)halt();
+
+     const std::uint32_t taken = samples_.load();
+     result.samples            = taken;

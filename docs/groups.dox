@@ -1,0 +1,157 @@
+// SPDX-FileCopyrightText: 2026 José M. Requena Plens
+// SPDX-License-Identifier: GPL-3.0-or-later
+//
+// The firmware reference's topics, one per module of firmware/src: the one
+// place a group id is defined. Each file joins its group with an
+// `@addtogroup <id>` wrap opened inside its namespace and names it with
+// `@ingroup <id>` in its `@file` block (Doxyfile, AGENTS.md "Firmware").
+
+/**
+ * @defgroup app_entry Entry point
+ * @brief `app_main()`: the boot order, and the five objects of the instrument.
+ */
+
+/**
+ * @defgroup ina228_driver INA228 driver
+ * @brief The TI INA228 on the I2C bus: its register map, field encodings and
+ *        LSBs, the bring-up that proves what is on the bus, and register access.
+ */
+
+/**
+ * @defgroup i2c_bus I2C master
+ * @brief I2C0 on its registers for the INA228's bus: the set-up, the clock
+ *        set by rewriting the timing registers, each transaction polled to
+ *        its end, and the recovery of a stuck bus, with nothing allocated, in
+ *        place of ESP-IDF's I2C master.
+ */
+
+/**
+ * @defgroup sampling Sampling
+ * @brief The four profiles, the pacing, the TRACE ring, the stream queue, the
+ *        zero-offset null, and the integer arithmetic that turns counts into
+ *        units.
+ */
+
+/**
+ * @defgroup scpi_parser SCPI parser
+ * @brief SCPI-1999 and IEEE 488.2: program-message parsing, header matching,
+ *        parameter decoding, the error queue and the status bytes.
+ */
+
+/**
+ * @defgroup bit_work Bit work
+ * @brief Flag tests and register fields on `std::uint32_t`, so that no narrow
+ *        unsigned operand is promoted to `int` (MISRA C++:2023 7.0.5).
+ */
+
+/**
+ * @defgroup characters Characters
+ * @brief Character classes, case folding, digits and the bytes a character
+ *        stands for, from a compile-time table, with no character's
+ *        numerical value used (MISRA C++:2023 7.0.3).
+ */
+
+/**
+ * @defgroup text_output Text output
+ * @brief The bounded writer: typed appends on `std::to_chars` into a caller's
+ *        buffer, with no format string, no variadic call and nothing
+ *        allocated (MISRA C++:2023 21.10.1, 30.0.1).
+ */
+
+/**
+ * @defgroup console_dispatch Console
+ * @brief The UART0 command surface: the reader, the command table and every
+ *        handler, the responses, the stream records and the status registers.
+ */
+
+/**
+ * @defgroup console_uart Console line
+ * @brief UART0 on its registers for the console: the port, a static receive
+ *        ring filled by an interrupt nothing allocated, the polled transmit
+ *        and the overflow `-363` reports, in place of ESP-IDF's UART driver.
+ */
+
+/**
+ * @defgroup calibration_store Calibration
+ * @brief The working copy of the calibration (the null, the shunts, the tag
+ *        and date) as a record of the flash log, the store's judgment of a
+ *        record, the quality token, and the shunt calibration's arithmetic.
+ */
+
+/**
+ * @defgroup flash_log Record logs
+ * @brief Append-only logs of records, each over two sectors of raw flash: the
+ *        newest valid record wins, a power cut at any point of a save leaves
+ *        the last complete one, and nothing is allocated; the calibration's
+ *        store since FW-16, in the `calib` partition, and the pin map's from
+ *        FW-03, in the `pins` partition, through a port on `esp_flash_*` and
+ *        a static region check.
+ */
+
+/**
+ * @defgroup pin_map Pin map
+ * @brief The board's pin table, generated from `firmware/board/pins.toml`, and
+ *        the pin map: which GPIO each role takes, the default map (the rig as
+ *        wired), the one definition of the rules a map must keep, and the
+ *        map's record in its own flash log.
+ */
+
+/**
+ * @defgroup relay_bank Relays
+ * @brief The relay module: the DUT's battery lead, the shunt bypass and the
+ *        spares, the four circuits they make, make-before-break, the null-path
+ *        checks and the hold.
+ */
+
+/**
+ * @defgroup instrument_identity Identity
+ * @brief Which instrument this is: the serial derived from the factory MAC
+ *        (with its SHA-256), and the image it runs.
+ */
+
+/**
+ * @defgroup status_led Status LED
+ * @brief The carrier's addressable RGB LED, blanked once at boot and never lit.
+ */
+
+/**
+ * @defgroup heap_monitor Heap monitor
+ * @brief The heap hooks that count every allocation and free, before
+ *        `app_main()`'s first line and since, and the census build's ring of
+ *        every event (`DIAGnostic:HEAP?`, docs/misra.md).
+ */
+
+/**
+ * @defgroup interrupt_routing Interrupt routing
+ * @brief A peripheral's interrupt routed to a free level-1 CPU line by the
+ *        CPU's own tables, with nothing allocated: the ALERT pin's and
+ *        UART0's, in place of ESP-IDF's GPIO ISR service, its UART driver's
+ *        interrupt and its interrupt allocator.
+ */
+
+/**
+ * @defgroup watchdog_timer Watchdog
+ * @brief Timer Group 0's main watchdog timer, fed only once the console, the
+ *        sampler and Core 0's idle task have all checked in, with nothing
+ *        allocated: in place of ESP-IDF's task watchdog.
+ */
+
+/**
+ * @defgroup startup_memory Startup memory
+ * @brief Static storage in place of what ESP-IDF's startup would take from
+ *        the heap before `app_main()`: the idle tasks' stacks and control
+ *        blocks, and PSA's initialization, linked wrapped.
+ */
+
+/**
+ * @defgroup brownout_detector Brownout detector
+ * @brief The supply's brownout detector, armed to reset the chip in hardware
+ *        with no interrupt and nothing allocated: in place of ESP-IDF's
+ *        brownout handling.
+ */
+
+/**
+ * @defgroup rtos_ticks FreeRTOS ticks
+ * @brief Milliseconds to ticks and the wait with no deadline, in place of
+ *        FreeRTOS's casting macros `pdMS_TO_TICKS()` and `portMAX_DELAY`.
+ */

@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW04-samebus: a map on the default bus falls back to it.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/pin_boot.cpp b/firmware/src/pin_boot.cpp
+--- a/firmware/src/pin_boot.cpp
++++ b/firmware/src/pin_boot.cpp
+@@ -78,7 +78,7 @@
+
+ BringUpResult bringUp( Ina228Driver& device, Live& pins ) noexcept {
+     const BringUpResult result = bringUpOn( device, pins.map );
+-    if ( !busSilent( result ) || pinmap::sameBus( pins.map, pinmap::kDefaultMap ) ) {
++    if ( !busSilent( result ) ) {
+         return result;
+     }
+     const pinmap::PinMap fallback = pinmap::withBusOf( pins.map, pinmap::kDefaultMap );

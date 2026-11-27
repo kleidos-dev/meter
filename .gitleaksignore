@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# Findings gitleaks may pass, by fingerprint (commit:file:rule:line). Only a
+# finding in the history that the tree no longer holds belongs here: one in
+# the working tree is fixed, never listed.
+#
+# aeeff9f ("Move the bench meter here and speak SCPI", 2026-11-19) wrote the
+# meter's CH343 port name, with its USB serial number, three times; the
+# documents name it `usbmodem<serial>1` since. Taking it out of the history
+# means rewriting main, which is the owner's decision, not a commit's.
+# The 2026-11-19 port name in docs/carrier-board.md, gone from the tree (above).
+aeeff9f67ceecc248f180f5ca88295cd2640fc8c:docs/carrier-board.md:kleidos-usb-serial-port:216
+# The 2026-11-19 port name in docs/carrier-board.md, gone from the tree (above).
+aeeff9f67ceecc248f180f5ca88295cd2640fc8c:docs/carrier-board.md:kleidos-usb-serial-port:231
+# The 2026-11-19 port name in docs/firmware-design.md, gone from the tree (above).
+aeeff9f67ceecc248f180f5ca88295cd2640fc8c:docs/firmware-design.md:kleidos-usb-serial-port:880

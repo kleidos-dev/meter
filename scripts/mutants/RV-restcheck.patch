@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant RV-restcheck: an apply that moved a relay never puts the map back for what the shunt reads at rest, so a flipped active level is saved.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -2187,7 +2187,7 @@
+         std::int64_t restAfter = reference;
+         (void)readShuntPicovolts( restAfter );
+         trial.rest = { restBefore, restAfter };
+-        if ( relay::shareLeftShunt( restBefore - reference, restAfter - reference ) ) {
++        if ( false && relay::shareLeftShunt( restBefore - reference, restAfter - reference ) ) {
+             trial.reason = kReasonRest;
+         }
+     }

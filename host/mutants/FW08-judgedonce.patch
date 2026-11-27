@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW08-judgedonce: A window does not judge the override again at the running bus clock.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_sim_pins.py::test_every_window_judges_the_override_again_at_the_running_clock
+
+diff --git a/host/kleidos_meter/sim.py b/host/kleidos_meter/sim.py
+--- a/host/kleidos_meter/sim.py
++++ b/host/kleidos_meter/sim.py
+@@ -1821,7 +1821,7 @@
+         the period.
+         """
+         averaging = self.averaging[self.profile]
+-        refused = self._pace_refusal(averaging) if averaging.on else None
++        refused = None
+         period = self._conversion(self.profile).period_us
+         read_us = _read_us(self.scl_hz)
+         if refused is None and PROFILES[self.profile][1] and 2 * read_us >= period:

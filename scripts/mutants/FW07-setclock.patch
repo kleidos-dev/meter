@@ -1,0 +1,15 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW07-setclock: A clock change probes the bus instead of changing its clock.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/ina228.cpp b/firmware/src/ina228.cpp
+--- a/firmware/src/ina228.cpp
++++ b/firmware/src/ina228.cpp
+@@ -127,5 +127,5 @@ void Ina228Driver::makeCall( void* context ) noexcept {
+                                              request.in, request.inLength );
+     } else {
+-        request.result = i2c_bus::setClock( request.hz );  // SetClock, the fifth and last
++        request.result = i2c_bus::probe( driver.address_ );  // SetClock, the fifth and last
+     }
+ }

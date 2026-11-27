@@ -1,0 +1,202 @@
+{
+  "schema": "kleidos.meter.instrument/1",
+  "serial": "KM-0000000000",
+  "label": "bench 1",
+  "events": [
+    {
+      "id": "2026-10-28-01",
+      "kind": "nominal_declared",
+      "device": {
+        "shunt_uohm": 100000,
+        "cal_tag": "R100_0.10ohm_1pct_1028"
+      },
+      "notes": [
+        "The nominal 0.100 ohm written as the shunt and flagged measured, with the 1 % of the part's marking as every figure's gain term; no measurement behind it (records/2026-11-19.md)."
+      ]
+    },
+    {
+      "id": "2026-11-19-01",
+      "kind": "as_found",
+      "record": {
+        "path": "records/2026-11-19.md",
+        "sha256": "b7e6e3b2ec6a848058f6c52b402daf38646478705510b3f402a372bc2f7122b2"
+      },
+      "notes": [
+        "The calibration as found at the move to SCPI (firmware 0.1.0 to 0.2.0): still the nominal of 2026-10-28."
+      ]
+    },
+    {
+      "id": "2026-11-20-00",
+      "kind": "hardware_change",
+      "configuration": "mjkdz-r100-relay2click",
+      "voids_calibration": false,
+      "what": "The bypass moved from the HW-316's K3 to channel RL2 of a MikroE Relay 2 Click on GPIO15 (image meter_relay2); outside the Kelvin sense, so no calibration is voided. The instrument was mjkdz-r100-hw316 before."
+    },
+    {
+      "id": "2026-11-20-01",
+      "kind": "calibration",
+      "verdict": "superseded",
+      "configuration": "mjkdz-r100-relay2click",
+      "taken_at": "2026-11-20T02:49:00+01:00",
+      "firmware": "0.3.0",
+      "why": "Taken with the reference's joints twisted and clipped: every limit held and 100.043 mOhm was stored (R100_20261120), but the same wiring then read 100.15 to 100.21 mOhm within 40 minutes, a contact of about 0.17 ohm drifting in the reference's VBUS path. Replaced by 2026-11-20-02 after the joints were screwed.",
+      "ranges": {
+        "0": {
+          "points_nohm": [
+            100035634,
+            100046072
+          ],
+          "profile": "STATE"
+        },
+        "1": {
+          "points_nohm": [
+            100046169,
+            100043185
+          ],
+          "profile": "STATE"
+        }
+      },
+      "record": {
+        "path": "records/2026-11-20.md",
+        "sha256": "409fdb0d3bc4d065818721cc839591060337fd5c5095c65e92ca56a30a7ec4c1"
+      },
+      "raw_log": {
+        "path": "records/2026-11-20.log",
+        "sha256": "bd43879644682e29d1c22038f898c8d5053b4fd4ebc6bf7dae088fb77f904b46"
+      }
+    },
+    {
+      "id": "2026-11-20-02",
+      "kind": "calibration",
+      "verdict": "accepted",
+      "configuration": "mjkdz-r100-relay2click",
+      "taken_at": "2026-11-20T03:45:17+01:00",
+      "method": "two_point_reference/manual",
+      "firmware": "0.3.0",
+      "reference": {
+        "part": "VPG Y0785100R000T9L",
+        "nominal_nohm": 100000000000,
+        "tolerance_ppm": 100,
+        "tcr_ppm_per_c": 2,
+        "certificate": null
+      },
+      "conditions": {
+        "profile": "SLEEP",
+        "vshct_us": 4120,
+        "avg": 16,
+        "samples_per_point": 600,
+        "null_s": 60,
+        "null_path": "lead open (K1, ROUTe:LEAD OPEN,FORCe)",
+        "die_mc": [
+          26062,
+          26484
+        ],
+        "joints": "screwed",
+        "order": "range 0 (4 points), range 1 (4 points)",
+        "cell_on": "VIN+, VBUS on the reference's top lead"
+      },
+      "ranges": {
+        "0": {
+          "points_nohm": [
+            100104667,
+            100077748,
+            100078437,
+            100091723
+          ],
+          "mean_nohm": 100088144,
+          "sd_ppm": 127,
+          "null_pv": {
+            "before": 4382038,
+            "after": 4609023
+          },
+          "applied_nohm": 100116000,
+          "u_ppm": 424
+        },
+        "1": {
+          "points_nohm": [
+            100132213,
+            100147473,
+            100151308,
+            100146675
+          ],
+          "mean_nohm": 100144417,
+          "sd_ppm": 84,
+          "null_pv": {
+            "before": 3941001,
+            "after": null
+          },
+          "applied_nohm": 100116000,
+          "u_ppm": 424
+        }
+      },
+      "range_split_ppm": 562,
+      "budget": [
+        {
+          "term": "reference_tolerance",
+          "limit_ppm": 100,
+          "distribution": "rectangular",
+          "u_ppm": 58,
+          "source": "VPG Y0785100R000T9L, +/-0.01 %"
+        },
+        {
+          "term": "reference_tcr",
+          "limit_ppm": 40,
+          "distribution": "rectangular",
+          "u_ppm": 23,
+          "source": "+/-2 ppm/C over a +/-20 C bound on the reference's temperature"
+        },
+        {
+          "term": "ina228_bus_gain",
+          "limit_ppm": 500,
+          "distribution": "rectangular",
+          "u_ppm": 289,
+          "source": "TI SBOSA20 6.5, +/-0.05 %"
+        },
+        {
+          "term": "range_split",
+          "limit_ppm": 281,
+          "distribution": "normal",
+          "u_ppm": 281,
+          "source": "half the 562 ppm between the range means"
+        },
+        {
+          "term": "null_drift",
+          "limit_ppm": 57,
+          "distribution": "rectangular",
+          "u_ppm": 33,
+          "source": "range 0's null moved 0.227 uV across the run, on 4.06 mV"
+        },
+        {
+          "term": "repeatability",
+          "limit_ppm": 112,
+          "distribution": "measured",
+          "u_ppm": 112,
+          "source": "the points' scatter"
+        }
+      ],
+      "u_c_ppm": 424,
+      "coverage_k": 2,
+      "expanded_ppm": 848,
+      "device": {
+        "shunt_uohm_r0": 100116,
+        "shunt_uohm_r1": 100116,
+        "cal_tag": "R100_20261120_HR",
+        "cal_date": "2026-11-20",
+        "vbus_side": "source"
+      },
+      "notes": [
+        "The range split is not yet a property of the instrument: 38, 153 and 562 ppm in three runs, each with range 0 measured first, so drift is confounded with range. One value is applied to both ranges and half the split is a budget term.",
+        "Run 2, 20 STATE points on range 0 after the joints were screwed: mean 100.160 mOhm, sd 87 ppm, no trend; on a null 1.44 uV older than this run's.",
+        "The working copy holds no cal_date (firmware 0.3.0 has none): kleidos-meter calibration restore writes it once firmware 0.4.0 runs."
+      ],
+      "record": {
+        "path": "records/2026-11-20.md",
+        "sha256": "409fdb0d3bc4d065818721cc839591060337fd5c5095c65e92ca56a30a7ec4c1"
+      },
+      "raw_log": {
+        "path": "records/2026-11-20.log",
+        "sha256": "bd43879644682e29d1c22038f898c8d5053b4fd4ebc6bf7dae088fb77f904b46"
+      }
+    }
+  ]
+}

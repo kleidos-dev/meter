@@ -1,0 +1,112 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+#
+# What the heap sweep (tests/bench/test_heap_sweep.py, --run-bench) must read
+# on the meter: DIAGnostic:HEAP?'s four counts by phase once the boot has
+# settled, and what each command family of the sweep adds to the two
+# since-main counts. A count is exact: above it is a new allocation, below it
+# a change removed one and lowers this file in the same commit. No count is
+# a ceiling (FW-17: until FW-16 an NVS write allocated by the state of its
+# pages, and such a step was marked one); bench_support.load_expectations()
+# refuses the mark. The file only falls (test_bench_support.py reads its
+# history), and from FW-17 both since-main counts read 0 at the boot and
+# after every step, which the sweep also checks on each report as it reads
+# it (bench_support.since_main_problems()).
+#
+# Measured on 2026-11-22 on the plain image of FW-07 (fw=0.16.6,
+# five sweeps); the per-site table is
+# scripts/heap_census.py's on the census build of the same commit
+# (docs/misra.md, "What allocates, and where"). FW-09 (2026-11-22) took
+# off the GPIO ISR service's three: its handler table and the interrupt
+# allocator's record and vector for its line. FW-10 (2026-11-22) took off
+# the RMT driver's LED frame: 33 allocations and 22 frees, ten of whose
+# allocations (the C library's lazy locks, the I2C master's interrupt
+# records) the next caller now makes. FW-11 (2026-11-22) took ESP-IDF's
+# task watchdog off for the firmware's own: its two subscriptions since
+# app_main, and its object, Core 0's idle entry and its interrupt's two
+# allocator records before it.
+# FW-12 (2026-11-22) took ESP-IDF's UART driver off for the console's own
+# on UART0's registers: 15 allocations since app_main (the driver's object,
+# its receive ring buffer, event queue, mutexes and pattern queue, its
+# interrupt's allocator records), no free.
+# FW-14 (2026-11-22) took ESP-IDF's I2C master off for the own master on
+# I2C0's registers: 12 allocations since app_main (the bus object, its
+# semaphores and queue, the port's handle slot, its interrupt's allocator
+# records and the device object), no free; and a clock change now rewrites
+# the timing registers and allocates nothing.
+# FW-16 (2026-11-23) took NVS off for the firmware's own record log on raw
+# flash: the 21 allocations and 6 frees left since app_main (NVS's
+# initialization, the partition table's load and mapping, the C library's
+# lazy locks, the handle), and a calibration save allocates and frees
+# nothing, where it allocated 10 to 26 of each; and, with the build reduced
+# to the firmware's own components, 4 allocations fewer before app_main (no
+# census build of this commit was read, so they are not split by site). Only
+# the idle task's two frees of the main task are left since app_main.
+# FW-17 (2026-11-23) keeps the main task: app_main() runs the console's loop
+# on it and never returns, so the idle task frees neither its stack nor its
+# control block, and nothing allocates or frees since app_main()'s first line.
+# FW-18 (2026-11-23) took 15 of ESP-IDF's allocations before app_main() off:
+# PSRAM's heap registration and its 32 KiB internal reserve (3), PSA's
+# initialization (5) and the idle tasks' memory (4), the last two linked
+# wrapped onto static answers, and the brownout interrupt (3), the detector
+# armed by the firmware. The 16 left, and their 4 frees, are the rows of
+# docs/misra.md D1's residue table, which test_bench_support.py holds this
+# file to.
+# The review of 2026-11-24 took 15 more and the 4 frees off: the IPC and main
+# tasks (6), the flash lock (1) and the system interrupts' records (8, 4
+# freed), linked wrapped onto static memory and the firmware's own interrupt
+# router (firmware/src/startup_memory.h). Its plain image read
+# pre_main_allocs=1 pre_main_frees=0, and the census build of the same
+# commit one event, the C library's environ; its wrap of malloc() (HM2-04)
+# took that last one off, and the startup allocates nothing.
+
+[boot]
+# ESP-IDF's startup and its own tasks, before app_main()'s first line: one
+# allocation per row of docs/misra.md D1's residue table, and one free per row
+# it marks freed (FW-18; the review of 2026-11-24).
+pre_main_allocs = 0
+pre_main_frees = 0
+# The firmware's boot, read a second and a half after the instrument first
+# answers: from FW-17 nothing allocated and nothing freed (from FW-16 to
+# FW-17 the idle task's two frees of the main task's stack and control block,
+# when app_main() returned). Exact from FW-16; a ceiling from FW-09 to FW-15, while nvs_flash_init()
+# loads each NVS page it reads in full through a 512-byte buffer it
+# allocates and frees (nvs_page.cpp:47 and :66), by the state of the
+# pages, so a boot after calibration saves can read a pair fewer. FW-09's
+# image read 76 and 31 twice, then 75 and 30 in three sweeps after a sweep's
+# saves; FW-07's census held two such loads (D1, FW-16 removes NVS).
+# FW-10's images read 52 and 8 at seven boots (two reads after a flash,
+# four sweeps and the census build), each with one page load; FW-11's
+# read 50 and 8, FW-12's 35 and 8, FW-14's 23 and 8, FW-16's 0 and 2,
+# FW-17's 0 and 0.
+allocs_since_main = 0
+frees_since_main = 0
+
+[steps]
+common = { allocs = 0, frees = 0 }
+system = { allocs = 0, frees = 0 }
+# the pin map's queries and staging (0.18.0), nothing on the board moved
+pins = { allocs = 0, frees = 0 }
+status = { allocs = 0, frees = 0 }
+sense = { allocs = 0, frees = 0 }
+range = { allocs = 0, frees = 0 }
+sample_format_trigger = { allocs = 0, frees = 0 }
+configure_measure_read_fetch = { allocs = 0, frees = 0 }
+capture_state = { allocs = 0, frees = 0 }
+capture_sleep = { allocs = 0, frees = 0 }
+capture_trace = { allocs = 0, frees = 0 }
+# two clock changes: a rewrite of the timing registers each (FW-14; until
+# then each freed and added the I2C device handle again, 2 and 2, D8)
+i2c_clock = { allocs = 0, frees = 0 }
+# its two clock changes, to 1 MHz and back, the same
+capture_burst = { allocs = 0, frees = 0 }
+calibration_reads = { allocs = 0, frees = 0 }
+# two saves that change the record: records of the flash log from FW-16,
+# nothing allocated (until then two NVS saves, 21 to 26 of each, a ceiling)
+calibration_save = { allocs = 0, frees = 0 }
+# the null window's save: the same (10 to 12 of each in NVS until FW-16)
+null = { allocs = 0, frees = 0 }
+diagnostic = { allocs = 0, frees = 0 }
+route = { allocs = 0, frees = 0 }
+status_polling = { allocs = 0, frees = 0 }
+reset = { allocs = 0, frees = 0 }

@@ -1,0 +1,18 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant FW28-mark: a mark is written into a response half on the wire.
+# Applied by scripts/run_mutants.sh to a copy of the tree; the host tests must fail.
+
+diff --git a/firmware/src/console.cpp b/firmware/src/console.cpp
+--- a/firmware/src/console.cpp
++++ b/firmware/src/console.cpp
+@@ -1213,9 +1213,6 @@
+ }
+
+ void Console::printMark( const Mark& mark ) noexcept {
+-    if ( wirePartial_ ) {
+-        return;  // kept in the capture, replayed by TRACe:DATA?
+-    }
+     text::Writer w = openRecord();
+     if ( format_ == StreamFormat::Csv ) {
+         w.text( "K," );

@@ -1,0 +1,14 @@
+{
+  "$comment": "Written by brand's tools/sync_kicad.py --copy. The Kleidos KiCad kit, byte copies of brand's kicad/ at the commit below; never edit a file here: change brand and sync.",
+  "kit": "kleidos-kicad/1",
+  "source": "https://github.com/kleidos-dev/brand",
+  "commit": "f645cc51a9c4ffcebc1e1b2cbd04fdde7ed9e75c",
+  "files": {
+    "kleidos-dark.kicad_wks": "ae829ca3ec0bbe5550b52d9bf7afbfa582e7627749073912bece27438e8a4f02",
+    "kleidos-light.kicad_wks": "b5e09ed34154dcabdc70679065e9a19a6a233c24f3460844b0622bd55261d95a",
+    "kleidos-dark.json": "1a7c24f934114b1f966fd7f57078d2ee56c102c24588234c4525e5125f9cc684",
+    "kleidos-light.json": "e1b30d73e13bb7ef1bd51e66a5f3e8c0575e374e98edac5ed85dbb0c5abf1b98",
+    "style.json": "5438a6d1239723f3bcca3fde8ba8c8c10a657c2f3bf2c578d7a69e7b85470dc3",
+    "kleidos_kicad.py": "af06b44d68d9298e11a4a149d8d601438e9d36e4e5217ad85bccd4e51926436e"
+  }
+}
