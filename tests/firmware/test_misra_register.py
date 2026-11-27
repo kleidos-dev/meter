@@ -372,10 +372,18 @@ def rises(history: list[tuple[str, int]]) -> list[str]:
 
 def test_the_printf_integer_names_fell_to_none_and_their_count_went_with_d2() -> None:
     """FW-23 to FW-26: the names the formats needed only fell, and FW-26 took the
-    last of them and the count with D2; the working tree states it no more."""
-    history = count_history("d2.integer_names", register_versions())
-    assert history, "no version of the register stated d2.integer_names"
-    assert history[-1][0] != "working tree", "D2 is gone: its count is stated no more"
+    last of them and the count with D2; the working tree states it no more.
+
+    The versions that stated the count are older than the published history,
+    which starts at one commit; any version the history holds that states it
+    must not show it rising."""
+    versions = register_versions()
+    working_tree = versions[-1][1]
+    assert "d2.integer_names" not in reg.register_counts(working_tree), (
+        "D2 is gone: its count is stated no more"
+    )
+    history = count_history("d2.integer_names", versions)
+    assert all(where != "working tree" for where, _ in history)
     assert rises(history) == []
 
 
