@@ -266,7 +266,7 @@ def finish(pdf: Path) -> None:
         {NameObject("/DisplayDocTitle"): BooleanObject(True)}
     )
     file_id = digest.digest()[:16]
-    writer._ID = ArrayObject([ByteStringObject(file_id), ByteStringObject(file_id)])
+    writer._file_identifiers = ArrayObject([ByteStringObject(file_id), ByteStringObject(file_id)])
     kit.sort_fonts(writer)
     with open(pdf, "wb") as handle:
         writer.write(handle)
