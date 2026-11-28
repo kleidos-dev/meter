@@ -29,6 +29,12 @@ SCPI log are filed under ``calibration/records/<serial>/``, and the index is
 regenerated. A refused session writes nothing to the instrument and is filed
 as ``refused``, because it is knowledge. Nothing is committed.
 
+An instrument the registry files under a placeholder (no real serial is
+tracked, ``calibration/README.md``, "Identity") is found, recorded and filed
+under the serial ``KLEIDOS_METER_SERIAL_ALIASES`` maps its own to
+(:func:`~kleidos_meter.identity.load_aliases`), and the raw log, which holds
+its ``*IDN?``, is filed with the serial it reports replaced by that one.
+
 Usage::
 
     kleidos-meter calibrate --port "$KLEIDOS_METER_PORT"
@@ -44,12 +50,13 @@ import json
 import math
 import os
 import time
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
 from .client import Meter, SerialTransport, Transport
+from .identity import load_aliases
 from .invariant import present
 from .registry import (
     ROOT,
@@ -459,6 +466,7 @@ class Session:
     :param points_per_block: The points of one block.
     :param now: The time, with its zone.
     :param transcript: The transport that keeps the exchange, filed as the raw log.
+    :param aliases: The serial aliases (:func:`~kleidos_meter.identity.load_aliases`).
     :ivar result: The gates and figures, once :meth:`run` judged them.
     :ivar stored: Whether the working copy was written.
     """
@@ -478,6 +486,7 @@ class Session:
         points_per_block: int = POINTS_PER_BLOCK,
         now: Callable[[], dt.datetime] = lambda: dt.datetime.now().astimezone(),
         transcript: TeeTransport | None = None,
+        aliases: Mapping[str, str] | None = None,
     ) -> None:
         self.meter = meter
         self.root = root
@@ -491,10 +500,12 @@ class Session:
         self.points_per_block = points_per_block
         self.now = now
         self.transcript = transcript
+        self.aliases = dict(aliases or {})
         self.registry: Registry | None = None
         self.instrument: dict[str, Any] | None = None
         self.configuration: dict[str, Any] = {}
         self.serial = ""
+        self.reported_serial = ""
         self.firmware = ""
         self.info: dict[str, str] = {}
         self.before: dict[str, str] = {}
@@ -544,7 +555,8 @@ class Session:
         """
         m = self.meter
         identity = parse_idn(m.idn())
-        self.serial, self.firmware = identity["serial"], identity["firmware"]
+        self.reported_serial, self.firmware = identity["serial"], identity["firmware"]
+        self.serial = self.aliases.get(self.reported_serial, self.reported_serial)
         self.info = m.info()
         self.before = m.calibration()
         if not SERIAL_PATTERN.match(self.serial):
@@ -560,7 +572,9 @@ class Session:
                     current = event["configuration"]
         if current is None and self.configuration_id is None:
             raise Refused(
-                f"{self.serial} has no configuration in the registry: name it with --configuration"
+                f"{self.serial} has no configuration in the registry: name it with"
+                " --configuration, or, if the registry files it under a placeholder, map its"
+                " serial to that one in KLEIDOS_METER_SERIAL_ALIASES"
             )
         if current is not None and self.configuration_id not in (None, current):
             raise Refused(
@@ -874,6 +888,8 @@ class Session:
         folder.mkdir(parents=True, exist_ok=True)
         record_text = self.record(event_id)
         log_text = self.transcript.text() if self.transcript is not None else ""
+        if self.serial != self.reported_serial:
+            log_text = log_text.replace(self.reported_serial, self.serial)
         (folder / f"{event_id}.md").write_text(record_text, encoding="utf-8")
         (folder / f"{event_id}.log").write_text(log_text, encoding="utf-8")
         relative = f"records/{self.serial}/{event_id}"
@@ -957,6 +973,10 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if not args.sim and not args.port:
         parser.error("name the port with --port or KLEIDOS_METER_PORT, or use --sim")
+    try:
+        aliases = load_aliases()
+    except ValueError as error:
+        parser.error(str(error))
     reference = dict(REFERENCES[args.reference])
     if args.reference_ohm is not None:
         reference = {
@@ -979,6 +999,7 @@ def main(argv: list[str] | None = None) -> int:
             null_seconds=args.null_seconds,
             samples=args.samples,
             transcript=transcript,
+            aliases=aliases,
         )
         try:
             result = session.run()

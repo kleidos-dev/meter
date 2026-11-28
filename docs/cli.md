@@ -222,7 +222,7 @@ The registry is the calibration and the instrument holds a working copy of it, w
 |---|---|
 | 0 | the instrument holds the registry's working copy (`applied`) |
 | 1 | an error ended the run, its traceback or its message on stderr: the port is held elsewhere, the instrument did not answer or refused the copy, or `--rev` holds no index |
-| 2 | a usage error, or a `restore` with no terminal to answer its question and no `--yes` |
+| 2 | a usage error (a `KLEIDOS_METER_SERIAL_ALIASES` that is not serial pairs among them), or a `restore` with no terminal to answer its question and no `--yes` |
 | 3 | it does not: the verdict says why |
 
 Example, on the simulator:

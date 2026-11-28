@@ -87,6 +87,15 @@ def add_events(root: Path, *events: dict[str, Any], serial: str = SIM_SERIAL) ->
     path.write_text(json.dumps(instrument))
 
 
+def file_under(root: Path, serial: str) -> None:
+    """File the simulator's instrument under *serial*, as the bench is under a placeholder."""
+    path = instrument_path(root)
+    instrument = json.loads(path.read_text())
+    instrument["serial"] = serial
+    path.unlink()
+    instrument_path(root, serial).write_text(json.dumps(instrument))
+
+
 def problems_of(root: Path) -> list[str]:
     return check(Registry.from_directory(root))[0]
 
@@ -468,6 +477,37 @@ def test_compare_each_status(index: dict[str, Any]) -> None:
     assert differs.status == "working_copy_differs" and "cal_date=-" in differs.differences[0]
     late = compare(index, *device(), dt.date(2027, 10, 20))
     assert late.status == "applied" and late.warnings and late.ok
+
+
+def test_compare_looks_an_aliased_serial_up_as_the_registry_files_it(registry_root: Path) -> None:
+    placeholder, other = "KM-0000000001", "KM-0000000002"  # made up, as every test's serial
+    add_events(registry_root, accepted(registry_root, "2026-11-02-01"))
+    file_under(registry_root, placeholder)
+    assert problems_of(registry_root) == []
+    index = build_index(Registry.from_directory(registry_root))
+    day = dt.date(2026, 11, 5)
+    unknown = compare(index, *device(), day)
+    assert unknown.status == "unregistered" and not unknown.aliased
+    assert unknown.serial == SIM_SERIAL
+    assert unknown.differences[0] == f"{SIM_SERIAL} has no calibration in the registry"
+    assert unknown.differences[1].startswith("no alias maps it: if the registry files")
+    assert "KLEIDOS_METER_SERIAL_ALIASES=<its serial>=<the filed serial>" in unknown.differences[1]
+    found = compare(index, *device(), day, {SIM_SERIAL: placeholder})
+    assert found.status == "applied" and found.serial == placeholder and found.aliased
+    assert found.entry is not None and found.entry["event"] == "2026-11-02-01"
+    lost = compare(index, *device(shunt_measured="0"), day, {SIM_SERIAL: placeholder})
+    assert lost.status == "working_copy_lost" and lost.serial == placeholder
+    # Aliased to a serial the registry does not file, or filed with no calibration
+    # on the day: no word about aliases, which are not what is missing.
+    wrong = compare(index, *device(), day, {SIM_SERIAL: other})
+    assert (wrong.status, wrong.serial, wrong.aliased) == ("unregistered", other, True)
+    assert wrong.differences == [f"{other} has no calibration in the registry"]
+    early = compare(index, *device(), dt.date(2026, 10, 1), {SIM_SERIAL: placeholder})
+    assert early.differences == [f"{placeholder} has no calibration in the registry"]
+    # Another instrument's alias changes nothing for this one.
+    assert compare(index, *device(), day, {other: placeholder}).status == "unregistered"
+    nameless = compare(index, *device(idn="KLEIDOS,KLEIDOS-METER,0,0.3.0"), day, {"0": other})
+    assert nameless.status == "unregistered" and not nameless.aliased
 
 
 def test_one_image_from_080_is_the_click_rig_and_the_old_name_stays_valid() -> None:

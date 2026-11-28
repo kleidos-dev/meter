@@ -11,11 +11,12 @@ from pathlib import Path
 from typing import Any
 
 import pytest
+from conftest import SIM_SERIAL
 from kleidos_meter import Meter, SimulatedMeter
 from kleidos_meter.calibration_cli import load_index, main, restore, verify
 from kleidos_meter.cli import main as cli_main
 from kleidos_meter.registry import Registry, build_index, dump_index
-from test_registry import accepted, add_events
+from test_registry import accepted, add_events, file_under
 
 DAY = dt.date(2026, 11, 5)
 
@@ -72,6 +73,38 @@ def test_the_command_line(
     assert cli_main(["calibration", "restore", "--yes", *common]) == 0
     with pytest.raises(SystemExit):
         main(["verify"])
+
+
+def test_an_instrument_filed_under_a_placeholder_is_found_through_its_alias(
+    registry_root: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    placeholder = "KM-0000000001"  # made up, as every test's serial
+    add_events(registry_root, accepted(registry_root, "2026-11-02-01"))
+    file_under(registry_root, placeholder)
+    common = ["--sim", "--registry", str(registry_root), "--date", DAY.isoformat()]
+    assert main(["restore", "--yes", *common]) == 3
+    out = capsys.readouterr().out
+    assert f"{SIM_SERIAL}: unregistered" in out and "no alias maps it" in out
+    assert "Not restored" in out
+    monkeypatch.setenv("KLEIDOS_METER_SERIAL_ALIASES", f"{SIM_SERIAL}={placeholder}")
+    assert main(["verify", "--json", *common]) == 3  # a fresh simulator: nothing measured
+    printed = capsys.readouterr().out
+    shown = json.loads(printed)
+    assert (shown["status"], shown["serial"], shown["aliased"]) == (
+        "working_copy_lost",
+        placeholder,
+        True,
+    )
+    assert SIM_SERIAL not in printed
+    assert main(["restore", "--yes", *common]) == 0
+    out = capsys.readouterr().out
+    assert f"{placeholder}: applied" in out and SIM_SERIAL not in out
+    assert "the instrument's own serial is mapped to it by KLEIDOS_METER_SERIAL_ALIASES" in out
+    monkeypatch.setenv("KLEIDOS_METER_SERIAL_ALIASES", "nonsense")
+    with pytest.raises(SystemExit) as exited:
+        main(["verify", *common])
+    assert exited.value.code == 2
+    assert "pair 1 is not <reported serial>=<filed serial>" in capsys.readouterr().err
 
 
 def test_the_index_at_a_revision(registry_root: Path, index: dict[str, Any]) -> None:

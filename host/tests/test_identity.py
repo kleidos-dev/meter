@@ -4,9 +4,23 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pytest
 from kleidos_meter import Meter, SimulatedMeter
-from kleidos_meter.identity import parse_idn, serial_from_mac, version_tuple
+from kleidos_meter.identity import (
+    ALIAS_VARIABLE,
+    DOTENV,
+    load_aliases,
+    parse_aliases,
+    parse_idn,
+    serial_from_mac,
+    version_tuple,
+)
+
+#: Made-up serials only (``tests/ci/test_instrument_serials.py``): the
+#: simulator's, and the registry tests' own.
+REPORTED, FILED, OTHER = "KM-EE529C1B03", "KM-0000000001", "KM-0000000002"
 
 
 def test_the_serial_is_the_firmware_s_digest_of_the_mac() -> None:
@@ -59,3 +73,52 @@ def test_the_simulator_reports_serial_image_and_per_range_shunt() -> None:
     assert [e.code for e in errors] == [-114, -222, -222, -222]
     sim.mac = None
     assert meter.idn() == "KLEIDOS,KLEIDOS-METER,0,0.8.0"
+
+
+def test_aliases_are_serial_pairs_and_name_no_serial_when_wrong() -> None:
+    assert parse_aliases("") == {} and parse_aliases(" , ") == {}
+    text = f" {REPORTED.lower()}={FILED} ,\n{OTHER}=KM-0000000003 "
+    assert parse_aliases(text) == {REPORTED: FILED, OTHER: "KM-0000000003"}
+    assert parse_aliases(f"{REPORTED}={FILED},{REPORTED}={FILED}") == {REPORTED: FILED}
+    for wrong, place in (
+        (REPORTED, 1),
+        (f"{REPORTED}={FILED},{OTHER}=", 2),
+        (f"{REPORTED}=KM-12", 1),
+        (f"KM-XYZ={FILED}", 1),
+    ):
+        with pytest.raises(ValueError, match=f"pair {place} is not") as raised:
+            parse_aliases(wrong)
+        assert REPORTED not in str(raised.value) and FILED not in str(raised.value)
+    with pytest.raises(ValueError, match="pair 2 gives a serial a second alias") as raised:
+        parse_aliases(f"{REPORTED}={FILED} {REPORTED}={OTHER}")
+    assert REPORTED not in str(raised.value)
+
+
+def test_aliases_come_from_the_environment_else_the_ignored_dotenv(tmp_path: Path) -> None:
+    assert DOTENV.name == ".env" and DOTENV.parent == Path(__file__).resolve().parents[2]
+    dotenv = tmp_path / ".env"
+    assert load_aliases({}, dotenv) == {}  # no file
+    dotenv.write_text(
+        "# the bench\n"
+        "KLEIDOS_METER_PORT=/dev/null\n"
+        "not a line\n"
+        f"export {ALIAS_VARIABLE}={REPORTED}={FILED}  # the bench instrument\n"
+    )
+    assert load_aliases({}, dotenv) == {REPORTED: FILED}
+    dotenv.write_text(f"{ALIAS_VARIABLE}='{REPORTED}={OTHER}'\n")
+    assert load_aliases({}, dotenv) == {REPORTED: OTHER}
+    dotenv.write_text(f'{ALIAS_VARIABLE}="{REPORTED}={FILED}"\n')
+    assert load_aliases({}, dotenv) == {REPORTED: FILED}
+    dotenv.write_text("KLEIDOS_METER_PORT=/dev/null\n")
+    assert load_aliases({}, dotenv) == {}  # a file without the key
+    dotenv.write_text(f"{ALIAS_VARIABLE}={REPORTED}={FILED}\n")
+    # The environment wins, an empty value included.
+    assert load_aliases({ALIAS_VARIABLE: f"{REPORTED}={OTHER}"}, dotenv) == {REPORTED: OTHER}
+    assert load_aliases({ALIAS_VARIABLE: ""}, dotenv) == {}
+    with pytest.raises(ValueError):
+        load_aliases({ALIAS_VARIABLE: "nonsense"}, dotenv)
+
+
+def test_aliases_default_to_the_process_environment(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv(ALIAS_VARIABLE, f"{REPORTED}={FILED}")
+    assert load_aliases() == {REPORTED: FILED}

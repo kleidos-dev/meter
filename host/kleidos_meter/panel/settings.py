@@ -48,7 +48,7 @@ from typing import Any
 from ..calibration_cli import describe, load_index
 from ..calibration_cli import restore as restore_registry
 from ..client import MeterError
-from ..identity import SERIAL_PATTERN, parse_idn
+from ..identity import SERIAL_PATTERN, load_aliases
 from ..protocol import ErrorEntry, parse_fields
 from ..registry import DIVISORS, Verdict, compare
 from .executor import Executor, pack_units
@@ -467,6 +467,7 @@ def verdict_json(verdict: Verdict) -> dict[str, Any]:
         "status": verdict.status,
         "ok": verdict.ok,
         "serial": verdict.serial,
+        "aliased": verdict.aliased,
         "event": verdict.entry["event"] if verdict.entry else None,
         "differences": list(verdict.differences),
         "warnings": list(verdict.warnings),
@@ -483,6 +484,9 @@ class Calibration:
     :param today: The day verdicts are judged on.
     :param wall: The host's wall clock, for an override's ``written_at``.
     :param index_loader: How the registry's index is built from *registry*.
+    :param alias_loader: The serial aliases, read again with the index
+        (:func:`~kleidos_meter.identity.load_aliases`: the environment, else
+        the repository's ``.env``, which git ignores).
     """
 
     def __init__(
@@ -494,6 +498,7 @@ class Calibration:
         today: Callable[[], dt.date] = dt.date.today,
         wall: Callable[[], dt.datetime] = lambda: dt.datetime.now(dt.UTC),
         index_loader: Callable[[Path], dict[str, Any]] = load_index,
+        alias_loader: Callable[[], dict[str, str]] = load_aliases,
     ) -> None:
         self.executor = executor
         self.registry = registry
@@ -501,6 +506,7 @@ class Calibration:
         self.today = today
         self.wall = wall
         self.index_loader = index_loader
+        self.alias_loader = alias_loader
         self.link = InstrumentLink(executor)
 
     def index(self) -> tuple[dict[str, Any], str | None]:
@@ -517,12 +523,27 @@ class Calibration:
             said = shown_error(error) if isinstance(error, OSError) else error
             return {"instruments": {}}, f"the registry could not be read: {said}"
 
+    def lookup(self) -> tuple[dict[str, Any], dict[str, str], str | None]:
+        """The index, the serial aliases, and why either could not be read.
+
+        :returns: The index (:meth:`index`), the aliases (none when they could
+            not be read) and the reasons, joined, None when both were read.
+        """
+        index, problem = self.index()
+        try:
+            aliases = self.alias_loader()
+        except ValueError as error:
+            aliases = {}
+            alias_problem = f"the serial aliases could not be read: {error}"
+            problem = alias_problem if problem is None else f"{problem}; {alias_problem}"
+        return index, aliases, problem
+
     def _read(self) -> tuple[str, dict[str, str], dict[str, str], Verdict, str | None]:
         """``*IDN?``, ``SYSTem:INFormation?``, ``CALibration:DATA?`` and the verdict on them."""
         idn, info, cal = self.executor.query_all(["*IDN?", "SYST:INF?", "CAL:DATA?"])
-        index, problem = self.index()
+        index, aliases, problem = self.lookup()
         info_fields, cal_fields = parse_fields(info), parse_fields(cal)
-        verdict = compare(index, idn, info_fields, cal_fields, self.today())
+        verdict = compare(index, idn, info_fields, cal_fields, self.today(), aliases)
         if problem is not None:
             verdict.differences.append(problem)
         return idn, info_fields, cal_fields, verdict, problem
@@ -542,8 +563,8 @@ class Calibration:
         registry nor the panel wrote. ``uncertainty`` is the figures of what
         it converts with, None for the last two: nothing states one.
         """
-        idn, _, cal, verdict, problem = self._read()
-        serial = parse_idn(idn)["serial"]
+        _, _, cal, verdict, problem = self._read()
+        serial = verdict.serial
         entry = verdict.entry if verdict.status in _ENTRY_APPLIES else None
         stored = self.overrides.load(serial)
         overrides = stored["ranges"] if stored else {}
@@ -694,10 +715,12 @@ class Calibration:
             registry has none to give it; and the body: the verdicts before
             and after, whether anything was written, what restore said.
         """
-        index, problem = self.index()
+        index, aliases, problem = self.lookup()
         said: list[str] = []
-        before = compare(index, *self._identity(), self.today())
-        after = restore_registry(self.link, index, self.today(), ask=lambda _: "y", say=said.append)
+        before = compare(index, *self._identity(), self.today(), aliases)
+        after = restore_registry(
+            self.link, index, self.today(), ask=lambda _: "y", say=said.append, aliases=aliases
+        )
         cleared = self.overrides.clear(after.serial) if after.ok else False
         return (200 if after.ok else 409), {
             "before": verdict_json(before),

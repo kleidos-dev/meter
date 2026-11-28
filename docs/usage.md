@@ -103,11 +103,12 @@ k1=lead:closed k2=bypass:open k3=spare:unwired k4=spare:unwired path=shunt check
 
 ## Verify the calibration
 
-The calibration is the registry in this repository ([calibration/README.md](../calibration/README.md)); what the instrument holds is a working copy.
+The calibration is the registry in this repository ([calibration/README.md](../calibration/README.md)); what the instrument holds is a working copy. The registry files the bench instrument under the placeholder `KM-0000000000`, since no real serial is tracked, so map the serial the instrument reports to it once, in the repository's `.env`, which git ignores (`KLEIDOS_METER_SERIAL_ALIASES=<its serial>=KM-0000000000`) or the environment ([calibration/README.md, "The alias"](../calibration/README.md#the-registry)); without it the answer is `unregistered`, and says so.
 
 ```console
 $ kleidos-meter calibration verify
 KM-0000000000: applied
+  the instrument's own serial is mapped to it by KLEIDOS_METER_SERIAL_ALIASES
   calibration 2026-11-20-02 (mjkdz-r100-relay2click), valid 2026-11-20 to 2027-11-20: range 0 100.116000 mΩ (u 424 ppm), range 1 100.116000 mΩ (u 424 ppm)
 ```
 
@@ -116,6 +117,7 @@ KM-0000000000: applied
 ```console
 $ kleidos-meter calibration restore --yes
 KM-0000000000: applied
+  the instrument's own serial is mapped to it by KLEIDOS_METER_SERIAL_ALIASES
   calibration 2026-11-20-02 (mjkdz-r100-relay2click), valid 2026-11-20 to 2027-11-20: range 0 100.116000 mΩ (u 424 ppm), range 1 100.116000 mΩ (u 424 ppm)
 Nothing to restore: the working copy is the registry's.
 ```

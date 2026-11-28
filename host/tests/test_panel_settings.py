@@ -33,7 +33,7 @@ from kleidos_meter.panel.settings import (
 )
 from kleidos_meter.registry import DIVISORS, ROOT, Registry, build_index, select
 from test_panel_http import Panel, serving_panel
-from test_registry import accepted, add_events
+from test_registry import accepted, add_events, file_under
 
 #: The bench instrument, and a day its calibration of 2026-11-20 holds on.
 BENCH = "KM-0000000000"
@@ -366,6 +366,56 @@ def test_a_registry_that_cannot_be_read_is_said_so(panel: Panel) -> None:
         "the registry could not be read: calibration/index.json is not JSON"
     )
     assert verdict["verdict"]["status"] == "unregistered"
+
+
+def test_an_instrument_filed_under_a_placeholder_is_found_through_its_alias(
+    registry: Path,
+) -> None:
+    placeholder = "KM-0000000001"  # made up, as every test's serial
+    file_under(registry, placeholder)
+    with serving_panel(registry=registry, today=TODAY) as panel:
+        unaliased = panel.calibration.verify()["verdict"]
+        assert unaliased["status"] == "unregistered" and unaliased["aliased"] is False
+        calibration = Calibration(
+            panel.executor,
+            registry,
+            panel.calibration.overrides,
+            today=lambda: TODAY,
+            alias_loader=lambda: {SIM_SERIAL: placeholder},
+        )
+        verdict = calibration.verify()
+        assert verdict["registry_problem"] is None
+        assert verdict["verdict"]["serial"] == placeholder and verdict["verdict"]["aliased"]
+        assert verdict["verdict"]["status"] == "working_copy_lost"
+        assert calibration.shunt()["serial"] == placeholder
+        status, body = calibration.restore()
+        assert status == 200 and body["after"]["serial"] == placeholder
+        assert body["after"]["lines"][1].endswith("mapped to it by KLEIDOS_METER_SERIAL_ALIASES")
+        assert SIM_SERIAL not in json.dumps(body)
+
+
+def test_serial_aliases_that_cannot_be_read_are_said_so(panel: Panel) -> None:
+    def broken() -> dict[str, str]:
+        raise ValueError("KLEIDOS_METER_SERIAL_ALIASES: pair 1 is not <reported>=<filed>")
+
+    calibration = Calibration(
+        panel.executor,
+        panel.calibration.registry,
+        panel.calibration.overrides,
+        today=lambda: TODAY,
+        alias_loader=broken,
+    )
+    verdict = calibration.verify()
+    assert verdict["registry_problem"] == (
+        "the serial aliases could not be read: KLEIDOS_METER_SERIAL_ALIASES: pair 1 is not"
+        " <reported>=<filed>"
+    )
+    assert verdict["verdict"]["status"] == "working_copy_lost"  # looked up unaliased
+    bare = Calibration(panel.executor, None, panel.calibration.overrides, alias_loader=broken)
+    assert bare.verify()["registry_problem"] == (
+        "serve was given no registry; the serial aliases could not be read:"
+        " KLEIDOS_METER_SERIAL_ALIASES: pair 1 is not <reported>=<filed>"
+    )
 
 
 def test_a_registry_file_that_cannot_be_read_is_named_by_no_absolute_path(

@@ -1781,6 +1781,8 @@ Which instrument this is: the serial `*IDN?` reports, derived as the firmware de
 
 The serial (firmware 0.4.0 and later) is `KM-` and ten hex digits, the first five bytes of `SHA-256("kleidos-meter-serial-v1" || MAC)` over the ESP32-S3's factory eFuse MAC (`firmware/src/identity.h`): a name that survives a full flash erase, and a pseudonym rather than the MAC, which never enters a tracked file.
 
+Because a serial is a digest a search can undo, no real one is tracked (`calibration/README.md`, "Identity"): the registry files the bench instrument under a placeholder of the serial's shape. The instrument still reports its own serial, so a host maps it to the one the registry files it under through an **alias** it reads only from what git ignores: the environment variable `ALIAS_VARIABLE`, or else that key in the repository's `.env` ([`load_aliases`](#load_aliases)). Its value is pairs `<reported>=<filed>`, separated by commas or white space.
+
 ### `serial_from_mac`
 
 ```python
@@ -1814,6 +1816,38 @@ A version as numbers, to compare with another.
 
 - `text`: `"0.4.0"`.
 - returns: `(0, 4, 0)`; `()` for anything unreadable.
+
+### `parse_aliases`
+
+```python
+parse_aliases(text: str) -> dict[str, str]
+```
+
+The alias map written in *text*: pairs `<reported>=<filed>`.
+
+The pairs are separated by commas or white space, and each side is a serial of either case, kept upper case as the firmware reports it. No message names a serial: an alias's whole point is that its left side is private, so a mistake is named by the pair's place.
+
+- `text`: The value of `ALIAS_VARIABLE`.
+- returns: Each reported serial and the serial the registry files it under.
+- raises `ValueError`: When a pair is not two serials joined by `=`, or one reported serial is given two filed ones.
+
+### `load_aliases`
+
+```python
+load_aliases(
+    environment: Mapping[str, str] | None = None,
+    dotenv: Path = DOTENV,
+) -> dict[str, str]
+```
+
+The alias map: `ALIAS_VARIABLE` in the environment, else in *dotenv*.
+
+The environment's value wins even when empty, which turns off one the `.env` holds. Neither present is no alias.
+
+- `environment`: The variables, `os.environ` when None.
+- `dotenv`: The `.env`, which git ignores, read when the environment has none.
+- returns: [`parse_aliases`](#parse_aliases) of the value found.
+- raises `ValueError`: As [`parse_aliases`](#parse_aliases).
 
 ## `kleidos_meter.registry`
 
@@ -2090,16 +2124,18 @@ class Verdict(
     entry: dict[str, Any] | None = None,
     differences: list[str] = [],
     warnings: list[str] = [],
+    aliased: bool = False,
 )
 ```
 
 What `verify` concluded about an instrument and the registry.
 
 - `status`: One of [`compare`](#compare)'s statuses.
-- `serial`: The instrument's serial.
+- `serial`: The instrument's serial as the registry files it: the one it reports, or the one an alias maps that to.
 - `entry`: The calibration's entry in the index, when there is one.
 - `differences`: What differs from the registry, a sentence each.
 - `warnings`: What to see to, a sentence each.
+- `aliased`: Whether an alias mapped the serial the instrument reports to `serial` ([`load_aliases`](#load_aliases)).
 
 #### `Verdict.ok`
 
@@ -2118,6 +2154,7 @@ compare(
     info: dict[str, str],
     cal: dict[str, str],
     on: dt.date,
+    aliases: Mapping[str, str] | None = None,
 ) -> Verdict
 ```
 
@@ -2125,11 +2162,14 @@ Compare an instrument with the registry.
 
 Statuses, in the order they are judged: `unregistered` (no serial, an unknown one, firmware too old to report one), `configuration_mismatch` (the image, the bypass part or the INA228 is not what the registry says this instrument is), `expired`, `working_copy_lost` (its calibration at factory defaults: `shunt_measured=0`), `working_copy_differs`, `applied`.
 
+The serial the instrument reports is looked up as *aliases* maps it, when it does, and the verdict names the serial the registry files: the one it reports is never in it then. An unknown serial no alias maps says how to name one.
+
 - `index`: The index.
 - `idn`: The instrument's `*IDN?`.
 - `info`: Its `SYSTem:INFormation?`'s fields.
 - `cal`: Its `CALibration:DATA?`'s fields.
 - `on`: The day.
+- `aliases`: Each reported serial and the serial the registry files it under ([`load_aliases`](#load_aliases)); None for none.
 - returns: The verdict.
 
 ### `restore_messages`
@@ -2198,6 +2238,8 @@ kleidos-meter calibration verify  --sim                                   # simu
 ```
 
 `verify` exits 0 when the working copy is the registry's (status `applied`), 3 otherwise; `--json` prints the verdict for a script. `restore` writes the shunt of each range, the tag, the date and the VBUS side of the calibration that holds today, reads them back and verifies; it never writes a null, which is session state. It refuses an instrument the registry does not know, or one whose image, bypass part or INA228 is not the configuration the registry files it under.
+
+The registry files the bench instrument under a placeholder serial, since no real serial is tracked (`calibration/README.md`, "Identity"). Name the serial it reports in `KLEIDOS_METER_SERIAL_ALIASES`, in the environment or in the repository's `.env`, which git ignores ([`load_aliases`](#load_aliases)): both commands then look it up, and print it, as the serial the registry files.
 
 ### `Instrument`
 
@@ -2278,7 +2320,12 @@ Ask the instrument what it is and what calibration it holds.
 ### `verify`
 
 ```python
-verify(meter: Instrument, index: dict[str, Any], on: dt.date) -> Verdict
+verify(
+    meter: Instrument,
+    index: dict[str, Any],
+    on: dt.date,
+    aliases: Mapping[str, str] | None = None,
+) -> Verdict
 ```
 
 Compare the instrument with the registry on *on*.
@@ -2286,6 +2333,7 @@ Compare the instrument with the registry on *on*.
 - `meter`: The instrument.
 - `index`: The registry's index.
 - `on`: The day.
+- `aliases`: The serial aliases ([`load_aliases`](#load_aliases)).
 - returns: The verdict.
 
 ### `describe`
@@ -2309,6 +2357,7 @@ restore(
     *,
     ask: Callable[[str], str] = input,
     say: Callable[[str], None] = print,
+    aliases: Mapping[str, str] | None = None,
 ) -> Verdict
 ```
 
@@ -2319,6 +2368,7 @@ Write the registry's working copy to the instrument and verify it.
 - `on`: The day.
 - `ask`: Shows the confirmation and returns the answer.
 - `say`: Prints a line.
+- `aliases`: The serial aliases ([`load_aliases`](#load_aliases)).
 - returns: The verdict after the restore (or before it, when nothing was written: the copy was already right, or the instrument is refused).
 
 ### `ask_terminal`
@@ -2346,6 +2396,8 @@ What 2026-11-20 taught is built in (`calibration/records/2026-11-20.md`):
 - a closure gate compares the first and the last block of each range, and a null-closure gate each range's closing null with its opening one: a joint that drifts fails the session instead of being stored.
 
 The acceptance window comes from the instrument's configuration in the registry, not from constants here. An accepted session, once confirmed, is written to the instrument as its working copy and read back; then the event is appended to `calibration/instruments/<serial>.json`, its record and raw SCPI log are filed under `calibration/records/<serial>/`, and the index is regenerated. A refused session writes nothing to the instrument and is filed as `refused`, because it is knowledge. Nothing is committed.
+
+An instrument the registry files under a placeholder (no real serial is tracked, `calibration/README.md`, "Identity") is found, recorded and filed under the serial `KLEIDOS_METER_SERIAL_ALIASES` maps its own to ([`load_aliases`](#load_aliases)), and the raw log, which holds its `*IDN?`, is filed with the serial it reports replaced by that one.
 
 Usage:
 
@@ -2599,6 +2651,7 @@ class Session(
     points_per_block: int = POINTS_PER_BLOCK,
     now: Callable[[], dt.datetime] = lambda: dt.datetime.now().astimezone(),
     transcript: TeeTransport | None = None,
+    aliases: Mapping[str, str] | None = None,
 )
 ```
 
@@ -2616,6 +2669,7 @@ The guided flow of one calibration.
 - `points_per_block`: The points of one block.
 - `now`: The time, with its zone.
 - `transcript`: The transport that keeps the exchange, filed as the raw log.
+- `aliases`: The serial aliases ([`load_aliases`](#load_aliases)).
 - attribute `result`: The gates and figures, once [`run`](#sessionrun) judged them.
 - attribute `stored`: Whether the working copy was written.
 

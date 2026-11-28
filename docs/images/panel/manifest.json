@@ -3,7 +3,7 @@
   "taken_by": "scripts/take_panel_shots.py",
   "sources": {
     "host/kleidos_meter/board_pins.json": "sha256:3d6a31f4e0f4f7cc85dc21d51161f2e5efd1f557c051ca90a5fc30c60d745e4c",
-    "host/kleidos_meter/panel/schema.py": "sha256:d0501b42d812c22363a53f2e9c174342b12711ca6136cb93d1271f64fad53d06",
+    "host/kleidos_meter/panel/schema.py": "sha256:fbaf060f86dac9bbcbd9560d57e7bb06c4901d182bc2955e3138a295365a4a74",
     "host/kleidos_meter/panel/static/index.html#console": "sha256:cab966147aa9299c545ad56f1fc1954272b6461a57ec33b9ed3c0fc476d40527",
     "host/kleidos_meter/panel/static/index.html#health": "sha256:f9fd8401072a7eba4343649ed34990e143c44a2a8a8d59c79fcd97015f9cc7e6",
     "host/kleidos_meter/panel/static/index.html#live": "sha256:851e3dffca33f70cad53acf28afd3dc2bdc95ef6ef81a14b94c76569330a74ea",
@@ -123,7 +123,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:ed62e1c597947aac041fb9a58e66380f874d1217aaf1680a22fa07bacd3cdc0f",
+      "digest": "sha256:21c661b9952a8b4aeddacf76e433146021bb42fbcd3ce16050dbb1ada7bd49ce",
       "signature": "sha256:49b718d94662c9f7a13ee2e070b8b36ebf2e4e25fd7f6e6f6ad7dbcf1773d54f"
     },
     "console-dark-390.png": {
@@ -146,7 +146,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:ed62e1c597947aac041fb9a58e66380f874d1217aaf1680a22fa07bacd3cdc0f",
+      "digest": "sha256:21c661b9952a8b4aeddacf76e433146021bb42fbcd3ce16050dbb1ada7bd49ce",
       "signature": "sha256:49b718d94662c9f7a13ee2e070b8b36ebf2e4e25fd7f6e6f6ad7dbcf1773d54f"
     },
     "console-light-1280.png": {
@@ -169,7 +169,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:ed62e1c597947aac041fb9a58e66380f874d1217aaf1680a22fa07bacd3cdc0f",
+      "digest": "sha256:21c661b9952a8b4aeddacf76e433146021bb42fbcd3ce16050dbb1ada7bd49ce",
       "signature": "sha256:49b718d94662c9f7a13ee2e070b8b36ebf2e4e25fd7f6e6f6ad7dbcf1773d54f"
     },
     "health-dark-1280.png": {
@@ -192,7 +192,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:29b8a75661718151db5671fdb7020ffc29d9ef502a214a90906fa17f0cd8db7f",
+      "digest": "sha256:04815436e008a37b40ebc941fc01b9a60c72063bc2be2188e5d5a560ee68635d",
       "signature": "sha256:4a9645932ce28b387e53be32420a717e7d8541ad02798d0fd997df92d5dae8ec"
     },
     "health-dark-390.png": {
@@ -215,7 +215,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:29b8a75661718151db5671fdb7020ffc29d9ef502a214a90906fa17f0cd8db7f",
+      "digest": "sha256:04815436e008a37b40ebc941fc01b9a60c72063bc2be2188e5d5a560ee68635d",
       "signature": "sha256:c98c1ceaeb3bbc8115bbb23a48c68902af31c396ae63fde70d51b748826bad5d"
     },
     "health-light-1280.png": {
@@ -238,7 +238,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:29b8a75661718151db5671fdb7020ffc29d9ef502a214a90906fa17f0cd8db7f",
+      "digest": "sha256:04815436e008a37b40ebc941fc01b9a60c72063bc2be2188e5d5a560ee68635d",
       "signature": "sha256:4a9645932ce28b387e53be32420a717e7d8541ad02798d0fd997df92d5dae8ec"
     },
     "live-dark-1280.png": {
@@ -262,7 +262,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:9bd217bc1df0f0e0a7a3d9440b42e3e9716f0905aa48b3426eb8cc1bb30a2f17",
+      "digest": "sha256:ea8ca6845a30e1c18cd59d8ecb93b3aff7aa8307777696dd8d4d848cfad78f8c",
       "signature": "sha256:0cb153d71c7c9c3cf909d418d9cf1aea409c047a6ecbab0792ca593635ee8170"
     },
     "live-dark-390.png": {
@@ -286,7 +286,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:9bd217bc1df0f0e0a7a3d9440b42e3e9716f0905aa48b3426eb8cc1bb30a2f17",
+      "digest": "sha256:ea8ca6845a30e1c18cd59d8ecb93b3aff7aa8307777696dd8d4d848cfad78f8c",
       "signature": "sha256:84fa26f1c1325cf93494c785171e7be5eb0f7c1a7f93cd5f1249fad145d4119a"
     },
     "live-light-1280.png": {
@@ -310,7 +310,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:9bd217bc1df0f0e0a7a3d9440b42e3e9716f0905aa48b3426eb8cc1bb30a2f17",
+      "digest": "sha256:ea8ca6845a30e1c18cd59d8ecb93b3aff7aa8307777696dd8d4d848cfad78f8c",
       "signature": "sha256:0cb153d71c7c9c3cf909d418d9cf1aea409c047a6ecbab0792ca593635ee8170"
     },
     "live-smoothing-100ms-dark-1280.png": {
@@ -334,7 +334,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:9bd217bc1df0f0e0a7a3d9440b42e3e9716f0905aa48b3426eb8cc1bb30a2f17",
+      "digest": "sha256:ea8ca6845a30e1c18cd59d8ecb93b3aff7aa8307777696dd8d4d848cfad78f8c",
       "signature": "sha256:5ab9cb66ea923ef17c85b142aef33abc611d64dfb682483877dcd14c7fa3b4c7"
     },
     "live-smoothing-off-dark-1280.png": {
@@ -358,7 +358,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:9bd217bc1df0f0e0a7a3d9440b42e3e9716f0905aa48b3426eb8cc1bb30a2f17",
+      "digest": "sha256:ea8ca6845a30e1c18cd59d8ecb93b3aff7aa8307777696dd8d4d848cfad78f8c",
       "signature": "sha256:0cb153d71c7c9c3cf909d418d9cf1aea409c047a6ecbab0792ca593635ee8170"
     },
     "pins-conflict-dark-1280.png": {
@@ -384,7 +384,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:b01f23fd4389c933331cab8d31ee64f51a0720628a42e3b60f6443f08aeb7426",
+      "digest": "sha256:1cf80c4d7d8441131bfafef6296d905b91b7aa5820ee6db57b67ca07701f8782",
       "signature": "sha256:250161d3145629de35789beccba91683e0ac62b1f3b02851856e573618145a3d"
     },
     "pins-dark-1280.png": {
@@ -410,7 +410,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:b01f23fd4389c933331cab8d31ee64f51a0720628a42e3b60f6443f08aeb7426",
+      "digest": "sha256:1cf80c4d7d8441131bfafef6296d905b91b7aa5820ee6db57b67ca07701f8782",
       "signature": "sha256:1ac42247af6514b99848f07715cb20bfb7bad22999a5d44235cbc14e30e371ce"
     },
     "pins-dark-390.png": {
@@ -436,7 +436,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:b01f23fd4389c933331cab8d31ee64f51a0720628a42e3b60f6443f08aeb7426",
+      "digest": "sha256:1cf80c4d7d8441131bfafef6296d905b91b7aa5820ee6db57b67ca07701f8782",
       "signature": "sha256:defcc0ef2ce8b22de4730855052bd0f3f68a5880e406a56664e3af2a29d918ac"
     },
     "pins-light-1280.png": {
@@ -462,7 +462,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:b01f23fd4389c933331cab8d31ee64f51a0720628a42e3b60f6443f08aeb7426",
+      "digest": "sha256:1cf80c4d7d8441131bfafef6296d905b91b7aa5820ee6db57b67ca07701f8782",
       "signature": "sha256:8b6976221f6c37b4c0477726eb29fde980c7607d8480471e7dc286e9170829cc"
     },
     "pins-menu-dark-1280.png": {
@@ -488,7 +488,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:b01f23fd4389c933331cab8d31ee64f51a0720628a42e3b60f6443f08aeb7426",
+      "digest": "sha256:1cf80c4d7d8441131bfafef6296d905b91b7aa5820ee6db57b67ca07701f8782",
       "signature": "sha256:7b332bd1f2c2c4d3843080b75edf8edf1dbc4320205865bc9500aad7625a7ca4"
     },
     "pins-reverted-dark-1280.png": {
@@ -514,7 +514,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:b01f23fd4389c933331cab8d31ee64f51a0720628a42e3b60f6443f08aeb7426",
+      "digest": "sha256:1cf80c4d7d8441131bfafef6296d905b91b7aa5820ee6db57b67ca07701f8782",
       "signature": "sha256:347987e7423639341f141c0b9c7e7d649e518e675ebcb0bdf59395b3e8d26a68"
     },
     "relays-dark-1280.png": {
@@ -538,7 +538,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:5c70e8135d1d892b31f5dad2e27aa19ebeffa87e1e8fa64ab16a0ae503020192",
+      "digest": "sha256:67b3033e7c7e2d65d91fb1eeef714e70680269cfc03bd60f0a6e2007eca5c68d",
       "signature": "sha256:8e041076d12fc1346b688d7a69835cd9e4a2c15ede7e897def3e2e9d62730000"
     },
     "relays-dark-390.png": {
@@ -562,7 +562,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:5c70e8135d1d892b31f5dad2e27aa19ebeffa87e1e8fa64ab16a0ae503020192",
+      "digest": "sha256:67b3033e7c7e2d65d91fb1eeef714e70680269cfc03bd60f0a6e2007eca5c68d",
       "signature": "sha256:a747c6e41a2c2ff98390b2bf76c4831a919ed9f32ec43c13b5da31e516917360"
     },
     "relays-light-1280.png": {
@@ -586,7 +586,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:5c70e8135d1d892b31f5dad2e27aa19ebeffa87e1e8fa64ab16a0ae503020192",
+      "digest": "sha256:67b3033e7c7e2d65d91fb1eeef714e70680269cfc03bd60f0a6e2007eca5c68d",
       "signature": "sha256:8e041076d12fc1346b688d7a69835cd9e4a2c15ede7e897def3e2e9d62730000"
     },
     "runs-dark-1280.png": {
@@ -609,7 +609,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:4a7ec6b0e1cad783603ca586a9941a53c48553f703eeb98ee3508362bf991f21",
+      "digest": "sha256:1a41dd22cac22cd6565038b7239e86ab89ece3522bf9a21bb164efdcaf2f3487",
       "signature": "sha256:08b51b6096399913e693d48b36ff5c72289712f6871eb0b4c4d37a58597c3abf"
     },
     "runs-dark-390.png": {
@@ -632,7 +632,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:4a7ec6b0e1cad783603ca586a9941a53c48553f703eeb98ee3508362bf991f21",
+      "digest": "sha256:1a41dd22cac22cd6565038b7239e86ab89ece3522bf9a21bb164efdcaf2f3487",
       "signature": "sha256:08b51b6096399913e693d48b36ff5c72289712f6871eb0b4c4d37a58597c3abf"
     },
     "runs-light-1280.png": {
@@ -655,7 +655,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:4a7ec6b0e1cad783603ca586a9941a53c48553f703eeb98ee3508362bf991f21",
+      "digest": "sha256:1a41dd22cac22cd6565038b7239e86ab89ece3522bf9a21bb164efdcaf2f3487",
       "signature": "sha256:08b51b6096399913e693d48b36ff5c72289712f6871eb0b4c4d37a58597c3abf"
     },
     "sequences-dark-1280.png": {
@@ -679,7 +679,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:c5a67a1c0820ca3ffa262571d57ff68b74efca7052b4d035b2b0504defe4b5a6",
+      "digest": "sha256:8d14364fdf0153f38c1d28a761dc0b9a6cb22abc1b8dde0112147842d9df60c4",
       "signature": "sha256:93a2b3a6e5cb199d045b8ecd394bb79053118bc3372a9140dddf9f51c59d92bd"
     },
     "sequences-dark-390.png": {
@@ -703,7 +703,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:c5a67a1c0820ca3ffa262571d57ff68b74efca7052b4d035b2b0504defe4b5a6",
+      "digest": "sha256:8d14364fdf0153f38c1d28a761dc0b9a6cb22abc1b8dde0112147842d9df60c4",
       "signature": "sha256:bf274da67898ce8a0d8da38f1c8f5688fcc2ab4c61347276e570ccc63a42b712"
     },
     "sequences-light-1280.png": {
@@ -727,7 +727,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:c5a67a1c0820ca3ffa262571d57ff68b74efca7052b4d035b2b0504defe4b5a6",
+      "digest": "sha256:8d14364fdf0153f38c1d28a761dc0b9a6cb22abc1b8dde0112147842d9df60c4",
       "signature": "sha256:93a2b3a6e5cb199d045b8ecd394bb79053118bc3372a9140dddf9f51c59d92bd"
     },
     "settings-dark-1280.png": {
@@ -754,7 +754,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:e89778d1954b0a638f499b928bbf0fd6c95587b51576b02e358c09936056dc8c",
+      "digest": "sha256:37a4052e64610677d5024544392335d7ad732d238355a8cf34a7d0eda428fdda",
       "signature": "sha256:53e24f22eda80825f4fdb9accf5f5d30d264fce64df3fa2b12c5ab3bdc1165c3"
     },
     "settings-dark-390.png": {
@@ -781,7 +781,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:e89778d1954b0a638f499b928bbf0fd6c95587b51576b02e358c09936056dc8c",
+      "digest": "sha256:37a4052e64610677d5024544392335d7ad732d238355a8cf34a7d0eda428fdda",
       "signature": "sha256:75b75bb2227ba14ee36c09213cf22c03c20c706fd50606d3bb2504ec545b1a19"
     },
     "settings-light-1280.png": {
@@ -808,7 +808,7 @@
         "host/kleidos_meter/panel/static/js/views.js",
         "host/kleidos_meter/panel/static/panel.css"
       ],
-      "digest": "sha256:e89778d1954b0a638f499b928bbf0fd6c95587b51576b02e358c09936056dc8c",
+      "digest": "sha256:37a4052e64610677d5024544392335d7ad732d238355a8cf34a7d0eda428fdda",
       "signature": "sha256:53e24f22eda80825f4fdb9accf5f5d30d264fce64df3fa2b12c5ab3bdc1165c3"
     }
   }

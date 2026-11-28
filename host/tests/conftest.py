@@ -198,6 +198,17 @@ def registry_root(tmp_path: Path) -> Path:
 
 
 @pytest.fixture(autouse=True)
+def no_serial_aliases(request: pytest.FixtureRequest, monkeypatch: pytest.MonkeyPatch) -> None:
+    """No alias from the shell or the repository's ``.env``: set empty, the variable wins.
+
+    A ``--run-bench`` run keeps the bench's own: the meter is filed under the
+    placeholder, and only its alias finds it (``calibration/README.md``).
+    """
+    if not request.config.getoption("--run-bench"):
+        monkeypatch.setenv("KLEIDOS_METER_SERIAL_ALIASES", "")
+
+
+@pytest.fixture(autouse=True)
 def state_home(tmp_path_factory: pytest.TempPathFactory, monkeypatch: pytest.MonkeyPatch) -> Path:
     """A state directory of the test's own, so no run is ever recorded in the user's."""
     directory = tmp_path_factory.mktemp("state")

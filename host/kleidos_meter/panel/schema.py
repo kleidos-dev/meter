@@ -911,8 +911,9 @@ ROUTES: tuple[Route, ...] = (
         False,
         "the registry's verdict on the instrument",
         _SHUNT_READ,
-        answers="`verdict`: `status` (`applied` is the one to measure on), `ok`, `serial`,"
-        " `event`, `differences`, `warnings` and its `lines`; and `registry_problem`",
+        answers="`verdict`: `status` (`applied` is the one to measure on), `ok`, `serial` (as"
+        " the registry files it), `aliased`, `event`, `differences`, `warnings` and its"
+        " `lines`; and `registry_problem`",
     ),
     Route(
         "POST",

@@ -174,7 +174,7 @@ Sends `*IDN?`, `SYST:INF?`, `CAL:DATA?`, `SENS:CURR:SHUN:RANG1`.
 
 The registry's verdict on the instrument.
 
-Answers `verdict`: `status` (`applied` is the one to measure on), `ok`, `serial`, `event`, `differences`, `warnings` and its `lines`; and `registry_problem`.
+Answers `verdict`: `status` (`applied` is the one to measure on), `ok`, `serial` (as the registry files it), `aliased`, `event`, `differences`, `warnings` and its `lines`; and `registry_problem`.
 
 Sends `*IDN?`, `SYST:INF?`, `CAL:DATA?`.
 

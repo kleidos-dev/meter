@@ -19,6 +19,13 @@ side of the calibration that holds today, reads them back and verifies; it
 never writes a null, which is session state. It refuses an instrument the
 registry does not know, or one whose image, bypass part or INA228 is not the
 configuration the registry files it under.
+
+The registry files the bench instrument under a placeholder serial, since
+no real serial is tracked (``calibration/README.md``, "Identity"). Name the
+serial it reports in ``KLEIDOS_METER_SERIAL_ALIASES``, in the environment or
+in the repository's ``.env``, which git ignores
+(:func:`~kleidos_meter.identity.load_aliases`): both commands then look it
+up, and print it, as the serial the registry files.
 """
 
 from __future__ import annotations
@@ -28,11 +35,12 @@ import datetime as dt
 import json
 import os
 import sys
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from pathlib import Path
 from typing import Any, Protocol
 
 from .client import Meter, SerialTransport
+from .identity import ALIAS_VARIABLE, load_aliases
 from .invariant import present
 from .protocol import ErrorEntry
 from .registry import ROOT, Registry, Verdict, build_index, compare, restore_messages
@@ -43,7 +51,8 @@ EXIT_STATUS = {
     0: "the instrument holds the registry's working copy (``applied``)",
     1: "an error ended the run, its traceback or its message on stderr: the port is held"
     " elsewhere, the instrument did not answer or refused the copy, or ``--rev`` holds no index",
-    2: "a usage error, or a ``restore`` with no terminal to answer its question and no ``--yes``",
+    2: "a usage error (a ``KLEIDOS_METER_SERIAL_ALIASES`` that is not serial pairs among them),"
+    " or a ``restore`` with no terminal to answer its question and no ``--yes``",
     3: "it does not: the verdict says why",
 }
 
@@ -113,16 +122,22 @@ def identify(meter: Instrument) -> tuple[str, dict[str, str], dict[str, str]]:
     return meter.idn(), meter.info(), meter.calibration()
 
 
-def verify(meter: Instrument, index: dict[str, Any], on: dt.date) -> Verdict:
+def verify(
+    meter: Instrument,
+    index: dict[str, Any],
+    on: dt.date,
+    aliases: Mapping[str, str] | None = None,
+) -> Verdict:
     """Compare the instrument with the registry on *on*.
 
     :param meter: The instrument.
     :param index: The registry's index.
     :param on: The day.
+    :param aliases: The serial aliases (:func:`~kleidos_meter.identity.load_aliases`).
     :returns: The verdict.
     """
     idn, info, cal = identify(meter)
-    return compare(index, idn, info, cal, on)
+    return compare(index, idn, info, cal, on, aliases)
 
 
 def describe(verdict: Verdict) -> list[str]:
@@ -132,6 +147,8 @@ def describe(verdict: Verdict) -> list[str]:
     :returns: Its lines.
     """
     lines = [f"{verdict.serial or '(no serial)'}: {verdict.status}"]
+    if verdict.aliased:
+        lines.append(f"  the instrument's own serial is mapped to it by {ALIAS_VARIABLE}")
     if verdict.entry is not None:
         entry = verdict.entry
         ranges = ", ".join(
@@ -154,6 +171,7 @@ def restore(
     *,
     ask: Callable[[str], str] = input,
     say: Callable[[str], None] = print,
+    aliases: Mapping[str, str] | None = None,
 ) -> Verdict:
     """Write the registry's working copy to the instrument and verify it.
 
@@ -162,10 +180,11 @@ def restore(
     :param on: The day.
     :param ask: Shows the confirmation and returns the answer.
     :param say: Prints a line.
+    :param aliases: The serial aliases (:func:`~kleidos_meter.identity.load_aliases`).
     :returns: The verdict after the restore (or before it, when nothing was
         written: the copy was already right, or the instrument is refused).
     """
-    verdict = verify(meter, index, on)
+    verdict = verify(meter, index, on, aliases)
     for line in describe(verdict):
         say(line)
     if verdict.status == "applied":
@@ -183,7 +202,7 @@ def restore(
         say("Not restored.")
         return verdict
     meter.exchange(messages)
-    after = verify(meter, index, on)
+    after = verify(meter, index, on, aliases)
     for line in describe(after):
         say(line)
     return after
@@ -239,18 +258,23 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if not args.sim and not args.port:
         parser.error("name the port with --port or KLEIDOS_METER_PORT, or use --sim")
+    try:
+        aliases = load_aliases()
+    except ValueError as error:
+        parser.error(str(error))
     index = load_index(args.registry, args.rev)
     on = args.date or dt.datetime.now().astimezone().date()
     transport = SimulatedMeter() if args.sim else SerialTransport(args.port)
     with Meter(transport) as meter:
         if args.action == "verify":
-            verdict = verify(meter, index, on)
+            verdict = verify(meter, index, on, aliases)
             if args.json:
                 print(
                     json.dumps(
                         {
                             "status": verdict.status,
                             "serial": verdict.serial,
+                            "aliased": verdict.aliased,
                             "event": verdict.entry["event"] if verdict.entry else None,
                             "differences": verdict.differences,
                             "warnings": verdict.warnings,
@@ -271,7 +295,7 @@ def main(argv: list[str] | None = None) -> int:
                 )
                 return 2
             ask = (lambda prompt: "y") if args.yes else ask_terminal
-            verdict = restore(meter, index, on, ask=ask)
+            verdict = restore(meter, index, on, ask=ask, aliases=aliases)
     return 0 if verdict.ok else 3
 
 

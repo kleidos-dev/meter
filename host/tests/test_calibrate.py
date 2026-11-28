@@ -27,6 +27,7 @@ from kleidos_meter.calibrate import (
 )
 from kleidos_meter.cli import main as cli_main
 from kleidos_meter.registry import Registry, check
+from test_registry import file_under
 
 NOW = dt.datetime(2026, 11, 21, 10, 0, tzinfo=dt.timezone(dt.timedelta(hours=1)))
 
@@ -84,6 +85,35 @@ def test_an_accepted_session_writes_the_working_copy_and_files_the_event(
     second.run()
     path, problems = second.file()
     assert problems == [] and path.name == "2026-11-21-02.md"
+
+
+def test_an_instrument_filed_under_a_placeholder_is_calibrated_and_filed_under_it(
+    registry_root: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    placeholder = "KM-0000000001"  # made up, as every test's serial
+    file_under(registry_root, placeholder)
+    with pytest.raises(Refused, match="map its serial to that one in KLEIDOS_METER_SERIAL"):
+        session(SimulatedMeter(), registry_root).run()
+    s = session(SimulatedMeter(), registry_root, aliases={SIM_SERIAL: placeholder})
+    assert s.run().accepted
+    path, problems = s.file()
+    assert problems == [] and path.parent == registry_root / "records" / placeholder
+    log = path.with_suffix(".log").read_text()
+    assert "*IDN?" in log and placeholder in log and SIM_SERIAL not in log
+    assert SIM_SERIAL not in path.read_text()
+    instrument = json.loads((registry_root / "instruments" / f"{placeholder}.json").read_text())
+    assert instrument["events"][-1]["verdict"] == "accepted"
+    assert not (registry_root / "instruments" / f"{SIM_SERIAL}.json").exists()
+    assert problems == check(Registry.from_directory(registry_root))[0] == []
+    args = ["--sim", "--yes", "--null-seconds", "1", "--samples", "10"]
+    monkeypatch.setenv("KLEIDOS_METER_SERIAL_ALIASES", f"{SIM_SERIAL}={placeholder}")
+    assert main([*args, "--registry", str(registry_root)]) == 0
+    assert len(list((registry_root / "records" / placeholder).glob("*.log"))) == 2
+    monkeypatch.setenv("KLEIDOS_METER_SERIAL_ALIASES", f"{SIM_SERIAL}")
+    with pytest.raises(SystemExit) as exited:
+        main([*args, "--registry", str(registry_root)])
+    assert exited.value.code == 2
+    assert "KLEIDOS_METER_SERIAL_ALIASES: pair 1" in capsys.readouterr().err
 
 
 def test_declining_the_store_writes_nothing(registry_root: Path) -> None:

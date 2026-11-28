@@ -29,12 +29,12 @@ import json
 import math
 import re
 import subprocess
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Iterable, Mapping
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
-from .identity import SERIAL_PATTERN, parse_idn, serial_from_mac, version_tuple
+from .identity import ALIAS_VARIABLE, SERIAL_PATTERN, parse_idn, serial_from_mac, version_tuple
 
 #: The repository's ``calibration/`` directory, next to this package's ``host/``.
 ROOT = Path(__file__).resolve().parents[2] / "calibration"
@@ -792,10 +792,13 @@ class Verdict:
     """What ``verify`` concluded about an instrument and the registry.
 
     :ivar status: One of :func:`compare`'s statuses.
-    :ivar serial: The instrument's serial.
+    :ivar serial: The instrument's serial as the registry files it: the one it
+        reports, or the one an alias maps that to.
     :ivar entry: The calibration's entry in the index, when there is one.
     :ivar differences: What differs from the registry, a sentence each.
     :ivar warnings: What to see to, a sentence each.
+    :ivar aliased: Whether an alias mapped the serial the instrument reports
+        to :attr:`serial` (:func:`~kleidos_meter.identity.load_aliases`).
     """
 
     status: str
@@ -803,6 +806,7 @@ class Verdict:
     entry: dict[str, Any] | None = None
     differences: list[str] = field(default_factory=list)
     warnings: list[str] = field(default_factory=list)
+    aliased: bool = False
 
     @property
     def ok(self) -> bool:
@@ -816,6 +820,7 @@ def compare(
     info: dict[str, str],
     cal: dict[str, str],
     on: dt.date,
+    aliases: Mapping[str, str] | None = None,
 ) -> Verdict:
     """Compare an instrument with the registry.
 
@@ -825,22 +830,43 @@ def compare(
     this instrument is), ``expired``, ``working_copy_lost`` (its calibration at factory
     defaults: ``shunt_measured=0``), ``working_copy_differs``, ``applied``.
 
+    The serial the instrument reports is looked up as *aliases* maps it,
+    when it does, and the verdict names the serial the registry files: the
+    one it reports is never in it then. An unknown serial no alias maps
+    says how to name one.
+
     :param index: The index.
     :param idn: The instrument's ``*IDN?``.
     :param info: Its ``SYSTem:INFormation?``'s fields.
     :param cal: Its ``CALibration:DATA?``'s fields.
     :param on: The day.
+    :param aliases: Each reported serial and the serial the registry files it
+        under (:func:`~kleidos_meter.identity.load_aliases`); None for none.
     :returns: The verdict.
     """
-    serial = parse_idn(idn)["serial"]
-    if not SERIAL_PATTERN.match(serial):
-        return Verdict("unregistered", serial, differences=["the instrument reports no serial"])
+    reported = parse_idn(idn)["serial"]
+    if not SERIAL_PATTERN.match(reported):
+        return Verdict("unregistered", reported, differences=["the instrument reports no serial"])
+    serial = (aliases or {}).get(reported, reported)
+    aliased = serial != reported
     status, entry = select(index, serial, on)
     if entry is None:
-        return Verdict(status, serial, differences=[f"{serial} has no calibration in the registry"])
+        verdict = Verdict(
+            status,
+            serial,
+            differences=[f"{serial} has no calibration in the registry"],
+            aliased=aliased,
+        )
+        if not aliased and serial not in index.get("instruments", {}):
+            verdict.differences.append(
+                "no alias maps it: if the registry files this instrument under a placeholder,"
+                f" set {ALIAS_VARIABLE}=<its serial>=<the filed serial> in the environment or"
+                " in the repository's .env, which git ignores"
+            )
+        return verdict
     instrument = index["instruments"][serial]
     summary = instrument["configurations"][entry["configuration"]]
-    verdict = Verdict(status, serial, entry)
+    verdict = Verdict(status, serial, entry, aliased=aliased)
     firmware = parse_idn(idn)["firmware"]
     problem = image_problem(summary, info.get("image", "-"), firmware)
     if problem is not None and problem[0] == "image":
