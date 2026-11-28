@@ -11,13 +11,13 @@ Two legs, each over every translation unit of ``firmware/src/CMakeLists.txt``:
     meter -t compiledb``) with its response files expanded, reduced to its
     include paths and defines, for the real target (``--target=xtensa-esp-elf``)
     in the device's language mode (its ``-std``, ``-fno-exceptions``,
-    ``-fno-rtti``), with the host's own headers dropped (``-nostdlibinc``) and
+    ``-fno-rtti``, no C++ modules), with the host's own headers dropped (``-nostdlibinc``) and
     the toolchain's libstdc++ and picolibc roots, as its GCC reports them,
     after every include path of the build.
 ``harness``
     The sources as the host tests compile them: against the fake ESP-IDF of
     ``firmware/test/native/harness``, at the device's standard, with
-    ``-fno-exceptions -fno-rtti``.
+    ``-fno-exceptions -fno-rtti -fno-cxx-modules``.
 
 The guards are the firmware repository's (``scripts/run_clang_tidy.sh``
 there), each a failure of its own: the clang-tidy binary is of the LLVM major
@@ -74,8 +74,13 @@ FINDINGS = 1
 DEVICE_TARGET = "--target=xtensa-esp-elf"
 
 #: The language mode the device builds in, restated: the flag filter keeps
-#: only include paths and defines, and several checks key off these.
-LANGUAGE_MODE = ("-fno-exceptions", "-fno-rtti")
+#: only include paths and defines, and several checks key off these. Neither
+#: build compiles C++ modules: GCC reads a line that starts with ``module`` as
+#: a module directive only under ``-fmodules``, which no build passes, while
+#: clang's C++20 mode always does unless told otherwise, and ESP-IDF 6.1's
+#: ``soc/regdma.h`` (reached from ``hal/i2c_ll.h``) starts a line with a
+#: bit-field named ``module``, which clang then refuses as a parse error.
+LANGUAGE_MODE = ("-fno-exceptions", "-fno-rtti", "-fno-cxx-modules")
 
 #: The standard the host tests compile at (firmware/test/native/Makefile).
 HARNESS_STD = "-std=gnu++2c"

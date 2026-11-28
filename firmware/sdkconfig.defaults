@@ -3,7 +3,7 @@
 #
 # Kleidos bench power meter -- ESP-IDF defaults.
 # Every symbol below was confirmed to exist in the installed
-# framework-espidf@4.60003.0 tree (docs/architecture.md SS 10).
+# framework-espidf 4.60101.0 tree, ESP-IDF 6.1.1 (docs/architecture.md SS 10).
 
 # Silence. The firmware owns UART0 directly and prints one line per fact; a log
 # line inside a ring dump corrupts a capture (docs/architecture.md SS 10).
@@ -42,7 +42,7 @@ CONFIG_BT_ENABLED=n
 # start-of-frame hook ran from the FreeRTOS tick at 1 kHz. Both are off now,
 # so esp_perip_clk_init() disables the pad and gates the clock at startup
 # after any reset that is not of the CPU alone
-# ($IDF/components/esp_system/port/soc/esp32s3/clk.c:235-297; the switch is
+# ($IDF/components/esp_system/port/soc/esp32s3/clk.c:237-299; the switch is
 # $IDF/components/esp_driver_usb_serial_jtag/Kconfig:4-17). What still works:
 # flashing, which is the ROM's download mode over UART0 and the CH343, and the
 # console. What is lost: the native port's console and its built-in JTAG,
@@ -170,7 +170,7 @@ CONFIG_SPIRAM_MEMTEST=y
 
 # Flash size, stated once instead of defaulted. The ESPTOOLPY_FLASHSIZE choice
 # defaults to 2 MB
-# ($IDF/components/esptool_py/Kconfig.projbuild:114, `default
+# ($IDF/components/esptool_py/Kconfig.projbuild:125, `default
 # ESPTOOLPY_FLASHSIZE_2MB`), while the board JSON this project pins declares
 # 8 MB (`upload.flash_size` in the installed
 # platforms/espressif32/boards/esp32-s3-devkitc-1.json). PlatformIO compares the
@@ -178,7 +178,7 @@ CONFIG_SPIRAM_MEMTEST=y
 # address. The module is an N16R8, so the honest figure is 16 MB and
 # platformio.ini overrides the generic board JSON to say so -- the DevKitC
 # profile that ships with the platform describes a smaller part than the one on
-# this bench. The symbol is Kconfig.projbuild:124-125.
+# this bench. The symbol is Kconfig.projbuild:137-138.
 CONFIG_ESPTOOLPY_FLASHSIZE_16MB=y
 
 # The CPU, stated rather than defaulted. IDF's default for this target is

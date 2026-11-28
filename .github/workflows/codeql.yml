@@ -5,8 +5,8 @@
 # Kleidos firmware repository analyses it (its codeql.yml): CodeQL cannot
 # build a PlatformIO and ESP-IDF project by itself, so the job builds the
 # device image between the init and analyze steps, as CI's firmware job builds
-# it (the pinned platform, scripts/install_idf.sh, the cached ESP-IDF
-# package), and CodeQL traces the compiler calls. Beside it, the languages
+# it (the pinned platform and ESP-IDF package, installed from the project),
+# and CodeQL traces the compiler calls. Beside it, the languages
 # CodeQL reads without a build (python, javascript-typescript, actions).
 #
 # This is the repository's advanced setup: GitHub's default setup is off,
@@ -52,14 +52,12 @@ jobs:
       contents: read
       actions: read
       security-events: write
-    env:
-      KLEIDOS_PIO_JOB_ALONE: "1"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       # Python 3.14, not .python-version's 3.15: the platform's builder
-      # (espressif32 7.0.1, and 8.0.0 alike) installs pydantic ~=2.12.0
+      # (espressif32 8.0.0, as 7.0.1 before it) installs pydantic ~=2.12.0
       # into the ESP-IDF environment it makes from this Python, and that
       # pydantic's core (2.41.5) has no 3.15 wheel and builds with a PyO3
       # that stops at 3.14, so on 3.15 the build ends before CMake. Back
@@ -68,17 +66,11 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.14"
-      - name: Cache the installed ESP-IDF package
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.platformio/packages/framework-espidf@*
-          key: ${{ runner.os }}-espidf-${{ hashFiles('firmware/platformio.ini', 'scripts/install_idf.sh') }}
       - name: Install PlatformIO, the platform and the pinned ESP-IDF
         run: |
           set -euo pipefail
           pip install platformio==6.2.0
-          pio pkg install -g -p "platformio/espressif32@7.0.1"
-          bash scripts/install_idf.sh
+          pio pkg install --project-dir firmware -e meter
           rm -rf ~/.platformio/.cache/tmp
       - name: Initialize CodeQL
         uses: github/codeql-action/init@915412ff23e8b7659517e607487dbeae018f2934 # v4.39.5

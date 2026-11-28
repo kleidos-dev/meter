@@ -108,9 +108,6 @@ reviews:
     - "!hardware/sym-lib-table"
     # The Kleidos KiCad kit, byte copies of brand's kicad/ (KIT.json).
     - "!hardware/kicad/**"
-    # The ESP-IDF installer, a byte copy of the firmware repository's script.
-    - "!scripts/install_idf.sh"
-    - "!scripts/install_idf.json"
     # The quality kit's base configurations and its comment caller, byte
     # copies of kleidos-dev/.github (.github/quality/SOURCE.json); the
     # waivers in .github/quality/waivers.toml are this repository's.

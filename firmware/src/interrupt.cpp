@@ -7,7 +7,7 @@
  */
 #include "interrupt.h"
 
-// ESP-IDF 6.0.3's xtensa_api.h declares the port's handler-table calls
+// ESP-IDF 6.1.1's xtensa_api.h declares the port's handler-table calls
 // (xt_set_interrupt_handler(), xt_int_has_handler(), xt_ints_on()) with no C
 // linkage block, and esp_cpu.h includes it before opening its own: from C++
 // its inline wrappers would call C++-mangled names nothing defines. Included

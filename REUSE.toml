@@ -110,16 +110,6 @@ precedence = "override"
 SPDX-FileCopyrightText = "2026 José M. Requena Plens"
 SPDX-License-Identifier = "MIT"
 
-# The ESP-IDF installer, a byte copy of the Kleidos firmware repository's
-# scripts/install_idf.sh at the commit scripts/install_idf.json records (never
-# edited here, so it cannot take a header of its own), and that manifest;
-# GPL-3.0-or-later there as here.
-[[annotations]]
-path = ["scripts/install_idf.sh", "scripts/install_idf.json"]
-precedence = "override"
-SPDX-FileCopyrightText = "2026 José M. Requena Plens"
-SPDX-License-Identifier = "GPL-3.0-or-later"
-
 # The overlay of the Doxyfile for the published site: a Doxygen configuration
 # under a name the header check does not know; its header is in the file too.
 [[annotations]]

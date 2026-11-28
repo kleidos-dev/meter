@@ -9,13 +9,12 @@
 # (kleidos-dev/.github docs/quality.md). The kit's commit-message gate does
 # not check a pull request Dependabot opened. Moved by hand, because no
 # Dependabot ecosystem reads them: the firmware's toolchain (PlatformIO's
-# platform and the ESP-IDF release, firmware/platformio.ini and
-# scripts/install_idf.sh), the tools CI installs in its steps (PlatformIO,
-# the pinned Python packages, the gitleaks and Doxygen binaries by digest,
-# scripts/analysis_toolchain.sh's clang-tidy and cppcheck, the Trivy release
-# security.yml names) and the KiCad image, whose digest a job's container:
-# names (the docker ecosystem reads no workflow). There is no npm, Docker or
-# uv manifest here to watch.
+# platform and the ESP-IDF package, firmware/platformio.ini), the tools CI
+# installs in its steps (PlatformIO, the pinned Python packages, the gitleaks
+# and Doxygen binaries by digest, scripts/analysis_toolchain.sh's clang-tidy
+# and cppcheck, the Trivy release security.yml names) and the KiCad image,
+# whose digest a job's container: names (the docker ecosystem reads no
+# workflow). There is no npm, Docker or uv manifest here to watch.
 version: 2
 updates:
   - package-ecosystem: github-actions

@@ -146,7 +146,7 @@ SINKS = re.compile(
 #: ``__wrap_malloc()`` and the C library's leaves the image with its callers.
 CORE_SINKS = ("calloc", "free", "heap_caps_malloc", "heap_caps_free", "multi_heap_malloc")
 
-#: The ROM's code (ESP32-S3's internal ROM, as ESP-IDF 6.0.3's
+#: The ROM's code (ESP32-S3's internal ROM, as ESP-IDF 6.1.1's
 #: ``esp32s3.rom.ld`` places its functions): an address here is a ROM
 #: function. Outside the image's sections and this range an address is a
 #: register block or ROM data, and is not an edge.
@@ -173,7 +173,10 @@ ROM_LEAVES: dict[str, str] = {
         " write, a newline as CR LF, with no buffer of its own (app_main()'s"
         " fallback, FW-26)"
     ),
-    "esp_rom_regi2c_write_mask": "a register write over the analog I2C bus",
+    "_regi2c_impl_write_mask": (
+        "a register write over the analog I2C bus (ESP-IDF 6.1's name for the ROM"
+        " function 6.0 called esp_rom_regi2c_write_mask)"
+    ),
     "esp_rom_route_intr_matrix": "writes one interrupt matrix register",
     "itoa": "formats into the caller's buffer",
     "memchr": "finds a byte in a buffer (chars::untilNul(), FW-25)",
@@ -257,13 +260,14 @@ _STREAM_IO = (
     "vfscanf",
 )
 
-#: picolibc's two FILE objects, ``__stdin`` and ``__stdout`` (``stderr`` is
-#: the same object as ``stdout``), are what every task's TLS template points
-#: to, so FreeRTOS's stack set-up, which copies the template, reaches them; a
-#: FILE holds its operations, and four of them allocate: close frees the
-#: buffer, setvbuf allocates one, and put and get allocate it on their first
-#: use (``__bufio_buffer_allocate_locked()``, ``calloc()``; ``stdout`` has a
-#: static buffer, so on the image as it boots neither does). None runs
+#: picolibc's three FILE objects, ``__stdin``, ``__stdout`` and ``__stderr``
+#: (from ESP-IDF 6.1 ``stderr`` is an object of its own; in 6.0 it was
+#: ``stdout``), are what every task's TLS template points to, so FreeRTOS's
+#: stack set-up, which copies the template, reaches them; a FILE holds its
+#: operations, and four of them allocate: close frees the buffer, setvbuf
+#: allocates one, and put and get allocate it on their first use
+#: (``__bufio_buffer_allocate_locked()``, ``calloc()``; each of the three has a
+#: static buffer in 6.1, so on the image as it boots none does). None runs
 #: without a call of a stream function, and the guards fail the gate the day
 #: the walk reaches one.
 _OPERATIONS = {
@@ -279,7 +283,7 @@ CUTS: dict[tuple[str, str], Cut] = {
         " called on it, which nothing the walk reaches calls",
         _STREAM_CALLS + _STREAM_IO,
     )
-    for stream in ("__stdin", "__stdout")
+    for stream in ("__stdin", "__stdout", "__stderr")
     for operation in _OPERATIONS
 }
 
