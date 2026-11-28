@@ -37,9 +37,6 @@ ALIAS_VARIABLE = "KLEIDOS_METER_SERIAL_ALIASES"
 #: The repository's ``.env``, which ``.gitignore`` keeps out of every commit.
 DOTENV = Path(__file__).resolve().parents[2] / ".env"
 
-#: One ``KEY=VALUE`` line of an ``.env``, ``export`` allowed before the key.
-_ENV_LINE = re.compile(r"^\s*(?:export\s+)?([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)$")
-
 
 def serial_from_mac(mac: bytes) -> str:
     """The instrument's serial, as the firmware derives it from its factory MAC.
@@ -123,10 +120,10 @@ def _dotenv_value(path: Path, key: str) -> str | None:
     except FileNotFoundError:
         return None
     for line in lines:
-        match = _ENV_LINE.match(line)
-        if match is None or match.group(1) != key:
+        name, equals, rest = line.strip().removeprefix("export ").partition("=")
+        if not equals or name.strip() != key:
             continue
-        value = match.group(2).strip()
+        value = rest.strip()
         if value[:1] in ("'", '"') and value.endswith(value[0]) and len(value) > 1:
             return value[1:-1]
         return value.split(" #", 1)[0].strip()
