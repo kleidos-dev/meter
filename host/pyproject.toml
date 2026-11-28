@@ -28,7 +28,7 @@ dev = [
 ]
 # The panel's browser tests (tests/test_panel_browser.py): Python Playwright at
 # the Kleidos QA pin (qa/requirements.txt), then `python -m playwright install chromium`.
-browser = ["playwright==1.63.0"]
+browser = ["playwright==1.65.2"]
 
 [project.scripts]
 kleidos-meter = "kleidos_meter.cli:main"
