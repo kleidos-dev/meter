@@ -64,7 +64,7 @@ reserv1 = "reserv1"
 # The ROUTe:LEAD parameter's short form (CLOSe), as the console accepts it
 # and the host client sends it.
 CLOS = "CLOS"
-# ESP-IDF 6.0.3's hal/uart_ll.h, as Espressif names its threshold setter
+# ESP-IDF 6.1.1's hal/uart_ll.h, as Espressif names its threshold setter
 # (`thr` for threshold); the firmware's UART0 calls it (firmware/src/uart0.cpp).
 uart_ll_set_rxfifo_full_thr = "uart_ll_set_rxfifo_full_thr"
 # Clang's AST node for a function parameter, as its JSON dump names the kind

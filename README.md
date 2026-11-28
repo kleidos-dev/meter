@@ -42,7 +42,7 @@ The panel's Live view on the simulated instrument; every view, in both themes an
 
    `kleidos-meter serve --sim` runs the panel against the same simulator and prints its address ([`docs/panel.md`](docs/panel.md)).
 
-2. **Build** (the toolchain is pinned in `firmware/platformio.ini`: `platformio/espressif32 @ 7.0.1`, ESP-IDF 6.0.3, C++26, every warning an error; until PlatformIO publishes that framework package it is installed the way the Kleidos firmware repository installs it, `scripts/install_idf.sh` there and here):
+2. **Build** (the toolchain is pinned in `firmware/platformio.ini`: `platformio/espressif32 @ 8.0.0`, ESP-IDF 6.1.1 as the registry's `framework-espidf` 4.60101.0, C++26, every warning an error; the first build installs both):
 
    ```sh
    source ~/.platformio/penv/bin/activate

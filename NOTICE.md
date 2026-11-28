@@ -5,7 +5,7 @@
 
 ## In the firmware image
 
-The firmware links the Espressif IoT Development Framework (ESP-IDF 6.0.3) and the components it builds with it (FreeRTOS, newlib/picolibc, mbedTLS through ESP-IDF), under the Apache License 2.0 and the licenses ESP-IDF lists for each component. A binary distributed from this repository carries those notices with it; ESP-IDF's own `COPYRIGHT` file is the list.
+The firmware links the Espressif IoT Development Framework (ESP-IDF 6.1.1) and the components it builds with it (FreeRTOS, newlib/picolibc, mbedTLS through ESP-IDF), under the Apache License 2.0 and the licenses ESP-IDF lists for each component. A binary distributed from this repository carries those notices with it; ESP-IDF's own `COPYRIGHT` file is the list.
 
 ## In the documents
 

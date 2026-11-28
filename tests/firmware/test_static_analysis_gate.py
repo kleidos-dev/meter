@@ -298,12 +298,13 @@ def test_the_device_flags_are_the_build_s_includes_and_defines_for_xtensa(
     monkeypatch.setenv("METER_XTENSA_TOOLCHAIN", str(tmp_path / "toolchain-xtensa-esp-elf"))
     monkeypatch.setenv("PATH", "/usr/bin:/bin")
     flags = gate.device_flags(["main.cpp"], database)["main.cpp"]
-    assert flags[:6] == [
+    assert flags[:7] == [
         "--target=xtensa-esp-elf",
         "-nostdlibinc",
         "-std=gnu++26",
         "-fno-exceptions",
         "-fno-rtti",
+        "-fno-cxx-modules",
         "-DESP_PLATFORM",
     ]
     assert "-isystem/abs/esp" in flags
@@ -366,6 +367,7 @@ def test_response_files_are_expanded(tmp_path: Path) -> None:
 def test_both_legs_analyze_without_exceptions_or_rtti() -> None:
     harness = gate.harness_flags(["main.cpp"])["main.cpp"]
     assert "-fno-exceptions" in harness and "-fno-rtti" in harness
+    assert "-fno-cxx-modules" in harness
 
 
 # --- The real run ----------------------------------------------------------------

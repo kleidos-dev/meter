@@ -30,8 +30,8 @@ SECTION = "env:meter"
 
 #: The pins, exact: a version range is a toolchain nobody chose.
 PINS = {
-    "platform": "platformio/espressif32 @ 7.0.1",
-    "platform_packages": "platformio/framework-espidf @ ~4.60003.0",
+    "platform": "platformio/espressif32 @ 8.0.0",
+    "platform_packages": "platformio/framework-espidf @ ~4.60101.0",
     "framework": "espidf",
 }
 

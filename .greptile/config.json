@@ -32,7 +32,7 @@
   "fixWithAI": true,
   "hideFooter": true,
   "instructions": "Review the diff and post inline comments with concrete suggestions. The rules of this repository are in AGENTS.md (listed in files.json, with docs/scpi.md, docs/misra.md and calibration/README.md for their paths) and in the rules below: cite the rule a finding breaks. Never comment on the pull request's title or description. Files byte-copied from another repository (hardware/kicad/, scripts/install_idf.*, .github/commit-check/ and its workflows) and generated files (the KiCad schematic and its renders, calibration/index.json) are changed at their source, never by hand.",
-  "ignorePatterns": "hardware/*.kicad_sch\nhardware/*.kicad_pro\nhardware/*.kicad_sym\nhardware/sym-lib-table\nhardware/*.svg\nhardware/*.pdf\nhardware/kicad/\nscripts/install_idf.sh\nscripts/install_idf.json\n.github/commit-check/\n.github/workflows/commit-check.yml\n.github/workflows/commit-check-comment.yml\ncalibration/index.json\ncalibration/records/*.log",
+  "ignorePatterns": "hardware/*.kicad_sch\nhardware/*.kicad_pro\nhardware/*.kicad_sym\nhardware/sym-lib-table\nhardware/*.svg\nhardware/*.pdf\nhardware/kicad/\n.github/commit-check/\n.github/workflows/commit-check.yml\n.github/workflows/commit-check-comment.yml\ncalibration/index.json\ncalibration/records/*.log",
   "rules": [
     {
       "id": "spdx",

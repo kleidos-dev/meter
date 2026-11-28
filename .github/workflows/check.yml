@@ -160,7 +160,7 @@ jobs:
           # (tests/ci/test_changes_filter.py).
           panel_inputs='^(scripts/panel_images\.py|docs/images/panel/manifest\.json)$'
           # Paths the schematic and its renders never read.
-          not_schematic='^(docs/|host/|firmware/|calibration/|tests/|LICENSES/|\.github/(quality/.*|dependabot\.yml|zizmor\.yml)$|\.github/workflows/(commit-check-comment|codeql|security)\.yml$|scripts/(check_calibration_registry|check_doc_paths|check_spdx|test_report)\.py$|scripts/(run_tests\.sh|install_idf\.(sh|json))$|(LICENSE|REUSE\.toml|\.editorconfig|\.ecrc|\.typos\.toml|\.gitleaks\.toml|\.gitleaksignore|pyproject\.toml|\.python-version|\.gitleaks-mac\.toml|\.shellcheckrc|\.markdownlint\.yaml|\.markdownlint-cli2\.jsonc|\.gitattributes|\.gitignore|\.pre-commit-config\.yaml)$)|\.md$'
+          not_schematic='^(docs/|host/|firmware/|calibration/|tests/|LICENSES/|\.github/(quality/.*|dependabot\.yml|zizmor\.yml)$|\.github/workflows/(commit-check-comment|codeql|security)\.yml$|scripts/(check_calibration_registry|check_doc_paths|check_spdx|test_report)\.py$|scripts/run_tests\.sh$|(LICENSE|REUSE\.toml|\.editorconfig|\.ecrc|\.typos\.toml|\.gitleaks\.toml|\.gitleaksignore|pyproject\.toml|\.python-version|\.gitleaks-mac\.toml|\.shellcheckrc|\.markdownlint\.yaml|\.markdownlint-cli2\.jsonc|\.gitattributes|\.gitignore|\.pre-commit-config\.yaml)$)|\.md$'
           firmware=true
           docs=true
           panel=true
@@ -504,14 +504,12 @@ jobs:
     if: needs.changes.outputs.firmware == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    env:
-      KLEIDOS_PIO_JOB_ALONE: "1"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       # Python 3.14, not .python-version's 3.15: the platform's builder
-      # (espressif32 7.0.1, and 8.0.0 alike) installs pydantic ~=2.12.0
+      # (espressif32 8.0.0, as 7.0.1 before it) installs pydantic ~=2.12.0
       # into the ESP-IDF environment it makes from this Python, and that
       # pydantic's core (2.41.5) has no 3.15 wheel and builds with a PyO3
       # that stops at 3.14, so on 3.15 the build ends before CMake. Back
@@ -529,11 +527,6 @@ jobs:
             echo "CPPCHECK_VERSION=$METER_CPPCHECK_VERSION"
             echo "CPPCHECK_SHA256=$METER_CPPCHECK_SHA256"
           } >> "$GITHUB_ENV"
-      - name: Cache the installed ESP-IDF package
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.platformio/packages/framework-espidf@*
-          key: ${{ runner.os }}-espidf-${{ hashFiles('firmware/platformio.ini', 'scripts/install_idf.sh') }}
       - name: Cache the pinned cppcheck
         id: cppcheck-cache
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -557,8 +550,7 @@ jobs:
         run: |
           set -euo pipefail
           pip install platformio==6.2.0 "clang-tidy==${CLANG_TIDY_VERSION}"
-          pio pkg install -g -p "platformio/espressif32@7.0.1"
-          bash scripts/install_idf.sh
+          pio pkg install --project-dir firmware -e meter
           rm -rf ~/.platformio/.cache/tmp
           echo "$HOME/.local/cppcheck/bin" >> "$GITHUB_PATH"
       - name: The device's compile database
@@ -614,30 +606,26 @@ jobs:
         run: make -C firmware/test/native -j"$(nproc)" test32 CXX=g++
 
   # The device image, built as the bench builds it: the pinned platform
-  # (espressif32 7.0.1) and the ESP-IDF release firmware/platformio.ini pins,
-  # which the PlatformIO registry does not publish, installed by
-  # scripts/install_idf.sh (a byte copy of the firmware repository's, held by
-  # tests/firmware/test_install_idf_copy.py). The installer would hand itself
-  # to that repository's pio-job; KLEIDOS_PIO_JOB_ALONE says it runs alone.
-  # Only the installed ESP-IDF package is cached, on the two files that decide
-  # what it holds: the whole ~/.platformio (the RISC-V toolchain alone is
-  # 3 GB) left the runner no disk to write the cache archive on. The release
-  # archive is deleted once unpacked, for the same reason. The image's sizes go
-  # to the job summary.
+  # (espressif32 8.0.0) and the ESP-IDF release firmware/platformio.ini pins
+  # (framework-espidf 4.60101.0, ESP-IDF 6.1.1, from the PlatformIO registry),
+  # installed from the project so that the platform installs only the packages
+  # the meter's environment needs: installed alone (`-g -p`), it would also
+  # fetch its default toolchains, 14.2, beside the 15.2 an ESP-IDF build takes,
+  # and the RISC-V one alone is 3 GB. Nothing of ~/.platformio is cached, for
+  # the same reason, and the download cache is deleted once unpacked. The
+  # image's sizes go to the job summary.
   firmware:
     name: "🔨 Device image (meter)"
     needs: [changes, lint]
     if: needs.changes.outputs.firmware == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 45
-    env:
-      KLEIDOS_PIO_JOB_ALONE: "1"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       # Python 3.14, not .python-version's 3.15: the platform's builder
-      # (espressif32 7.0.1, and 8.0.0 alike) installs pydantic ~=2.12.0
+      # (espressif32 8.0.0, as 7.0.1 before it) installs pydantic ~=2.12.0
       # into the ESP-IDF environment it makes from this Python, and that
       # pydantic's core (2.41.5) has no 3.15 wheel and builds with a PyO3
       # that stops at 3.14, so on 3.15 the build ends before CMake. Back
@@ -646,17 +634,11 @@ jobs:
       - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
         with:
           python-version: "3.14"
-      - name: Cache the installed ESP-IDF package
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: ~/.platformio/packages/framework-espidf@*
-          key: ${{ runner.os }}-espidf-${{ hashFiles('firmware/platformio.ini', 'scripts/install_idf.sh') }}
       - name: Install PlatformIO
         run: pip install platformio==6.2.0
       - name: Install the platform and the pinned ESP-IDF
         run: |
-          pio pkg install -g -p "platformio/espressif32@7.0.1"
-          bash scripts/install_idf.sh
+          pio pkg install --project-dir firmware -e meter
           rm -rf ~/.platformio/.cache/tmp
       - name: Build meter
         run: pio run --project-dir firmware -e meter

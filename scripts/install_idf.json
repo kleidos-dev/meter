@@ -1,7 +1,0 @@
-{
-  "$comment": "scripts/install_idf.sh is a byte copy of the Kleidos firmware repository's scripts/install_idf.sh at the commit below; never edit it here: change it there, copy it, and update this commit and digest (tests/firmware/test_install_idf_copy.py).",
-  "source": "https://github.com/jmrplens/kleidos",
-  "path": "scripts/install_idf.sh",
-  "commit": "5b1a9ccbdaf86f680d7a97e7711ca08ad7d2d8da",
-  "sha256": "7d8a97ac9d28a2b7051c9c2cbf86c0fd10efc95111d0db2174051c70a825e2c7"
-}

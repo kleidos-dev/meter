@@ -32,11 +32,11 @@
  * allocates its interrupt (the I2C master's on Core 1 did until then, UART0's
  * until FW-12), but ESP-IDF's own startup still claims lines through the
  * allocator (`docs/misra.md` D1), and each skips the other's: ESP-IDF
- * 6.0.3's allocator refuses a line whose handler is set
+ * 6.1.1's allocator refuses a line whose handler is set
  * (`is_vect_desc_usable()`, `components/esp_hw_support/intr_alloc.c` line
- * 330, `esp_cpu_intr_has_handler()`), and it sets a handler on every line it
+ * 401, `esp_cpu_intr_has_handler()`), and it sets a handler on every line it
  * hands out (the driver's, or its shared dispatcher), which lineIsFree()
- * refuses in turn. Nothing in ESP-IDF 6.0.3 reserves a line without a handler
+ * refuses in turn. Nothing in ESP-IDF 6.1.1 reserves a line without a handler
  * but `esp_intr_reserve()`, which nothing calls.
  *
  * **One core's tables.** The handler table, the matrix route and the line's
@@ -45,7 +45,7 @@
  * claim run with this core's interrupts masked, so no other task of the core
  * can take the same line between them; and only a task of this core can:
  * `esp_intr_alloc()` claims a line of the core it is called on
- * (`intr_alloc.c` line 581), and `esp_intr_free()` moves to the line's core
+ * (`intr_alloc.c` line 676), and `esp_intr_free()` moves to the line's core
  * through the IPC task.
  */
 #ifndef KLEIDOS_METER_INTERRUPT_H

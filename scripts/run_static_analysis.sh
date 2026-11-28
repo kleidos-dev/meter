@@ -23,7 +23,8 @@
 #    ESP-IDF, libstdc++ and picolibc headers; the harness leg analyses it as
 #    the host tests compile it, against the fake ESP-IDF of
 #    firmware/test/native/harness/idf. Both run with -fno-exceptions -fno-rtti,
-#    as the image is built;
+#    as the image is built, and with no C++ modules (-fno-cxx-modules), which
+#    neither build compiles;
 # 3. cppcheck over the same sources with the firmware repository's flags, every
 #    finding an error (.cppcheck-suppress names the few left out, each with
 #    its reason), against the fake ESP-IDF.
