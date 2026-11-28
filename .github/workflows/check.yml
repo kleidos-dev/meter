@@ -417,8 +417,8 @@ jobs:
           path: build/test-report/panel.xml
           if-no-files-found: warn
 
-  # The firmware's reference and its gates: Doxygen 1.17.0 (the official Linux
-  # binary, pinned by digest, as the firmware repository's docs job pins it)
+  # The firmware's reference and its gates: Doxygen 1.18.0 (the official Linux
+  # binary, pinned by digest, as the firmware repository's docs job pins its own)
   # exits non-zero on any warning, and the Doxyfile shows undocumented symbols,
   # private, file-static and anonymous-namespace ones included, so an
   # undocumented symbol or parameter fails here. Then the link gate reads that
@@ -428,7 +428,7 @@ jobs:
   # function, private member and anonymous-namespace function to prove the
   # first gate still sees each.
   docs:
-    name: "📚 Documentation site and firmware reference (Doxygen 1.17.0)"
+    name: "📚 Documentation site and firmware reference (Doxygen 1.18.0)"
     needs: [changes, lint]
     if: needs.changes.outputs.firmware == 'true' || needs.changes.outputs.docs == 'true'
     runs-on: ubuntu-latest
@@ -439,8 +439,8 @@ jobs:
           persist-credentials: false
       - name: Install Doxygen
         env:
-          DOXYGEN_VERSION: 1.17.0
-          DOXYGEN_SHA256: 75419ef4f446fc1c24ef12514b574e66e898ee6f527c6ae2ad84f91a905823c2
+          DOXYGEN_VERSION: 1.18.0
+          DOXYGEN_SHA256: 14fa81bdc34171edb5f1f02b1d60e74802f0439b77fa44e592565d517d72df90
         # The project's own release asset on GitHub first, doxygen.nl second:
         # doxygen.nl's CDN has answered GitHub's runners with another body
         # (2026-11-27). Either copy must be the pinned file.

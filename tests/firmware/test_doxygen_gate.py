@@ -26,7 +26,7 @@ it after ``doxygen Doxyfile``. The Doxyfile expands ESP-IDF's placement
 attributes to nothing, and no generated member signature may carry one.
 
 Host-only. The runs need ``doxygen`` on ``PATH`` (CI's docs job installs
-1.17.0) and are skipped without it; the settings and the wiring are checked
+1.18.0) and are skipped without it; the settings and the wiring are checked
 always.
 """
 

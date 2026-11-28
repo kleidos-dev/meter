@@ -20,7 +20,7 @@
 # (kleidos:Doxyfile), stricter by those four and with undocumented symbols
 # shown from the first day: this tree reached zero in one pass, so the
 # coverage gate is the real one and no baseline or ratchet is kept. Pinned to
-# Doxygen 1.17.0.
+# Doxygen 1.18.0.
 # What the warnings cannot see, a link to a page that was never generated or a
 # name an enclosing namespace also declares, is the second gate's:
 # `python3 scripts/check_doc_links.py --html build/doxygen/html`, run on the

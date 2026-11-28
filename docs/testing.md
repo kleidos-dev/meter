@@ -70,7 +70,7 @@ scripts/run_tests.sh                           # every test and the report (docs
 METER_BROWSER_REQUIRED=1 host/.venv/bin/python -m pytest -q -W error host/tests/test_panel_browser.py  # the panel's page in Chromium and its modules' coverage (host/js_floors.toml; CI's panel job; needs host[browser] and `python -m playwright install chromium`; also in run_tests.sh where they are installed)
 scripts/run_mutants.sh --firmware              # by hand and before a release: the firmware's mutants, every one killed (half an hour and more; `--page` is the page's, CI's panel job)
 scripts/run_static_analysis.sh                 # clang-format, clang-tidy (device and harness legs; needs the compile database below), cppcheck
-mkdir -p build && doxygen Doxyfile             # the documentation site and the firmware reference, zero warnings (Doxygen 1.17.0)
+mkdir -p build && doxygen Doxyfile             # the documentation site and the firmware reference, zero warnings (Doxygen 1.18.0)
 python3 scripts/check_doc_links.py --html build/doxygen/html  # after it: every link resolves, no name shadows an outer one (--selftest plants each defect)
 python3 scripts/build_reference.py --out <new dir>  # the site as it is published, built and guarded (scripts/check_reference.py; --selftest plants each defect)
 python3 scripts/preview_reference.py --tree <dir>  # look at it, as the host serves it (http://127.0.0.1:8798/meter/)

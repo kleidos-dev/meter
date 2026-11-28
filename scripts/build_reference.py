@@ -48,7 +48,7 @@ control leads to the page of the search (``docs/published-reference/search.md``)
 computer.
 
 Usage: ``python3 scripts/build_reference.py --out <new directory>``
-(``--doxygen`` names the binary; CI pins 1.17.0). Exit code 0 when the tree is
+(``--doxygen`` names the binary; CI pins 1.18.0). Exit code 0 when the tree is
 written and guarded, 1 when a step failed, 2 on a usage error.
 """
 
@@ -210,7 +210,7 @@ def images_by_name(root: Path = REPO_ROOT) -> dict[str, Path]:
 def _captioned(match: re.Match[str]) -> str:
     """Return an image whose text is its caption, and the caption as a paragraph.
 
-    Doxygen 1.17.0 writes a Markdown image's words as a caption beside it and
+    Doxygen 1.18.0 writes a Markdown image's words as a caption beside it and
     leaves its ``alt`` empty, which says the image is decorative; the
     caption's plain words become its text. The caption becomes a paragraph,
     whose margin the host's sheet sets, so the text after it keeps its
@@ -369,7 +369,7 @@ _EMPTY_ROW_RE = re.compile(r'<nav class="letters"[^>]*>\s*</nav>|<div class="qin
 def drop_dead_letters(text: str) -> str:
     """Return an index without the letters of its row that link no heading of its page.
 
-    Doxygen 1.17.0 writes the row of letters of a member index that fits on one
+    Doxygen 1.18.0 writes the row of letters of a member index that fits on one
     page, and none of the headings it links (``globals.html`` of this tree);
     a letter that leads nowhere goes, and a row with none left goes with it.
     """

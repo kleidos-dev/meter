@@ -34,9 +34,9 @@ name:
   development." (the site follows the main branch).
 * ``title`` — a page without exactly one ``<h1>``.
 * ``doubled-text`` — a link whose words are written again right after it,
-  what Doxygen 1.17.0 makes of a Markdown link to an anchor
-  (``scripts/doxygen_md_filter.py`` writes those links as HTML so it never
-  does).
+  what Doxygen 1.17.0 makes of a Markdown link to an anchor (1.18.0 no
+  longer does; ``scripts/doxygen_md_filter.py`` writes those links as HTML so
+  neither does).
 * ``private`` — a private value, in a page, a twin, the ``llms.txt`` or a list
   of the search: a MAC
   address, a USB serial number or a serial port named by one (the patterns

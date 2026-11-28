@@ -40,9 +40,11 @@ every line where it was, so a warning still names the line of the file:
   as on a warning in a comment.
   ``https:`` and ``mailto:`` links stay. The HTML link is written because Doxygen 1.17.0
   turns a Markdown link with an anchor into a reference that writes its text
-  twice and drops the rest of the line. A link whose text is its target's
-  file (``[usage.md](usage.md)``), which GitHub shows among files, reads on
-  the site as the page's name (:func:`link_text`, :data:`LINK_NAMES`).
+  twice and drops the rest of the line; 1.18.0 writes it once, and the HTML
+  link keeps a build made with either release the same. A link whose text is
+  its target's file (``[usage.md](usage.md)``), which GitHub shows among
+  files, reads on the site as the page's name (:func:`link_text`,
+  :data:`LINK_NAMES`).
 
 What the filter does not judge, the tests do: that every link's heading
 exists, and its file (``tests/firmware/test_markdown_links.py``), that a Markdown link
@@ -194,7 +196,7 @@ def heading_id(fragment: str) -> str:
     """Return the id Doxygen gives the heading GitHub anchors as *fragment*.
 
     The two agree (``MARKDOWN_ID_STYLE = GITHUB``) but for an anchor that
-    starts with a digit, which Doxygen 1.17.0 prefixes with ``autotoc_md``:
+    starts with a digit, which Doxygen 1.18.0 prefixes with ``autotoc_md``:
     GitHub's ``#24-the-own-i2c-master`` is Doxygen's
     ``#autotoc_md24-the-own-i2c-master``.
     """

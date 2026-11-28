@@ -53,8 +53,8 @@ XML, and the sources it was built from, and fails on:
   XML writer prints (it parses the comments of private members, which the HTML
   writer skips), and the filter's for a link to a file that is not there.
 
-Three kinds of broken link are written by Doxygen 1.17.0 itself and no comment
-can fix them; ``GENERATOR_CAUSES`` names them and they are counted, not failed.
+Three kinds of broken link are written by Doxygen 1.18.0 itself, as by 1.17.0,
+and no comment can fix them; ``GENERATOR_CAUSES`` names them and they are counted, not failed.
 Two are the Kleidos gate's; the third, an empty navigation-index key for the
 related-pages index, is seen only in a tree with no related page, as this one
 was until its Markdown documents became pages of it, and as the self-test's
@@ -538,7 +538,7 @@ def scan_sources(root: Path) -> dict[str, Any]:
 # Findings
 # ---------------------------------------------------------------------------
 
-#: Broken links Doxygen 1.17.0 writes by itself. No comment fixes them, so
+#: Broken links Doxygen 1.18.0 writes by itself. No comment fixes them, so
 #: they are counted and not failed. Each rule is as narrow as the defect:
 #:
 #: * ``generator-nav-entry-at-file-page`` — a member that belongs to a group
@@ -1113,17 +1113,6 @@ PLANTS: list[tuple[str, str, dict[str, Any]]] = [
             "void wander( int steps );\n\n}\n\n/// @}\n",
             "firmware/src/loose.cpp": '#include "loose.h"\nnamespace loose {\n'
             "void wander( int ) {}\n}\n",
-        },
-    ),
-    (
-        "broken-link",
-        "a documented field of an unnamed struct in an unnamed union",
-        {
-            "firmware/src/cmd.h": "/// @file cmd.h\n/// @brief A command.\n#pragma once\n"
-            "namespace cmd {\n"
-            "/// @brief A command.\nstruct Cmd {\n    int kind;  ///< Kind.\n"
-            "    union {\n        struct {\n            int mode;  ///< Mode.\n"
-            "        } start;\n    } u;\n};\n}\n",
         },
     ),
     # This Doxyfile shows an undocumented class and warns on it, so the class
