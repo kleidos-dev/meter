@@ -26,8 +26,8 @@ METER_CLANG_TIDY_MAJOR=23
 METER_CLANG_TIDY_VERSION=23.1.4
 
 # Exact cppcheck release the cppcheck leg requires, and the SHA-256 of its
-# source archive (https://github.com/danmar/cppcheck/archive/refs/tags/2.21.0.tar.gz).
-METER_CPPCHECK_VERSION=2.21.0
-METER_CPPCHECK_SHA256=f028ff75ca5372738f3737c8b3e8611426a6526b6aea2ef01301ab0f5902f044
+# source archive (https://github.com/danmar/cppcheck/archive/refs/tags/2.22.0.tar.gz).
+METER_CPPCHECK_VERSION=2.22.0
+METER_CPPCHECK_SHA256=d74945deb2d50393430e07596b766f8a779512c7f60dac2a30ea64e059ece57b
 
 export METER_CLANG_TIDY_MAJOR METER_CLANG_TIDY_VERSION METER_CPPCHECK_VERSION METER_CPPCHECK_SHA256
