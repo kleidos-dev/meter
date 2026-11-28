@@ -1503,7 +1503,12 @@ def test_an_opened_run_is_drawn_from_its_weighted_buckets(watched: Watched, serv
         "async (us) => (await import('/static/js/chart-math.js')).formatDuration(us)",
         body["bucket_us"],
     )
-    assert f"run buckets {width}" in (page.get_attribute("#chart", "data-caption") or "")
+    # The caption is the run's once the chart has drawn it, on an animation
+    # frame the gate lets through after the note; until then it is the live view's.
+    until(
+        lambda: f"run buckets {width}" in (page.get_attribute("#chart", "data-caption") or ""),
+        "the run's buckets in the caption",
+    )
     page.focus("#chart")
     for _ in range(40):
         page.keyboard.press("+")
