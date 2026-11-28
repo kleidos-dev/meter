@@ -16,7 +16,7 @@ repos:
   # kit's mypy groups (pyproject.toml) with the mypy of the environment the
   # hook finds, where the host package and its stubs are installed.
   - repo: https://github.com/kleidos-dev/.github
-    rev: v3.1.1
+    rev: v3.4.0
     hooks:
       - id: kleidos-kit
       - id: kleidos-commit-msg
@@ -80,7 +80,7 @@ repos:
   # the ESP-IDF installer, the brand repository's KiCad kit), the byte-for-byte fixtures
   # and records, the generated schematic and its renders.
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
@@ -104,7 +104,7 @@ repos:
   # EditorConfig conformance (.editorconfig, .ecrc). The wrapper bundles the
   # ec binary at the version CI downloads.
   - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
-    rev: 3.0.3
+    rev: 3.11.1
     hooks:
       - id: editorconfig-checker
         alias: ec
