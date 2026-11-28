@@ -7,7 +7,10 @@
 # CycloneDX SBOM. Advisory: every scanner step continues on error, because
 # the ESP-IDF and PlatformIO dependency model is not one these scanners read
 # in full (the host client's pyproject.toml is), so findings are triaged by
-# hand; the blocking secret gate is gitleaks in CI's lint job.
+# hand; the blocking secret gate is gitleaks in CI's lint job. The Trivy
+# binary is pinned beside the action (its `version` input), because the
+# action's own default lags Trivy's releases; Dependabot moves the action,
+# not that input, so the binary is moved by hand.
 #
 # A workflow of its own, beside CI (the project's CI convention): its weekly
 # schedule re-scans an unchanged tree for newly disclosed vulnerabilities,
@@ -61,7 +64,7 @@ jobs:
             ./
       - name: Upload the OSV SARIF to code scanning
         if: ${{ !cancelled() && hashFiles('osv-results.sarif') != '' }}
-        uses: github/codeql-action/upload-sarif@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4.39.4
+        uses: github/codeql-action/upload-sarif@915412ff23e8b7659517e607487dbeae018f2934 # v4.39.5
         with:
           sarif_file: osv-results.sarif
           category: osv-scanner
@@ -84,12 +87,13 @@ jobs:
           scan-type: fs
           scan-ref: .
           scanners: vuln,secret,license
+          version: v0.76.2
           format: sarif
           output: trivy-results.sarif
           exit-code: "0"
       - name: Upload the Trivy SARIF to code scanning
         if: ${{ !cancelled() && hashFiles('trivy-results.sarif') != '' }}
-        uses: github/codeql-action/upload-sarif@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4.39.4
+        uses: github/codeql-action/upload-sarif@915412ff23e8b7659517e607487dbeae018f2934 # v4.39.5
         with:
           sarif_file: trivy-results.sarif
           category: trivy
@@ -99,6 +103,7 @@ jobs:
         with:
           scan-type: fs
           scan-ref: .
+          version: v0.76.2
           format: cyclonedx
           output: sbom.cyclonedx.json
       - name: Keep the SARIF and the SBOM
