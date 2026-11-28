@@ -1,7 +1,7 @@
 # SPDX-FileCopyrightText: 2026 José M. Requena Plens
 # SPDX-License-Identifier: GPL-3.0-or-later
 [build-system]
-requires = ["setuptools>=75"]
+requires = ["setuptools>=84.2"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -19,16 +19,17 @@ dependencies = ["pyserial>=3.5"]
 # pytest-xdist (exact, like the others that are not the tests' own) for the
 # parallel run every pytest invocation starts with (addopts below).
 dev = [
-    "pytest>=8",
-    "pytest-cov>=5",
+    "pytest>=9.2",
+    "pytest-cov>=7.1",
     "pytest-xdist==3.8.0",
     "ruff==0.17.6",
-    "pypdf==7.1.1",
-    "setuptools>=75",
+    "pypdf==7.2.0",
+    "setuptools>=84.2",
 ]
-# The panel's browser tests (tests/test_panel_browser.py): Python Playwright at
-# the Kleidos QA pin (qa/requirements.txt), then `python -m playwright install chromium`.
-browser = ["playwright==1.63.0"]
+# The panel's browser tests (tests/test_panel_browser.py): Python Playwright,
+# exact, so CI's cached Chromium is the release's, then
+# `python -m playwright install chromium`.
+browser = ["playwright==1.65.2"]
 
 [project.scripts]
 kleidos-meter = "kleidos_meter.cli:main"

@@ -34,8 +34,8 @@ WORKFLOW = ROOT / ".github" / "workflows" / "check.yml"
 RUN_TESTS = ROOT / "scripts" / "run_tests.sh"
 PYPROJECT = ROOT / "host" / "pyproject.toml"
 
-#: The Kleidos QA's Playwright on 2026-11-22 (its qa/requirements.txt): the two move together.
-KLEIDOS_PLAYWRIGHT = "1.63.0"
+#: The Playwright release the panel job runs, exact so its cached Chromium is that release's.
+PLAYWRIGHT = "1.65.2"
 
 
 def jobs() -> dict[str, str]:
@@ -189,7 +189,7 @@ def test_playwright_is_pinned_where_the_panel_job_reads_it() -> None:
     extras = tomllib.loads(PYPROJECT.read_text(encoding="utf-8"))["project"][
         "optional-dependencies"
     ]
-    assert extras["browser"] == [f"playwright=={KLEIDOS_PLAYWRIGHT}"]
+    assert extras["browser"] == [f"playwright=={PLAYWRIGHT}"]
 
 
 def test_every_guard_over_a_device_build_runs_in_a_job_that_has_one() -> None:

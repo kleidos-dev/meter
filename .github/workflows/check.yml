@@ -225,7 +225,7 @@ jobs:
         with:
           python-version: "3.13"
       - name: Install the host client and the checkers
-        run: pip install -e 'host[dev]' pypdf==7.1.1 pyelftools==0.33
+        run: pip install -e 'host[dev]' pypdf==7.2.0 pyelftools==0.33
       - name: Install gitleaks
         env:
           GITLEAKS_VERSION: 8.30.1
@@ -281,7 +281,7 @@ jobs:
       # pyelftools reads the planted images of the reachability gate's tests
       # (tests/firmware/test_heap_reachability_gate.py), which skip without it.
       - name: Install the host client
-        run: pip install -e 'host[dev]' reuse pypdf==7.1.1 pyelftools==0.33
+        run: pip install -e 'host[dev]' reuse pypdf==7.2.0 pyelftools==0.33
       - name: Every test, and the report (scripts/run_tests.sh)
         run: scripts/run_tests.sh
       - name: Keep the test report
@@ -317,7 +317,7 @@ jobs:
           sudo apt-get install -y -qq clang
           clang++ --version
       - name: Install the host client
-        run: pip install -e 'host[dev]' reuse pypdf==7.1.1 pyelftools==0.33
+        run: pip install -e 'host[dev]' reuse pypdf==7.2.0 pyelftools==0.33
       - name: The native bridge (the firmware on standard input and output)
         run: make -C firmware/test/native -j"$(nproc)" bridge CXX=clang++
       - name: The host package's tests, branch coverage
@@ -772,7 +772,7 @@ jobs:
           set -euo pipefail
           apt-get update
           apt-get install -y --no-install-recommends python3-pip
-          python3 -m pip install --break-system-packages --root-user-action=ignore pypdf==7.1.1
+          python3 -m pip install --break-system-packages --root-user-action=ignore pypdf==7.2.0
       - name: The generator gives back the committed files
         run: |
           set -euo pipefail
