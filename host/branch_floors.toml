@@ -9,11 +9,11 @@
 # sides over its floor is printed as a note: raise it.
 #
 # Each is what the suite measured, the same on Python 3.13 and 3.14
-# (2026-11-25): every side of every module. A side that only a race between
-# threads decides is staged by a test (a held read, a barrier, an injected
-# clock), so no floor leaves room for a lost race. A side no test could take
-# would lower its module's floor and be named here with its reason; there is
-# none. A module with no branch is at 100.
+# (2026-11-25) and on 3.15 (2026-11-28): every side of every module. A side
+# that only a race between threads decides is staged by a test (a held read,
+# a barrier, an injected clock), so no floor leaves room for a lost race. A
+# side no test could take would lower its module's floor and be named here
+# with its reason; there is none. A module with no branch is at 100.
 
 [floors]
 "kleidos_meter/__init__.py" = 100

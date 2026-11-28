@@ -61,9 +61,9 @@ source = ["kleidos_meter"]
 
 [tool.coverage.report]
 show_missing = true
-# The total as measured (statements and branch sides together, 2026-11-25,
-# Python 3.13 and 3.14): all of them, and the module floors say the same
-# (branch_floors.toml).
+# The total as measured (statements and branch sides together, Python 3.13
+# and 3.14 on 2026-11-25, 3.15 on 2026-11-28): all of them, and the module
+# floors say the same (branch_floors.toml).
 precision = 2
 fail_under = 100
 

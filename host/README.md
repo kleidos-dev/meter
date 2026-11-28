@@ -173,7 +173,7 @@ Without `--run-bench` the bench case skips (`talks to the meter on the bench: gi
 
 ## Coverage and mutants
 
-The suite takes every branch side of every module, on Python 3.13 and 3.14: `branch_floors.toml` holds each module to the share measured, and `fail_under` in `pyproject.toml` holds the total, so neither falls. A side only a race between threads decides is staged by a test (a held read, a barrier, an injected clock), never left to a lucky run.
+The suite takes every branch side of every module, on Python 3.13, 3.14 and 3.15 (CI's, `.python-version`): `branch_floors.toml` holds each module to the share measured, and `fail_under` in `pyproject.toml` holds the total, so neither falls. A side only a race between threads decides is staged by a test (a held read, a barrier, an injected clock), never left to a lucky run.
 
 Coverage says which decisions a test took, not that a test would notice them going wrong, so `mutants/*.patch` are small wrong changes to the package that a test must notice: the moving average's weights, centering and gap rule, the pin rules in Python and in the page, the refusals of a pin order, and what a path is cut to. Each patch says what it breaks on its `# Mutant` line and gives the command that must then fail on its `# Kill:` line, run with `sh -c` from the root of a copy of the tree on the Python that `PYTHON` names:
 

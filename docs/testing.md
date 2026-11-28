@@ -46,7 +46,7 @@ The firmware's reference is a gate of its own, beside the tests: `mkdir -p build
 ### Requirements
 
 - **LLVM 19 or later** (clang++, llvm-profdata, llvm-cov) for step 2: MC/DC instrumentation (`-fcoverage-mcdc`) arrived in LLVM 18 with a limit of six conditions per decision, which `isTokenSafe()` exceeded with seven until 0.6.0 refused bytes above 0x7E at the line, and 19 raised it; 19 stays the floor so that no decision has to be split to fit. On macOS, Homebrew's `llvm`; the script finds it in `/opt/homebrew/opt/llvm/bin` or `/usr/local/opt/llvm/bin`, or set `LLVM_BIN`. CI installs the runner's distribution `clang` and `llvm` packages.
-- Python 3.11 or later with `host[dev]` installed (`pip install -e 'host[dev]'`, which brings pytest, pytest-cov and ruff 0.17.6, the kit's hook pin); the script prefers `host/.venv` when it exists. For the page's browser tests, the `[browser]` extra and its Chromium: `pip install -e 'host[dev,browser]'`, then `python -m playwright install chromium`.
+- Python 3.11 or later (CI runs the version in `.python-version`, 3.15, and the three jobs that build with ESP-IDF on 3.14, for the reason `check.yml` gives beside them) with `host[dev]` installed (`pip install -e 'host[dev]'`, which brings pytest, pytest-cov and ruff 0.17.6, the kit's hook pin); the script prefers `host/.venv` when it exists. For the page's browser tests, the `[browser]` extra and its Chromium: `pip install -e 'host[dev,browser]'`, then `python -m playwright install chromium`.
 
 ### The build is the device's
 
