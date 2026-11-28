@@ -21,6 +21,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 import pytest
+from conftest import FakeClock
 from kleidos_meter.panel import live as live_module
 from kleidos_meter.panel.executor import (
     DeviceErrors,
@@ -232,6 +233,74 @@ def test_a_10_s_state_capture_reaches_the_stream_and_the_run_with_every_sample(
     ids = [event.id for event in events if event.id is not None]
     seqs = [int(text.split("-")[1]) for text in ids]
     assert seqs == list(range(seqs[0], seqs[0] + len(seqs)))  # no event skipped
+
+
+class SplitRead:
+    """The simulator as the line, with one read ended between a row's two lines.
+
+    The read after it waits *stall* seconds of real time, while the hub's
+    batch thread goes on ticking, as a busy host's reader does.
+    """
+
+    def __init__(self, inner: SimulatedMeter, stall: float) -> None:
+        self.inner = inner
+        self.stall = stall
+        self.held = b""
+        self.split_at: int | None = None  # the timestamp of the row it split
+
+    def write(self, data: bytes) -> int:
+        return self.inner.write(data)
+
+    def read(self, size: int) -> bytes:
+        if self.held:
+            time.sleep(self.stall)
+            chunk, self.held = self.held, b""
+            return chunk
+        chunk = self.inner.read(size)
+        second = chunk.find(b" ch=v_mv v=")
+        if self.split_at is None and second > 0:
+            start = chunk.rindex(b"METER t=", 0, second)
+            self.split_at = int(chunk[start:second].split(b"=")[1])
+            chunk, self.held = chunk[:start], chunk[start:]
+        return chunk
+
+    def close(self) -> None:
+        self.inner.close()
+
+
+def test_a_row_split_across_two_reads_of_a_stalled_line_reaches_the_stream_whole(
+    tmp_path: Any,
+) -> None:
+    clock = FakeClock()
+    sim = SimulatedMeter(clocked=True, clock=clock, sleep=clock.sleep)
+    line = SplitRead(sim, stall=ROW_IDLE_TICKS * 20 * 0.005)
+    executor = Executor(line, clock=clock)
+    session = Session(executor)
+    live = LiveHub(interval=0.005)  # twenty ticks and more while the second read waits
+    executor.add_listener(live.on_event)
+    recorder = Recorder(session, tmp_path / "runs", live=live, clock=clock)
+    executor.start()
+    live.start()
+    try:
+        executor.wait_ready(WAIT)
+        session.open()
+        sub = live.subscribe()
+        recorder.start("STATE", ["CURR", "VOLT"], 1)
+        assert recorder.wait_idle(WAIT)
+        meta = recorder.last_meta
+        assert meta is not None
+        events: list[Event] = []
+        while batch := frames(live, sub):
+            events += batch
+    finally:
+        recorder.close()
+        live.close()
+        executor.close()
+    assert line.split_at is not None, "no read was split between a row's lines"
+    rows = dict(rows_of(events))
+    assert len(rows) == int(meta["statistics"]["fields"]["samples"]) > 100
+    assert rows[line.split_at] == {"i_na": 88_600_000, "v_uv": 4_064_000}
+    assert all(set(values) == {"i_na", "v_uv"} for values in rows.values())
 
 
 def test_a_stalled_stream_is_told_what_it_lost_and_the_line_never_waits() -> None:
@@ -488,33 +557,73 @@ def test_the_text_formats_lines_of_one_timestamp_become_one_row() -> None:
 def test_an_open_row_waits_for_its_other_channels_and_an_event_never_cuts_it() -> None:
     hub = LiveHub()
     sub = hub.subscribe()
-    hub.on_event(text_sample(100, "i_ua", 1.0))
+    hub.on_event(text_sample(50, "i_ua", 0.5))
+    hub.on_event(text_sample(50, "v_mv", 1.0))
+    hub.on_event(text_sample(100, "i_ua", 1.0))  # the next timestamp: the row of 50 was whole
     hub.tick()  # it just grew: it stays open
     hub.publish("sequence", {"step": 1})  # an event between its lines leaves it open
-    assert [e.kind for e in frames(hub, sub)] == ["sequence"]
+    events = frames(hub, sub)
+    assert [e.kind for e in events] == ["samples", "sequence"]
+    assert events[0].data["t_us"] == [50]
     hub.on_event(text_sample(100, "v_mv", 2.0))
     hub.tick()
     assert [e for e in frames(hub, sub) if e.kind == "samples"] == []
     for _ in range(ROW_IDLE_TICKS - 1):
-        hub.tick()  # unchanged for ROW_IDLE_TICKS batches: closed
+        hub.tick()  # whole, and unchanged for ROW_IDLE_TICKS batches: closed
     (batch,) = [e for e in frames(hub, sub) if e.kind == "samples"]
     assert batch.data["i_na"] == [1000] and batch.data["v_uv"] == [2000]
+
+
+def test_a_row_the_line_delivers_in_two_reads_keeps_every_channel_however_long_between() -> None:
+    hub = LiveHub()
+    sub = hub.subscribe()
+    hub.on_event(text_sample(100, "i_ua", 1.0))
+    for _ in range(ROW_IDLE_TICKS * 10):
+        hub.tick()  # a capture's first row: no row before it says what whole is
+    hub.on_event(text_sample(100, "v_mv", 2.0))
+    hub.on_event(text_sample(200, "i_ua", 3.0))  # one read ends here, between a row's lines
+    for _ in range(ROW_IDLE_TICKS * 10):
+        hub.tick()  # the reader stalls: the row of 200 lacks v_mv and stays open
+    hub.on_event(text_sample(200, "v_mv", 4.0))  # the next read
+    for _ in range(ROW_IDLE_TICKS):
+        hub.tick()
+    rows = rows_of(frames(hub, sub))
+    assert rows == [(100, {"i_na": 1000, "v_uv": 2000}), (200, {"i_na": 3000, "v_uv": 4000})]
+    hub.on_event(text_sample(300, "i_ua", 5.0))
+    hub.on_event(text_sample(400, "i_ua", 6.0))  # rows of one channel from here
+    hub.capture_started()  # a capture of two channels: what whole was is forgotten
+    hub.on_event(text_sample(500, "i_ua", 7.0))
+    for _ in range(ROW_IDLE_TICKS * 10):
+        hub.tick()
+    hub.on_event(text_sample(500, "v_mv", 8.0))
+    hub.flush()
+    assert rows_of(frames(hub, sub)) == [
+        (300, {"i_na": 5000}),
+        (400, {"i_na": 6000}),
+        (500, {"i_na": 7000, "v_uv": 8000}),
+    ]
 
 
 def test_a_channel_that_comes_after_its_row_closed_never_makes_a_second_row() -> None:
     hub = LiveHub()
     sub = hub.subscribe()
-    hub.on_event(text_sample(100, "i_ua", 1.0))
+    hub.on_event(text_sample(50, "i_ua", 0.5))
+    hub.on_event(text_sample(100, "i_ua", 1.0))  # rows of one channel, so far
     for _ in range(ROW_IDLE_TICKS):
-        hub.tick()  # the line is slow: the row is closed with one channel
-    hub.on_event(text_sample(100, "v_mv", 2.0))  # its other channel, late
+        hub.tick()  # whole by the row before it: closed
+    hub.on_event(text_sample(100, "v_mv", 2.0))  # a channel the shape lacked, late
     hub.on_event(text_sample(200, "i_ua", 3.0))
+    for _ in range(ROW_IDLE_TICKS * 10):
+        hub.tick()  # the late channel taught the shape: this row waits for v_mv
     hub.on_event(text_sample(200, "v_mv", 4.0))
     hub.flush()
     batches = [e for e in frames(hub, sub) if e.kind == "samples"]
-    assert [t for batch in batches for t in batch.data["t_us"]] == [100, 200]
-    assert batches[0].data["i_na"] == [1000] and "v_uv" not in batches[0].data
-    assert batches[1].data == {"n0": 1, "count": 1, "t_us": [200], "i_na": [3000], "v_uv": [4000]}
+    assert rows_of(batches) == [
+        (50, {"i_na": 500}),
+        (100, {"i_na": 1000}),
+        (200, {"i_na": 3000, "v_uv": 4000}),
+    ]
+    assert batches[-1].data == {"n0": 2, "count": 1, "t_us": [200], "i_na": [3000], "v_uv": [4000]}
     hub.capture_started()  # a new capture's first row is never taken for a late channel
     hub.on_event(text_sample(200, "i_ua", 5.0))
     hub.flush()
@@ -751,9 +860,10 @@ def test_the_batch_thread_publishes_on_its_own() -> None:
     try:
         sub = hub.subscribe()
         hub.on_event(Sample(1, {"i_ua": 1.0}, "S,1,1.000,,,"))
+        hub.on_event(Sample(2, {"i_ua": 2.0}, "S,2,2.000,,,"))
         deadline = time.monotonic() + WAIT
         data = b""
-        while b"event: samples" not in data:
+        while data.count(b"event: samples") < 2:  # the row the next closed, then the last
             assert time.monotonic() < deadline
             data += sub.next(0.05)
     finally:

@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant RV-rowwhole: A tick closes a row that lacks a channel of the row before it.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_panel_live.py -k 'two_reads'
+
+diff --git a/host/kleidos_meter/panel/live.py b/host/kleidos_meter/panel/live.py
+--- a/host/kleidos_meter/panel/live.py
++++ b/host/kleidos_meter/panel/live.py
+@@ -467,9 +467,7 @@
+
+     def _row_settled(self, values: dict[str, int]) -> bool:
+         """Whether a tick closes the open row, *values* its channels (under the lock)."""
+-        if self._idle_ticks < ROW_IDLE_TICKS or self._shape is None:
+-            return False
+-        return self._shape <= values.keys()
++        return self._idle_ticks >= ROW_IDLE_TICKS
+
+     def _decide(self, extra: tuple[str, dict[str, Any]] | None) -> list[_Pending]:
+         """The pending events in their order, with their row counts (under the lock)."""

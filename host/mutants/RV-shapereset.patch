@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant RV-shapereset: A new capture's first row is judged by the last capture's channels.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_panel_live.py -k 'two_reads'
+
+diff --git a/host/kleidos_meter/panel/live.py b/host/kleidos_meter/panel/live.py
+--- a/host/kleidos_meter/panel/live.py
++++ b/host/kleidos_meter/panel/live.py
+@@ -387,7 +387,6 @@
+         with self._lock:
+             self._capture_rows = 0
+             self._skip_t = None
+-            self._shape = None  # its rows may carry other channels
+
+     def flush(self) -> None:
+         """Publish what is pending now, the open row included.

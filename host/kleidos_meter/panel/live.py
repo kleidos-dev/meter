@@ -15,7 +15,9 @@ that ``GET /api/events`` serves as Server-Sent Events. The event kinds:
   first row's index among the rows of the capture serve started last (or of
   the hub's life before any), ``count`` the rows. The ``TEXT`` format's one
   line per channel is merged into one row per timestamp; ``CSV`` rows are
-  rows already.
+  rows already. A row is whole once it carries every channel of the row
+  before it; one still waiting for a channel is never closed by the clock,
+  however long the line takes to bring it.
 - ``mark``: a mark record (``label``, ``n``, ``t_us``), in its place among
   the batches.
 - ``status``: ``kind`` ``poll`` (the last status poll's reports, at most one
@@ -100,7 +102,7 @@ _COLUMNS = tuple(CHANNEL_INTEGER_KEYS[channel] for channel in CSV_CHANNELS)
 #: The most bytes one read of a stream hands over at once.
 _CHUNK_BYTES = 1 << 20
 
-#: Batches an open row must stay unchanged before a tick closes it.
+#: Batches a whole open row must stay unchanged before a tick closes it.
 ROW_IDLE_TICKS = 2
 
 #: What a stream is told first: how long a browser waits before it reconnects.
@@ -221,6 +223,9 @@ class LiveHub:
         # What the line delivered since the last batch, under _lock.
         self._row: tuple[int, dict[str, int]] | None = None
         self._idle_ticks = 0  # batches closed since the open row last changed
+        # The channels a whole row carries: those of the last row the next
+        # timestamp closed, None before the capture's first such row.
+        self._shape: frozenset[str] | None = None
         self._batch: _Batch | None = None
         self._pending: list[tuple[str, dict[str, Any], _Batch | None]] = []
         self._pending_rows = 0
@@ -331,7 +336,12 @@ class LiveHub:
             self._idle_ticks = 0
             return
         if self._skip_t == sample.t_us:
-            return  # the rest of a row that had no room, or that was closed already
+            # The rest of a row that had no room, or that was closed already: a
+            # channel the shape lacked makes the rows after it wait for it.
+            self._shape = frozenset(values).union(self._shape or ())
+            return
+        if self._row is not None:
+            self._shape = frozenset(self._row[1])  # the next timestamp: the row is whole
         self._close_row()
         if self._pending_rows >= self.max_pending_rows:
             self._overrun += 1
@@ -357,8 +367,9 @@ class LiveHub:
             self._batch = _Batch(self._capture_rows)
         self._batch.rows.append(self._row)
         self._capture_rows += 1
-        # A channel of this row that comes after it closed (a tick closed it
-        # while the line was slow) is dropped: it would be a second row.
+        # A channel of this row that comes after it closed (a mark or a flush
+        # closed it, or a tick whose shape lacked that channel) is dropped: it
+        # would be a second row.
         self._skip_t = self._row[0]
         self._row = None
 
@@ -376,6 +387,7 @@ class LiveHub:
         with self._lock:
             self._capture_rows = 0
             self._skip_t = None
+            self._shape = None  # its rows may carry other channels
 
     def flush(self) -> None:
         """Publish what is pending now, the open row included.
@@ -388,11 +400,13 @@ class LiveHub:
     def tick(self) -> None:
         """Close a batch, as the batch thread does every :attr:`interval`.
 
-        The open row is closed too once it has not changed for
-        :data:`ROW_IDLE_TICKS` batches: the ``TEXT`` format writes a sample's
-        channels back to back, so a row that stopped growing that long is
-        whole, and a row is never cut between its lines by an event published
-        meanwhile.
+        The open row is closed too once it is whole, every channel of the
+        last row the next timestamp closed in it, and has not changed for
+        :data:`ROW_IDLE_TICKS` batches. The ``TEXT`` format writes a sample's
+        channels back to back, but the line can deliver them in two reads with
+        any pause between them, so a row that lacks a channel stays open until
+        that channel, the next timestamp, a mark or a flush closes it; nor is a
+        row ever cut between its lines by an event published meanwhile.
         """
         self._publish_pending(row="tick")
 
@@ -412,7 +426,8 @@ class LiveHub:
         """Decide the pending events under the lock, encode them outside it, and ring them.
 
         :param row: What becomes of the open row: ``close`` it, ``keep`` it
-            open, or close it on a ``tick`` once it has stopped growing.
+            open, or close it on a ``tick`` once it is whole and has stopped
+            growing.
         :param extra: An event to publish after the pending ones.
         """
         with self._publishing:
@@ -422,7 +437,7 @@ class LiveHub:
                 if row == "tick":
                     self._idle_ticks += 1
                 if self._row is not None and (
-                    row == "close" or (row == "tick" and self._idle_ticks >= ROW_IDLE_TICKS)
+                    row == "close" or (row == "tick" and self._row_settled(self._row[1]))
                 ):
                     self._close_row()
                 self._close_batch()  # a row still open goes in the next batch, after these
@@ -449,6 +464,12 @@ class LiveHub:
                     self._ring_size -= len(self._ring.popleft().frame)
                 if entries:
                     self._changed.notify_all()
+
+    def _row_settled(self, values: dict[str, int]) -> bool:
+        """Whether a tick closes the open row, *values* its channels (under the lock)."""
+        if self._idle_ticks < ROW_IDLE_TICKS or self._shape is None:
+            return False
+        return self._shape <= values.keys()
 
     def _decide(self, extra: tuple[str, dict[str, Any]] | None) -> list[_Pending]:
         """The pending events in their order, with their row counts (under the lock)."""

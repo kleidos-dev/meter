@@ -1,0 +1,17 @@
+# SPDX-FileCopyrightText: 2026 José M. Requena Plens
+# SPDX-License-Identifier: GPL-3.0-or-later
+# Mutant RV-shapewiden: A late channel does not make the rows after it wait for it.
+# Applied to a copy of the tree, whose kill command below must then fail:
+# Kill: cd host && ${PYTHON:-python3} -m pytest -q -W error -p no:cacheprovider tests/test_panel_live.py::test_a_channel_that_comes_after_its_row_closed_never_makes_a_second_row
+
+diff --git a/host/kleidos_meter/panel/live.py b/host/kleidos_meter/panel/live.py
+--- a/host/kleidos_meter/panel/live.py
++++ b/host/kleidos_meter/panel/live.py
+@@ -338,7 +338,6 @@
+         if self._skip_t == sample.t_us:
+             # The rest of a row that had no room, or that was closed already: a
+             # channel the shape lacked makes the rows after it wait for it.
+-            self._shape = frozenset(values).union(self._shape or ())
+             return
+         if self._row is not None:
+             self._shape = frozenset(self._row[1])  # the next timestamp: the row is whole
